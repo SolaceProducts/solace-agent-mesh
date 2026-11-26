@@ -1,0 +1,6 @@
+version: 1
+tools:
+  pptx_tools:
+    runtime: go
+    executable: ./pptx
+    timeout_seconds: 120

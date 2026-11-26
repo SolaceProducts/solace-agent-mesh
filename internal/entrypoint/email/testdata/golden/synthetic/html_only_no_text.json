@@ -1,0 +1,57 @@
+{
+  "MessageID": "\u003chtml-only-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003chtml-only-001@vendor.com\u003e",
+  "From": {
+    "Address": "eve@vendor.com",
+    "DisplayName": "Eve Martin"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "HTML only, no plain text",
+  "BodyText": "",
+  "BodyHTML": "\u003chtml\u003e\u003cbody\u003e\u003cp\u003eThis is the \u003cem\u003eonly\u003c/em\u003e part. No plain-text alternative.\u003c/p\u003e\u003c/body\u003e\u003c/html\u003e",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.926441-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "multipart/alternative; boundary=\"boundary-html-only-001\""
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Eve Martin\" \u003ceve@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003chtml-only-001@vendor.com\u003e"
+    ],
+    "Mime-Version": [
+      "1.0"
+    ],
+    "Subject": [
+      "HTML only, no plain text"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

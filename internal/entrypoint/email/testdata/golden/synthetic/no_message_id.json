@@ -1,0 +1,51 @@
+{
+  "MessageID": "\u003csynth-43e3e6425f5ad20e@sam-email-entrypoint\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003csynth-43e3e6425f5ad20e@sam-email-entrypoint\u003e",
+  "From": {
+    "Address": "grace@vendor.com",
+    "DisplayName": "Grace Lee"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Missing Message-ID test",
+  "BodyText": "This message intentionally has no Message-ID header.\r\nThe normalizer must synthesize one (SHA-256 of the raw bytes).\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.926522-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "text/plain; charset=utf-8"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Grace Lee\" \u003cgrace@vendor.com\u003e"
+    ],
+    "Subject": [
+      "Missing Message-ID test"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

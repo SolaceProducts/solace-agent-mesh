@@ -1,0 +1,78 @@
+type: event_mesh
+subtypes:
+  - subtype: solace
+    name: "Solace Event Mesh"
+    description: "Connect agents to event-driven services through a Solace event broker"
+    usage_guidance: |
+      Use the Event Mesh connector when agents need to interact with backend
+      microservices through Solace's event mesh. Supports Request-Reply and
+      Publish-Subscribe messaging patterns.
+
+      Each operation uses a standard JSON Schema object for its agent-facing
+      inputs. Its topic address can include {property_name} dynamic levels.
+      Add x-solace-payload-path to map a property into a nested payload and
+      x-solace-context-expression to source a value from runtime context.
+
+      Example input schema:
+      {"type":"object","properties":{"order_id":{"type":"string","description":"Order ID","x-solace-payload-path":"order.id"}},"required":["order_id"]}
+
+      When importing from Event Portal, treat the event's payload schema as a
+      starting point rather than the final tool input:
+      - Remove broker-generated envelope fields such as eventId and eventTimestamp.
+      - Add properties used only by the topic address, such as store_id or
+        warehouse_id, and leave their payload path empty (topic-only).
+      - Set a payload path for every property that belongs in the message body.
+      - Review required fields, descriptions, enums, and defaults for agent use.
+      - Remove fields the agent should not provide, or source them from runtime
+        context with x-solace-context-expression.
+    field_schema:
+      - name: broker_url
+        type: string
+        label: "Host URI"
+        required: true
+        order: 0
+        hint: "Secured SMF URI (Public Endpoint)"
+        placeholder: "tcps://broker.example.com:55443"
+        validation:
+          min_length: 1
+          max_length: 512
+      - name: broker_vpn
+        type: string
+        label: "Message VPN"
+        required: true
+        order: 1
+        validation:
+          min_length: 1
+          max_length: 128
+      - name: broker_username
+        type: string
+        label: "Username"
+        required: true
+        order: 2
+        validation:
+          min_length: 1
+          max_length: 128
+      - name: broker_password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 3
+        validation:
+          min_length: 1
+          max_length: 1024
+
+      - name: operations
+        type: operations
+        label: "Operations"
+        required: true
+        order: 10
+        hint: "One or more agent tools that share this event broker connection."
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: each operation's `tool_name`."
+        hint: "Approval gates for this connector's tools, keyed by each operation's `tool_name` (`event_mesh_request` by default). `{}` removes them."

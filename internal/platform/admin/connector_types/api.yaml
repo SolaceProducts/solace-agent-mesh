@@ -1,0 +1,296 @@
+type: api
+subtypes:
+  - subtype: openapi
+    name: "OpenAPI"
+    description: "Connect to REST APIs via OpenAPI specification"
+    usage_guidance: |
+      Use the OpenAPI connector when the user wants to connect an agent to a
+      REST API that has an OpenAPI (Swagger) specification. The spec URL points
+      to the API's OpenAPI JSON or YAML definition. The connector will parse
+      the spec and expose the API's endpoints as tools.
+
+      If the user provides the spec URL, you can use the parse_openapi_spec tool
+      to detect what authentication the API requires. This helps you set the
+      correct auth_type and fill in what you can. The tool also lists the API's
+      operations and their parameters; a workflow tool node on this connector
+      needs an allow_list or an uploaded spec, and a connector created from
+      only a spec URL needs the operationId of each operation in its allow_list.
+
+      Authentication options:
+      - none: Public API, no auth needed
+      - apikey: API key sent in a header or query parameter
+      - http: HTTP auth (basic username/password or bearer token)
+      - oauth: OAuth2 flow
+
+      Always use <<__SAM_REQUIRED__>> for secret fields since these should
+      never appear in artifacts.
+    warning: "All agents using this connector will have the same API access. Ensure the API has minimal necessary permissions."
+    field_schema:
+      - name: file_s3_key
+        type: string
+        label: "Specification File S3 Key"
+        required: false
+        secret: true
+        order: -1
+      - name: specification_file
+        type: string
+        label: "OpenAPI Specification File"
+        required: false
+        hidden: true
+        order: 1
+        hint: "Declarative-config only: path to a local OpenAPI spec file that `sam config apply` uploads as the connector resource. Mutually exclusive with specification_url."
+      - name: specification_url
+        type: string
+        label: "OpenAPI Specification URL"
+        required: false
+        order: 2
+        placeholder: "http://localhost:8002/openapi.json or upload file"
+        hint: "URL to your OpenAPI specification (leave empty if uploading file)"
+      - name: base_url
+        type: string
+        label: "Base Server URL"
+        required: true
+        order: 3
+        hint: "Base URL for the API server"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: custom_headers
+        type: key_value
+        label: "Custom HTTP Headers"
+        required: false
+        order: 400
+        hint: "Optional HTTP headers sent with every request (e.g. X-Tenant-ID, routing headers)"
+      - name: allow_list
+        type: text
+        label: "Allowed Operations (Optional)"
+        required: false
+        order: 500
+        placeholder: "operation1, operation2, operation3"
+        hint: "Only include these operations. Enter comma-separated operation IDs. Leave empty to allow all operations."
+      - name: auth_type
+        type: select
+        label: "Authentication Type"
+        required: true
+        order: 100
+        default: "none"
+        options:
+          - label: "No Authentication"
+            value: "none"
+            description: "No authentication required"
+          - label: "API Key"
+            value: "apikey"
+            description: "Authenticate using an API key in header or query parameter"
+          - label: "HTTP Authentication"
+            value: "http"
+            description: "HTTP Authentication using Basic Auth or Bearer Token"
+          - label: "OAuth 2.0 / OIDC"
+            value: "oauth"
+            description: "OAuth 2.0 and OpenID Connect authentication"
+      - name: auth_apikey_location
+        type: select
+        label: "API Key Location"
+        required: true
+        order: 200
+        default: "header"
+        hint: "Where to send the API key with each request."
+        visible_when:
+          auth_type: "apikey"
+        options:
+          - label: "Header"
+            value: "header"
+            description: "Send as an HTTP request header (recommended)"
+          - label: "Query Parameter"
+            value: "query"
+            description: "Append to the URL as a query parameter"
+      - name: auth_apikey_name
+        type: string
+        label: "API Key Parameter Name"
+        required: true
+        order: 201
+        hint: "Name of the header or query parameter"
+        visible_when:
+          auth_type: "apikey"
+        validation:
+          min_length: 1
+          max_length: 200
+          pattern: "^[a-zA-Z0-9\\-_]+$"
+      - name: auth_apikey_value
+        type: password
+        label: "API Key Value"
+        required: true
+        secret: true
+        order: 202
+        hint: "The actual API key value. Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+        visible_when:
+          auth_type: "apikey"
+        validation:
+          min_length: 8
+          max_length: 2048
+      - name: auth_http_scheme
+        type: select
+        label: "HTTP Auth Scheme"
+        required: true
+        order: 200
+        default: "basic"
+        hint: "HTTP Authorization header scheme."
+        visible_when:
+          auth_type: "http"
+        options:
+          - label: "Basic (Username/Password)"
+            value: "basic"
+            description: "HTTP Basic Authentication using username and password"
+          - label: "Bearer (Token)"
+            value: "bearer"
+            description: "Bearer token authentication (JWT, OAuth2 access token, etc.)"
+      - name: auth_http_basic_username
+        type: string
+        label: "Username"
+        required: true
+        order: 201
+        hint: "Username for Basic Authentication"
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "basic"
+        validation:
+          min_length: 1
+          max_length: 320
+      - name: auth_http_basic_password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 202
+        hint: "Password for Basic Authentication. Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "basic"
+        validation:
+          min_length: 4
+          max_length: 1024
+      - name: auth_http_bearer_token
+        type: password
+        label: "Bearer Token"
+        required: true
+        secret: true
+        order: 201
+        hint: "The bearer token (JWT, OAuth2 access token, API token, etc.). Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "bearer"
+        validation:
+          min_length: 10
+          max_length: 8192
+      - name: auth_oauth_authorization_url
+        type: string
+        label: "Authorization URL"
+        required: true
+        order: 201
+        hint: "The OAuth authorization endpoint where users grant permission"
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_token_url
+        type: string
+        label: "Token URL"
+        required: true
+        order: 202
+        hint: "The OAuth token endpoint where codes are exchanged for access tokens"
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_refresh_url
+        type: string
+        label: "Refresh URL (Optional)"
+        required: false
+        order: 203
+        hint: "The OAuth refresh endpoint. If not specified, will use the token URL."
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_client_id
+        type: string
+        label: "Client ID"
+        required: true
+        order: 204
+        hint: "The OAuth client ID for your application"
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          min_length: 1
+          max_length: 512
+      - name: auth_oauth_client_secret
+        type: password
+        label: "Client Secret"
+        required: false
+        secret: true
+        order: 205
+        hint: "The OAuth client secret. Leave empty for PKCE-only flows. Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          min_length: 4
+          max_length: 1024
+      - name: auth_oauth_scopes
+        type: string
+        label: "Scopes"
+        required: false
+        order: 206
+        hint: "Space-separated OAuth scopes for API access (e.g., `openid email read:api`)"
+        visible_when:
+          auth_type: "oauth"
+        validation:
+          max_length: 2048
+      - name: auth_oauth_token_endpoint_auth_method
+        type: select
+        label: "Token Endpoint Auth Method"
+        required: false
+        order: 207
+        default: "client_secret_basic"
+        hint: "How to authenticate at the token endpoint"
+        visible_when:
+          auth_type: "oauth"
+        options:
+          - label: "Client Secret Basic"
+            value: "client_secret_basic"
+            description: "Send credentials via HTTP Basic Auth (default)"
+          - label: "Client Secret Post"
+            value: "client_secret_post"
+            description: "Send credentials in POST body"
+          - label: "None (PKCE only)"
+            value: "none"
+            description: "No client secret - uses PKCE for security"
+      - name: auth_oauth_pkce
+        type: select
+        label: "PKCE"
+        required: false
+        order: 208
+        default: "enabled"
+        hint: "Sends a PKCE (S256) challenge with each sign-in. Disable only for a provider that rejects PKCE, such as Atlassian Cloud. Cannot be disabled when Token Endpoint Auth Method is None."
+        visible_when:
+          auth_type: "oauth"
+        options:
+          - label: "Enabled (S256)"
+            value: "enabled"
+            description: "Send a code challenge with the sign-in and its verifier with the token request (recommended)"
+          - label: "Disabled"
+            value: "disabled"
+            description: "Send neither, for an authorization server that rejects PKCE"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: the snake_case operation tool names."
+        hint: "Approval gates for this connector's tools, keyed by the snake_case operation tool name (`delete_user`). `{}` removes them."

@@ -1,0 +1,34 @@
+type: slack
+subtypes:
+  - subtype: bot
+    name: "Slack"
+    description: "Send messages to Slack channels"
+    warning: "All agents using this connector can send messages to any channel the bot has access to. Ensure the bot's channel access is appropriately scoped in Slack's app settings."
+    usage_guidance: |
+      Use the Slack connector when the user wants an agent to send messages
+      to Slack channels. The connector provides a slack_send_message tool.
+      The user needs to provide a Slack Bot Token (xoxb-...).
+      Use <<__SAM_REQUIRED__>> for the bot token if not mentioned in the
+      conversation.
+    field_schema:
+      - name: slack_bot_token
+        type: password
+        label: "Bot Token"
+        required: true
+        secret: true
+        order: 1
+        placeholder: "xoxb-..."
+        hint: "Slack Bot User OAuth Token. Recommended scopes: chat:write, files:write, users:read, users:read.email"
+        validation:
+          min_length: 10
+          max_length: 255
+          pattern: "^xoxb-"
+          error_msg: "Bot Token must start with 'xoxb-'"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `slack_send_message`, `slack_update`."
+        hint: "Approval gates for this connector's tools, keyed by role (`slack_send_message`, `slack_update`). `{}` removes them."

@@ -1,0 +1,14 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "Total is «math:2+2».\n\n[Note from SAM to the calling agent: the user already sees the output above.]\n\n```python\nprint(1)\n"
+      }
+    ]
+  }
+]

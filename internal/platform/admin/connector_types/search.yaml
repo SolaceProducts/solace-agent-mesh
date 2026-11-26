@@ -1,0 +1,248 @@
+type: search
+subtypes:
+  - subtype: elasticsearch
+    name: "Elasticsearch"
+    description: "Connect to an Elasticsearch cluster"
+    warning: "All agents using this connector will have the same cluster access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the cluster level. For security, use API keys with minimal necessary permissions. Self-hosted OpenSearch clusters that expose the Elasticsearch-compatible API can also be reached through this connector."
+    usage_guidance: |
+      Use the Elasticsearch connector when the user wants an agent to query
+      an Elasticsearch cluster (or a self-hosted OpenSearch cluster that
+      exposes the Elasticsearch-compatible API) with the Query DSL.
+      Connect via either a host (with optional port) or an Elastic Cloud ID
+      (Cloud ID). Authentication is via an API key for secured clusters;
+      leave it blank for a local or unsecured cluster (e.g. one started with
+      security disabled).
+
+      When an API key is supplied, use <<__SAM_REQUIRED__>> for it.
+    field_schema:
+      - name: scheme
+        type: select
+        label: "Scheme"
+        required: false
+        order: 1
+        default: "https"
+        hint: "Connection scheme. Ignored when a Cloud ID is provided."
+        options:
+          - label: "HTTPS"
+            value: "https"
+            description: "Encrypted connection (recommended for production)"
+          - label: "HTTP"
+            value: "http"
+            description: "Unencrypted connection (use only for local/dev clusters)"
+      - name: hostname
+        type: string
+        label: "Host"
+        required: false
+        order: 2
+        placeholder: "elastic.example.com"
+        hint: "Elasticsearch host (without scheme). Provide either this or a Cloud ID."
+        validation:
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+          error_msg: "Host must be a valid hostname or IPv4 address"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 9200
+        placeholder: "9200"
+        hint: "Elasticsearch port. Defaults to 9200."
+        validation:
+          min: 1
+          max: 65535
+      - name: cloud_id
+        type: string
+        label: "Cloud ID"
+        required: false
+        order: 4
+        placeholder: "my-deployment:dXMtZWFzdC0xLmF3cy5jbG91ZC5lcy5pbyQ..."
+        hint: "Elastic Cloud deployment ID. Provide either this or a Host."
+        validation:
+          max_length: 2048
+      - name: api_key
+        type: password
+        label: "API Key"
+        required: false
+        secret: true
+        order: 5
+        hint: "Elasticsearch API key (Base64-encoded id:api_key) for secured clusters. Leave blank for a local/unsecured cluster or when using a username and password. Leave the placeholder to keep an existing value."
+        validation:
+          min_length: 10
+          max_length: 4096
+      - name: username
+        type: string
+        label: "Username"
+        required: false
+        order: 6
+        hint: "Basic-auth username (e.g. 'elastic'). Use this with a password as an alternative to an API key. Leave blank for an API key or an unsecured cluster."
+        validation:
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: false
+        secret: true
+        order: 7
+        hint: "Basic-auth password, paired with the username. Leave the placeholder to keep an existing value."
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `elasticsearch_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`elasticsearch_query`). `{}` removes them."
+
+  - subtype: opensearch
+    name: "Amazon OpenSearch"
+    description: "Connect to an Amazon-managed OpenSearch domain or Serverless collection"
+    warning: "Agents using this connector run queries with the configured AWS credentials. Use a least-privilege IAM role or user scoped to specific domains/collections. For self-hosted OpenSearch with the Elasticsearch-compatible API, use the Elasticsearch connector instead."
+    usage_guidance: |
+      Use the OpenSearch connector when the user wants an agent to query
+      an Amazon-managed OpenSearch domain or OpenSearch Serverless
+      collection. Provide the cluster URL (typically ending in
+      .es.amazonaws.com or .aoss.amazonaws.com), AWS region, and either
+      AWS Access Keys or an IAM Role to assume. For self-hosted OpenSearch
+      that exposes the Elasticsearch-compatible API, use the Elasticsearch
+      connector instead.
+
+      Always use <<__SAM_REQUIRED__>> for the access key, secret key, and
+      external ID fields since these are AWS credentials that should never
+      appear in artifacts.
+    field_schema:
+      - name: scheme
+        type: select
+        label: "Scheme"
+        required: false
+        order: 1
+        default: "https"
+        hint: "Connection scheme."
+        options:
+          - label: "HTTPS"
+            value: "https"
+            description: "Encrypted connection (required for managed OpenSearch)"
+          - label: "HTTP"
+            value: "http"
+            description: "Unencrypted connection (use only for local/dev clusters)"
+      - name: hostname
+        type: string
+        label: "Host"
+        required: true
+        order: 2
+        placeholder: "my-domain.us-east-1.es.amazonaws.com"
+        hint: "OpenSearch domain or serverless collection host (without scheme)."
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+          error_msg: "Host must be a valid hostname or IPv4 address"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        placeholder: "443"
+        hint: "Optional. Managed OpenSearch listens on 443 (leave blank). Set only for a non-standard port."
+        validation:
+          min: 1
+          max: 65535
+      - name: region
+        type: string
+        label: "AWS Region"
+        required: true
+        order: 4
+        default: "us-east-1"
+        placeholder: "us-east-1"
+        hint: "AWS region used for SigV4 request signing."
+        validation:
+          min_length: 1
+          max_length: 50
+          pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          error_msg: "AWS Region must be a valid region name (e.g., us-east-1, eu-west-1)"
+      - name: auth_type
+        type: select
+        label: "Authentication Scheme"
+        required: true
+        order: 5
+        default: "access_key"
+        hint: "How the connector authenticates with AWS."
+        options:
+          - label: "AWS Access Key"
+            value: "access_key"
+            description: "Authenticate with a static access key ID and secret key pair"
+          - label: "AWS IAM Role Chaining"
+            value: "iam"
+            description: "Assume an IAM role via the node's instance credentials (requires SAM running on AWS)"
+      - name: aws_access_key_id
+        type: password
+        label: "AWS Access Key ID"
+        required: true
+        secret: true
+        order: 6
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 16
+          max_length: 128
+      - name: aws_secret_access_key
+        type: password
+        label: "AWS Secret Access Key"
+        required: true
+        secret: true
+        order: 7
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 30
+          max_length: 255
+      - name: role_arn
+        type: string
+        label: "Role ARN"
+        required: true
+        order: 8
+        placeholder: "arn:aws:iam::123456789012:role/SolaceOpenSearchAccess"
+        hint: "ARN of the IAM role with permissions to query the OpenSearch cluster."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 20
+          max_length: 2048
+          pattern: "^arn:aws[a-zA-Z\\-]*:iam::\\d+:role/.+$"
+          error_msg: "Role ARN must look like arn:aws:iam::<account>:role/<name>"
+      - name: session_name
+        type: string
+        label: "Session Name"
+        required: false
+        order: 9
+        placeholder: "solace-opensearch-session"
+        hint: "Session name for auditing the assumed role in AWS CloudTrail logs."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 64
+      - name: external_id
+        type: password
+        label: "External ID"
+        required: false
+        secret: true
+        order: 10
+        placeholder: "solace-sam-abc-123"
+        hint: "Optional security token for cross-account access. Required if configured in the IAM role's trust policy."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 1224
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `opensearch_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`opensearch_query`). `{}` removes them."

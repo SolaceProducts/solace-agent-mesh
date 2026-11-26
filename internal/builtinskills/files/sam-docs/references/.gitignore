@@ -1,0 +1,3 @@
+# Docs are copied from ../solace-agent-mesh at build time (make build-skills).
+# Do not commit them here.
+documentation/

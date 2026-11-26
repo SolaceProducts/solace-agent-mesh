@@ -1,0 +1,320 @@
+type: mcp
+subtypes:
+  - subtype: remote
+    name: "Remote MCP"
+    description: "Connect to remote MCP servers via SSE or Streamable HTTP"
+    usage_guidance: |
+      Use the MCP connector when the user wants to connect to a remote tool server
+      implementing the Model Context Protocol (MCP). MCP servers expose tools that
+      agents can call over HTTP. The user needs to provide the server URL and choose
+      a connection type (streamable-http or SSE). Authentication is optional and
+      depends on the server.
+
+      If the user provides credentials (or none are needed), you can use the
+      discover_mcp_tools tool to list available tools before saving. If credentials
+      are required but not yet provided, skip discovery — the UI will handle it
+      after the user fills in the <<__SAM_REQUIRED__>> placeholders.
+
+      Common MCP servers include Stripe, GitHub, Slack, and custom enterprise
+      tool servers. Ask the user what the MCP server provides to help write a
+      good connector description.
+    warning: "Remote MCP servers must be accessible and trusted. Ensure proper network security and validate the MCP server's identity before connecting."
+    field_schema:
+      - name: server_url
+        type: string
+        label: "MCP Server URL"
+        required: true
+        order: 1
+        placeholder: "https://example.com/mcp"
+        hint: "The Remote MCP Server URL (e.g., https://mcp.example.com/mcp)"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: connection_type
+        type: select
+        label: "Connection Type"
+        required: true
+        order: 2
+        default: "streamable-http"
+        hint: "Protocol for connecting to the MCP server."
+        options:
+          - label: "Streamable HTTP"
+            value: "streamable-http"
+            description: "Modern bidirectional HTTP transport (recommended)"
+          - label: "Server-Sent Events (SSE)"
+            value: "sse"
+            description: "Legacy SSE-based transport for older MCP servers"
+      - name: custom_headers
+        type: key_value
+        label: "Custom HTTP Headers"
+        required: false
+        order: 300
+        hint: "Optional custom HTTP headers sent with every MCP request (e.g., routing headers, tenant IDs)"
+      - name: tool_name
+        type: string
+        label: "Single Tool Name"
+        required: false
+        order: 400
+        hint: "Expose exactly this one MCP tool. Mutually exclusive with allow_list and deny_list."
+        hidden: true
+      - name: tool_name_prefix
+        type: string
+        label: "Tool Name Prefix"
+        required: false
+        order: 401
+        hint: "Prepended to every exposed tool name (lets the agent disambiguate tools when multiple MCP servers are bound)."
+        hidden: true
+      - name: allow_list
+        type: text
+        label: "Allow List"
+        required: false
+        order: 402
+        placeholder: "tool_a, tool_b, tool_c"
+        hint: "Comma-separated MCP tool names to expose. Mutually exclusive with tool_name and deny_list."
+      - name: deny_list
+        type: text
+        label: "Deny List"
+        required: false
+        order: 403
+        placeholder: "tool_x, tool_y"
+        hint: "Comma-separated MCP tool names to hide from the agent. Mutually exclusive with tool_name and allow_list."
+        hidden: true
+      - name: manifest
+        type: textarea
+        label: "Inline Tool Manifest (YAML/JSON)"
+        required: false
+        order: 404
+        hint: "Optional full override of the tool definitions: a list of entries with name, description, an optional inputSchema and an optional outputSchema. An outputSchema declares what the tool returns; its top-level properties are the fields a workflow addresses as {{node.output.mcp_structured_content.<field>}}, and a reference they do not name is reported as unverified. When set, the connector skips live discovery and registers exactly these tools, so it cannot be combined with Single Tool Name, Allow List or Deny List. An update that leaves it out asks the server for its tools again (an OAuth connector is never asked) and, when the server lists them, stores that list in its place, so send it with every update to keep it. To narrow the tools instead, use selected_tools, the Allow List or the Deny List."
+        hidden: true
+      - name: hil
+        type: hil
+        label: "Human-In-The-Loop Tool Approvals"
+        required: false
+        order: 405
+        hint: "Optional per-tool approval gating. Map of tool names to HIL config under a top-level `tools:` key. Each entry supports require_approval (bool), approval_message (Go text/template string — use `{{.argName}}` to interpolate LLM-supplied args, e.g. `Update Jira issue {{.issueIdOrKey}}?`), show_args (bool), and timeout (duration string e.g. \"30m\"). When require_approval is true the agent pauses on tool invocation and surfaces approval_message in the UI before proceeding."
+        hidden: true
+      - name: auth_type
+        type: select
+        label: "Authentication Type"
+        required: true
+        order: 100
+        default: "none"
+        options:
+          - label: "No Authentication"
+            value: "none"
+            description: "No authentication required"
+          - label: "API Key"
+            value: "apikey"
+            description: "Authenticate using an API key in header or query parameter"
+          - label: "HTTP Authentication"
+            value: "http"
+            description: "HTTP Authentication using Basic Auth or Bearer Token"
+          - label: "OAuth 2.0 / OIDC"
+            value: "oauth"
+            description: "OAuth 2.0 and OpenID Connect authentication"
+      - name: auth_apikey_location
+        type: select
+        label: "API Key Location"
+        required: true
+        order: 200
+        default: "header"
+        hint: "Where to send the API key with each request."
+        visible_when:
+          auth_type: "apikey"
+        options:
+          - label: "Header"
+            value: "header"
+            description: "Send as an HTTP request header (recommended)"
+          - label: "Query Parameter"
+            value: "query"
+            description: "Append to the URL as a query parameter"
+      - name: auth_apikey_name
+        type: string
+        label: "API Key Parameter Name"
+        required: true
+        order: 201
+        hint: "Name of the header or query parameter"
+        visible_when:
+          auth_type: "apikey"
+        validation:
+          min_length: 1
+          max_length: 200
+          pattern: "^[a-zA-Z0-9\\-_]+$"
+      - name: auth_apikey_value
+        type: password
+        label: "API Key Value"
+        required: true
+        secret: true
+        order: 202
+        hint: "The actual API key value. Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+        visible_when:
+          auth_type: "apikey"
+        validation:
+          min_length: 8
+          max_length: 2048
+      - name: auth_http_scheme
+        type: select
+        label: "HTTP Auth Scheme"
+        required: true
+        order: 200
+        default: "basic"
+        hint: "HTTP Authorization header scheme."
+        visible_when:
+          auth_type: "http"
+        options:
+          - label: "Basic (Username/Password)"
+            value: "basic"
+            description: "HTTP Basic Authentication using username and password"
+          - label: "Bearer (Token)"
+            value: "bearer"
+            description: "Bearer token authentication (JWT, OAuth2 access token, etc.)"
+      - name: auth_http_basic_username
+        type: string
+        label: "Username"
+        required: true
+        order: 201
+        hint: "Username for Basic Authentication"
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "basic"
+        validation:
+          min_length: 1
+          max_length: 320
+      - name: auth_http_basic_password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 202
+        hint: "Password for Basic Authentication. Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "basic"
+        validation:
+          min_length: 4
+          max_length: 1024
+      - name: auth_http_bearer_token
+        type: password
+        label: "Bearer Token"
+        required: true
+        secret: true
+        order: 201
+        hint: "The bearer token (JWT, OAuth2 access token, API token, etc.). Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "http"
+          auth_http_scheme: "bearer"
+        validation:
+          min_length: 10
+          max_length: 8192
+      - name: auth_oauth_mode
+        type: select
+        label: "Configuration Mode"
+        required: true
+        order: 200
+        default: "discovery"
+        hint: "How to configure the OAuth endpoints."
+        visible_when:
+          auth_type: "oauth"
+        options:
+          - label: "Discovery (Automatic)"
+            value: "discovery"
+            description: "Automatically discover OAuth endpoints from the API server"
+          - label: "Manual (Explicit)"
+            value: "manual"
+            description: "Manually configure all OAuth endpoints and settings"
+      - name: auth_oauth_authorization_url
+        type: string
+        label: "Authorization URL"
+        required: true
+        order: 201
+        hint: "The OAuth authorization endpoint where users grant permission"
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_token_url
+        type: string
+        label: "Token URL"
+        required: true
+        order: 202
+        hint: "The OAuth token endpoint where codes are exchanged for access tokens"
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_refresh_url
+        type: string
+        label: "Refresh URL (Optional)"
+        required: false
+        order: 203
+        hint: "The OAuth refresh endpoint. If not specified, will use the token URL."
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          min_length: 11
+          max_length: 2048
+          pattern: "^https?://[^\\s]+$"
+      - name: auth_oauth_client_id
+        type: string
+        label: "Client ID"
+        required: true
+        order: 204
+        hint: "The OAuth client ID for your application"
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          min_length: 1
+          max_length: 512
+      - name: auth_oauth_client_secret
+        type: password
+        label: "Client Secret"
+        required: false
+        secret: true
+        order: 205
+        hint: "The OAuth client secret. Leave empty for PKCE-only flows. Leave placeholder to keep existing value. After saving, this will no longer be displayed."
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          min_length: 4
+          max_length: 1024
+      - name: auth_oauth_scopes
+        type: string
+        label: "Scopes"
+        required: false
+        order: 206
+        hint: "Space-separated OAuth scopes for API access (e.g., `openid email read:api`)"
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        validation:
+          max_length: 2048
+      - name: auth_oauth_token_endpoint_auth_method
+        type: select
+        label: "Token Endpoint Auth Method"
+        required: false
+        order: 207
+        default: "client_secret_basic"
+        hint: "How to authenticate at the token endpoint"
+        visible_when:
+          auth_type: "oauth"
+          auth_oauth_mode: "manual"
+        options:
+          - label: "Client Secret Basic"
+            value: "client_secret_basic"
+            description: "Send credentials via HTTP Basic Auth (default)"
+          - label: "Client Secret Post"
+            value: "client_secret_post"
+            description: "Send credentials in POST body"
+          - label: "None (PKCE only)"
+            value: "none"
+            description: "No client secret - uses PKCE for security"

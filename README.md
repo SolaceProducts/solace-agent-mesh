@@ -5,10 +5,35 @@
 
 [Solace Agent Mesh](https://solace.com/products/agent-mesh/) is an agent development and runtime platform. It supports the full agent development lifecycle: build, test, deploy, monitor, and improve your agents and business process workflows. It hosts the agents you build, runs the tools they call, and coordinates everything over an event broker, with sessions, artifacts, authentication, evaluators, and observability built in.
 
-> [!NOTE]
-> **The Solace Agent Mesh source code is coming to this repository soon.**
-> Until then, this repository holds Agent Mesh Desktop downloads and
-> ready-to-run examples.
+This repository holds the Solace Agent Mesh source code, the Agent Mesh Desktop
+install scripts, and ready-to-run examples. The Agent Mesh Desktop downloads are
+attached to the [releases](../../releases) of this repository. For the product
+documentation, see the
+[Solace Agent Mesh documentation](https://docs.solace.com/Agent-Mesh/agent-mesh.htm).
+
+This repository is read-only: it does not accept issues, pull requests, or
+other outside contributions. Solace publishes the source here from its internal
+repository. For where to send questions, bug reports, feature requests, and
+security vulnerabilities, see [Getting Help](#getting-help).
+
+## Repository Contents
+
+The following table describes the main directories of this repository. The
+`Dockerfile` and the license and policy files are at the root.
+
+| Directory | Contents |
+|---|---|
+| `cmd/` | The `main` package of each Agent Mesh binary, such as the `sam` CLI and the server components, and of each code generator that the build runs |
+| `internal/` | The implementation of those binaries |
+| `pkg/`, `common/` | Go packages that the binaries share, including the Go tool SDK in `pkg/samtoolsdk/` |
+| `python/sam-tool-sdk/` | The Python tool SDK, published on PyPI as [`sam-tool-sdk`](https://pypi.org/project/sam-tool-sdk/) |
+| `python/sam-link-sdk/` | The Python Link SDK, which lets agents built with other frameworks join Agent Mesh |
+| `tools/`, `skills/` | The built-in tools and skills |
+| `webui/` | The web interface |
+| `configs/` | Configuration files that the server container images include, and samples |
+| `install/` | The Agent Mesh Desktop install scripts |
+| `examples/` | Use cases that you apply with `sam config apply` |
+| `third_party/`, `licenses/` | Third-party code included in this repository, and the licenses of the packages that a build downloads |
 
 ## Installing Agent Mesh Desktop
 
@@ -71,9 +96,9 @@ alias on macOS and Linux:
   `alias sam='"/Applications/Solace Agent Mesh.app/Contents/MacOS/sam-desktop"'`
 - **On Linux:** Add an alias: `alias sam='solace-agent-mesh'`
 
-The following examples show common `sam` commands. The `sam ai-assistance` and
-`sam config` commands are Early Access, so their commands, flags, and output may
-change between releases.
+The following examples show common `sam` commands. The `sam ai-assistance`
+commands are Early Access, so their commands, flags, and output may change
+between releases.
 
 ```sh
 # Install skills that teach your AI coding assistant, such as Claude Code or

@@ -1,0 +1,87 @@
+## Examples
+
+Example 1:
+- User: "Create a markdown file with your two csv files as tables."
+<note>There are two csv files already uploaded: data1.csv and data2.csv</note>
+- Agent:
+«status_update:Creating Markdown tables from CSV files...»
+«««save_artifact: filename="data_tables.md" mime_type="text/markdown" description="Markdown tables from CSV files"
+# Data Tables
+## Data 1
+«««template_liquid: data="data1.csv"
+| {% for h in headers %}{{ h }} | {% endfor %}
+|{% for h in headers %}---|{% endfor %}
+{% for row in data_rows %}| {% for cell in row %}{{ cell }} | {% endfor %}{% endfor %}
+»»»
+## Data 2
+«««template_liquid: data="data2.csv"
+| {% for h in headers %}{{ h }} | {% endfor %}
+|{% for h in headers %}---|{% endfor %}
+{% for row in data_rows %}| {% for cell in row %}{{ cell }} | {% endfor %}{% endfor %}
+»»»
+»»»
+
+Example 2:
+- User: "Create a text file with the result of sqrt(12345) + sqrt(67890) + sqrt(13579) + sqrt(24680)."
+- Agent:
+«status_update:Calculating and creating text file...»
+«««save_artifact: filename="math.txt" mime_type="text/plain" description="Result of sqrt(12345) + sqrt(67890) + sqrt(13579) + sqrt(24680)"
+result = «math: sqrt(12345) + sqrt(67890) + sqrt(13579) + sqrt(24680) | .2f»
+»»»
+
+Example 3:
+- User: "Show me the first 10 entries from data1.csv"
+- Agent:
+«status_update:Loading CSV data...»
+«««template_liquid: data="data1.csv" limit="10"
+| {% for h in headers %}{{ h }} | {% endfor %}
+|{% for h in headers %}---|{% endfor %}
+{% for row in data_rows %}| {% for cell in row %}{{ cell }} | {% endfor %}{% endfor %}
+»»»
+
+Example 4:
+- User: "Show me the Jira issues as a table"
+<note>There is a JSON artifact jira_issues.json with items containing key, summary, status, type, assignee, updated fields</note>
+- Agent:
+«status_update:Rendering Jira issues table...»
+«««template_liquid: data="jira_issues.json" limit="10"
+| Key | Summary | Status | Type | Assignee | Updated |
+|-----|---------|--------|------|----------|---------|
+{% for item in items %}| [{{ item.key }}](https://jira.example.com/browse/{{ item.key }}) | {{ item.summary | replace: "|", "&#124;" }} | {{ item.status }} | {{ item.type }} | {{ item.assignee }} | {{ item.updated }} |
+{% endfor %}
+»»»
+<note>The replace filter on item.summary escapes any pipe characters that would break the markdown table. Only apply to text fields that might contain pipes.</note>
+
+Example 5:
+- User: "Search the database for all orders from last month"
+- Agent:
+«status_update:Querying order database...»
+[calls search_database tool with no visible text]
+[After getting results:]
+Found 247 orders from last month totaling $45,231.
+
+Example 6:
+- User: "Create an HTML with the chart image you just generated with the customer data."
+- Agent:
+«status_update:Generating HTML report with chart...»
+«««save_artifact: filename="customer_analysis.html" mime_type="text/html" description="Interactive customer analysis dashboard"
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Customer Chart - «datetime:%Y-%m-%d»</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .metric { background: #f0f0f0; padding: 10px; margin: 10px 0; }
+        img { max-width: 100%; height: auto; }
+    </style>
+</head>
+<body>
+<h1>Customer Analysis Report</h1>
+<p>Generated: «datetime:iso»</p>
+
+<h2>Customer Distribution Chart</h2>
+<img src="«artifact_content:customer_chart.png >>> format:datauri»" alt="Customer Distribution">
+
+</body>
+</html>
+»»»

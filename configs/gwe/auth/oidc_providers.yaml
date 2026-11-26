@@ -1,0 +1,19 @@
+# configs/gwe/auth/oidc_providers.yaml
+# OIDC provider catalog for the enterprise gateway.
+# Top-level key matches Python oauth2_config.yaml.
+providers:
+  azure:
+    issuer: "${OIDC_ISSUER}"
+    client_id: "${OIDC_CLIENT_ID}"
+    client_secret: "${OIDC_CLIENT_SECRET}"
+    # Space- or comma-separated. Set OIDC_SCOPES to add a scope your IdP
+    # needs before it returns the group claim (e.g. "groups"); the value
+    # replaces the default list, so keep openid in it.
+    scopes: "${OIDC_SCOPES:-openid email profile offline_access}"
+    # For self-signed or private-CA IdPs, pin a CA bundle:
+    ca_cert_path: "${OIDC_CA_CERT_PATH, }"
+    # DEV ONLY — disables TLS validation, exposes tokens to MITM:
+    insecure_skip_verify: ${OIDC_INSECURE_SKIP_VERIFY, false}
+    # DEV ONLY — drops the Secure flag on the OIDC state cookie so login
+    # works over http://localhost. Default false; set OIDC_DEV_MODE=true locally.
+    dev_mode: ${OIDC_DEV_MODE, false}

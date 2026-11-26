@@ -1,0 +1,54 @@
+test_case_id: "spend_workflow_001"
+description: "A two-node workflow whose nodes are agents; each node's LLM calls are booked to the workflow."
+tags: ["spend"]
+skip_intermediate_events: true
+expected_completion_timeout_seconds: 20
+
+gateway_input:
+  target_agent_name: "SimpleTestWorkflow"
+  user_identity: "spend_user@example.com"
+  parts:
+    - type: "data"
+      data:
+        input_text: "Process this test data"
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: |
+              «««save_artifact: filename="step1_output.json" mime_type="application/json" description="Output from step 1"
+              {"processed": "Step 1 completed", "data": "processed_data"}
+              »»»
+      usage: {prompt_tokens: 1000, completion_tokens: 50, total_tokens: 1050, cached_tokens: 600, cache_write_tokens: 200}
+
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "Step 1 output has been saved. «result:artifact=step1_output.json:0 status=success»"
+      usage: {prompt_tokens: 500, completion_tokens: 20, total_tokens: 520, cached_tokens: 100, cache_write_tokens: 40}
+
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: |
+              «««save_artifact: filename="step2_output.json" mime_type="application/json" description="Final workflow output"
+              {"final_result": "Workflow completed successfully"}
+              »»»
+      usage: {prompt_tokens: 520, completion_tokens: 10, total_tokens: 530, cached_tokens: 300, cache_write_tokens: 0}
+
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "Step 2 output has been saved. «result:artifact=step2_output.json:0 status=success»"
+      usage: {prompt_tokens: 1200, completion_tokens: 30, total_tokens: 1230, cached_tokens: 900, cache_write_tokens: 100}
+
+expected_gateway_output:
+  - type: "final_response"
+    task_state: "completed"
+
+expected_artifacts: []

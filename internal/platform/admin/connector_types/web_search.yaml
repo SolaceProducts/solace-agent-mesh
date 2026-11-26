@@ -1,0 +1,143 @@
+type: web_search
+subtypes:
+  - subtype: tavily
+    name: "Tavily"
+    description: "Search the web with Tavily and cite the sources"
+    warning: "Tavily bills each search to this API key, and every agent that uses this connector shares the key and its plan limits."
+    usage_guidance: |
+      Use the Web Search connector with the Tavily provider when the user
+      wants an agent to search the public web and cite its sources, and has
+      (or will get) a Tavily API key. The agent gets one web_search tool;
+      every result it cites is numbered in the chat.
+
+      Always use <<__SAM_REQUIRED__>> for the API key: it is a credential and
+      never belongs in an artifact. Leave api_base at its default unless the
+      user names a private mirror or proxy. Set safe_search to "yes" only when
+      the user asks for adult content to be filtered out.
+    field_schema:
+      - name: api_key
+        type: password
+        label: "API Key"
+        required: true
+        secret: true
+        order: 1
+        hint: "Your Tavily API key. Leave the placeholder to keep an existing value."
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: api_base
+        type: string
+        label: "API Base URL"
+        required: true
+        order: 2
+        default: "https://api.tavily.com"
+        placeholder: "https://api.tavily.com"
+        hint: "Tavily's API endpoint. Change it only to route searches through a private mirror or proxy."
+        validation:
+          max_length: 2048
+          pattern: "^https?://[^\\s/?#]+[^\\s?#]*$"
+          error_msg: "API Base URL must be an http:// or https:// URL with a host"
+      - name: max_results
+        type: number
+        label: "Results per Search"
+        required: false
+        order: 3
+        default: 5
+        placeholder: "5"
+        hint: "How many results a search returns when the agent does not ask for a number."
+        validation:
+          min: 1
+          max: 20
+      - name: safe_search
+        type: select
+        label: "Safe Search"
+        required: false
+        order: 4
+        default: "no"
+        hint: "Filter adult content out of the results."
+        options:
+          - label: "No"
+            value: "no"
+            description: "Return results without content filtering"
+          - label: "Yes"
+            value: "yes"
+            description: "Filter adult content out of the results"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `web_search`."
+        hint: "Approval gates for this connector's tools, keyed by role (`web_search`). `{}` removes them."
+
+  - subtype: exa
+    name: "Exa"
+    description: "Search the web with Exa and cite the sources"
+    warning: "Exa bills each search to this API key, and every agent that uses this connector shares the key and its credits."
+    usage_guidance: |
+      Use the Web Search connector with the Exa provider when the user wants
+      an agent to search the public web and cite its sources, and has (or
+      will get) an Exa API key. The agent gets one web_search tool; every
+      result it cites is numbered in the chat. Exa has no image search.
+
+      Always use <<__SAM_REQUIRED__>> for the API key: it is a credential and
+      never belongs in an artifact. Leave api_base at its default unless the
+      user names a private mirror or proxy. Set safe_search to "yes" only when
+      the user asks for unsafe content to be filtered out.
+    field_schema:
+      - name: api_key
+        type: password
+        label: "API Key"
+        required: true
+        secret: true
+        order: 1
+        hint: "Your Exa API key. Leave the placeholder to keep an existing value."
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: api_base
+        type: string
+        label: "API Base URL"
+        required: true
+        order: 2
+        default: "https://api.exa.ai"
+        placeholder: "https://api.exa.ai"
+        hint: "Exa's API endpoint. Change it only to route searches through a private mirror or proxy."
+        validation:
+          max_length: 2048
+          pattern: "^https?://[^\\s/?#]+[^\\s?#]*$"
+          error_msg: "API Base URL must be an http:// or https:// URL with a host"
+      - name: max_results
+        type: number
+        label: "Results per Search"
+        required: false
+        order: 3
+        default: 5
+        placeholder: "5"
+        hint: "How many results a search returns when the agent does not ask for a number."
+        validation:
+          min: 1
+          max: 20
+      - name: safe_search
+        type: select
+        label: "Safe Search"
+        required: false
+        order: 4
+        default: "no"
+        hint: "Filter unsafe content out of the results."
+        options:
+          - label: "No"
+            value: "no"
+            description: "Return results without content filtering"
+          - label: "Yes"
+            value: "yes"
+            description: "Filter unsafe content out of the results"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `web_search`."
+        hint: "Approval gates for this connector's tools, keyed by role (`web_search`). `{}` removes them."

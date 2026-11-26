@@ -1,0 +1,14 @@
+[
+  {
+    "taskId": "01a1ac8d-df54-7071-b3e6-edeb230d130c",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "- **Scope:** The file lists 40 purchase orders (PO-10001 to PO-10040) from 30 distinct suppliers. Together they total about **514,493.55**. Individual orders range from 469.92 to 33,798.86.\n- **Status:** 38 orders are **received**, 1 is **open** (PO-10015, 4,951.80) and 1 is **cancelled** (PO-10028, 14,896.30).\n- **Spend by cost centre:** CC-MKT is highest at 134,805.58 across 9 orders. CC-LOG follows at 117,487.31, then CC-FAC at 84,196.45, CC-IT at 72,196.48, CC-RND at 65,213.76 and CC-OPS at 40,593.97. The largest single order is PO-10011 (CC-IT, SUP-043, 33,798.86)."
+      }
+    ]
+  }
+]

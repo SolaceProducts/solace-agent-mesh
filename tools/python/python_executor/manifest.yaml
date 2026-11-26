@@ -1,0 +1,7 @@
+version: 1
+tools:
+  execute_python_code:
+    executable: python/bin/execute_python_code
+    effect: side_effecting
+    timeout_seconds: 300
+    sandbox_profile: standard

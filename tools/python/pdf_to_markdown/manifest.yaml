@@ -1,0 +1,10 @@
+version: 1
+tools:
+  convert_pdf_to_markdown:
+    # Path is relative to this manifest dir; STR's resolver accepts the
+    # first valid file at <manifest_dir>/<executable>. The Dockerfile.str
+    # venv build lands the pip console-script at python/bin/.
+    executable: python/bin/convert_pdf_to_markdown
+    effect: side_effecting
+    timeout_seconds: 120
+    sandbox_profile: standard

@@ -1,0 +1,63 @@
+/* System font stack definitions */
+:root {
+  --font-montserrat: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+  --font-roboto: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen-Sans, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
+}
+
+/* Apply system fonts to ReDoc elements */
+body {
+  margin: 0;
+  padding: 0;
+  font-family: var(--font-roboto);
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-montserrat);
+}
+
+/* Add Solace logo to the left panel */
+.menu-content::before {
+  content: "";
+  display: block;
+  padding: 5px 0;
+  margin: 0;
+  background-image: url('solace-logo.png');
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-size: 140px auto;
+  min-height: 70px;
+}
+
+/* Collapsible sidebar groups (x-tagGroups). Closed unless marked expanded, so
+   they are closed from the first paint, before any script runs. */
+li[data-item-id^="group/"]:not([data-expanded="true"]) > ul {
+  display: none;
+}
+
+li[data-item-id^="group/"] > label {
+  cursor: pointer;
+  user-select: none;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+li[data-item-id^="group/"] > label::after {
+  content: "";
+  width: 8px;
+  height: 8px;
+  margin-right: 14px;
+  border-right: 2px solid currentColor;
+  border-bottom: 2px solid currentColor;
+  transform: rotate(-45deg);
+  transition: transform 0.15s;
+}
+
+li[data-item-id^="group/"][data-expanded="true"] > label::after {
+  transform: rotate(45deg);
+}
+
+li[data-item-id^="group/"][data-has-active="true"] > label {
+  color: #00c895;
+  font-weight: 600;
+}

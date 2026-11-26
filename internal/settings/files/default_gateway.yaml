@@ -1,0 +1,109 @@
+# Default SAM gateway — created automatically when no configs exist.
+#
+# SSO/RBAC are driven entirely by environment variables, mirroring configs/gwe
+# so a .env that works against the standalone gateway/platform binaries also
+# works against `sam run --embedded`:
+#   FRONTEND_USE_AUTHORIZATION=true + OIDC_ISSUER/OIDC_CLIENT_ID/OIDC_CLIENT_SECRET
+#     turn on OIDC login.
+#   AUTHORIZATION_TYPE=default_rbac turns on RBAC. The role/user definitions and
+#     the gateway<->platform trust_manager live in default_platform.yaml.
+
+# OIDC provider catalog. The block is inert only while login is OFF
+# (FRONTEND_USE_AUTHORIZATION=false) — then the catalog is never consulted. With
+# login ON, the selected entry's issuer/client_id/client_secret are REQUIRED:
+# an empty issuer drops the entry, and a login-on gateway with no usable entry
+# fails to start (it does not silently disable login). The entry key is a label;
+# EXTERNAL_AUTH_PROVIDER selects which entry the gateway uses.
+providers:
+  default:
+    issuer: "${OIDC_ISSUER}"
+    client_id: "${OIDC_CLIENT_ID}"
+    client_secret: "${OIDC_CLIENT_SECRET}"
+    redirect_uri: "${OIDC_REDIRECT_URI, http://localhost:8800/api/v1/auth/callback}"
+    # Space- or comma-separated; OIDC_SCOPES replaces the list, so keep openid.
+    scopes: "${OIDC_SCOPES:-openid email profile offline_access}"
+    # Pin a CA bundle for a private-CA / self-signed IdP.
+    ca_cert_path: "${OIDC_CA_CERT_PATH, }"
+    # DEV/LAB ONLY — disables TLS validation, exposing tokens to MITM.
+    insecure_skip_verify: ${OIDC_INSECURE_SKIP_VERIFY, false}
+    # DEV ONLY — drops the Secure flag on the auth cookies (sam_access_token and
+    # the OAuth state cookies) so they work over plain HTTP. Applies to any host;
+    # keep it off in production.
+    dev_mode: ${OIDC_DEV_MODE, false}
+
+apps:
+  - name: default_gateway
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, true}
+      broker_url: ${SOLACE_BROKER_URL}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+    app_config:
+      namespace: ${NAMESPACE, solace-agent-mesh}
+      session_secret_key: "${SAM_SESSION_SECRET}"
+
+      model:
+        model: ${LLM_SERVICE_PLANNING_MODEL_NAME, openai/gpt-4o}
+        api_base: ${LLM_SERVICE_ENDPOINT}
+        api_key: ${LLM_SERVICE_API_KEY}
+
+      # The SSE replay buffer batches commits to the local SQLite file on a 1s
+      # timer instead of 50ms, writing sooner once 100 events are waiting or
+      # for a task's first event. Live chat reads the in-memory tail, so this
+      # only cuts disk writes during streaming.
+      event_log_flush_interval_ms: 1000
+
+      session_service:
+        type: sql
+        database_url: "sqlite:///${SAM_DATA_DIR}/sam.db"
+        default_behavior: PERSISTENT
+      artifact_service:
+        type: filesystem
+        base_path: ${SAM_DATA_DIR, ./sam-data}
+      # Volume service stores per-user filesystem workspaces under
+      # SAM_DATA_DIR/volumes by default. The CLI uses SAM_HOME/volumes
+      # instead; both layouts work side-by-side and are migrated by setting
+      # this `root:` explicitly when the user moves between them.
+      volume_service:
+        type: filesystem
+        root: ${SAM_DATA_DIR, ./sam-data}/volumes
+        # Same database as the AWE's volume_database_url. Empty keeps the
+        # volume list in a SQLite file under `root` (single-host runs).
+        database_url: ${SAM_VOLUME_DATABASE_URL:-${DATABASE_URL:-}}
+
+      task_logging:
+        enabled: true
+
+      gateway_id: default-gw
+      fastapi_host: localhost
+      fastapi_port: ${FASTAPI_PORT, 8800}
+      system_purpose: "AI assistant powered by Solace Agent Mesh."
+      # Flags listed here are surfaced in /api/v1/config. Flags registered in
+      # the feature registry (auto_title_generation, builder, ...) are NOT
+      # read from this block — toggle them via
+      # SAM_FEATURE_<UPPER_KEY> environment variables. For example:
+      #   SAM_FEATURE_AUTO_TITLE_GENERATION=true
+      frontend_welcome_message: "Welcome to Solace Agent Mesh"
+      frontend_app_name: "SAM"
+
+      # Login is off by default. EXTERNAL_AUTH_PROVIDER must match a `providers:`
+      # catalog key above.
+      frontend_use_authorization: ${FRONTEND_USE_AUTHORIZATION, false}
+      external_auth_provider: ${EXTERNAL_AUTH_PROVIDER, default}
+      # Where the gateway sends the browser AFTER minting the SAM token (with the
+      # tokens in the URL fragment). This MUST be the WebUI's dedicated callback
+      # page, which reads the fragment into localStorage and bounces into the app
+      # — NOT "/" (the app's hash router would discard the fragment, leaving the
+      # user stuck on the login screen). The embedded UI serves this page at
+      # /auth-callback.html on the gateway's own origin, so a relative default
+      # works for any host/port. Override only for a separately-hosted frontend.
+      frontend_redirect_url: ${FRONTEND_REDIRECT_URL, /auth-callback.html}
+
+      # Gateway-side RBAC switch. Under default_rbac the gateway calls the
+      # platform service (default_platform.yaml authorization_service:) over the
+      # broker at token-mint time and bakes the returned scopes into the JWT.
+      # Shares AUTHORIZATION_TYPE with the platform so the two always track each
+      # other. Modes: none / deny_all / default_rbac.
+      authorization_service:
+        type: ${AUTHORIZATION_TYPE, none}

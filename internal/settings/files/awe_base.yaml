@@ -1,0 +1,103 @@
+# Cluster AWE base config. Baked into /etc/sam/configs/awe/sam.yaml (the path
+# the Helm chart loads as the AWE pod's first --config). It
+# carries the enterprise framework blocks + broker connection but defines NO
+# chat agent:
+#   - the editable Orchestrator is seeded into the platform DB on first run
+#     (SeedBuiltinAgents) and pushed to this AWE over the control plane;
+#   - the Builder agent is always merged in by the AWE binary (MergeBundledAppEntries).
+# AWE resolves its broker from this top-level `broker:` block when no app
+# declares one (FirstBrokerConfig -> ExtractBrokerConfigFromRaw fallback).
+#
+# trust_manager + agent_identity are env-var driven so the same file works on
+# every cluster tier (TRUST_MANAGER_ENABLED etc. come from the Helm env secret).
+trust_manager:
+  enabled: ${TRUST_MANAGER_ENABLED, false}
+  card_publish_interval_seconds: ${TRUST_CARD_PUBLISH_INTERVAL, 10}
+  card_expiration_days: 7
+  verification_mode: ${TRUST_VERIFICATION_MODE, strict}
+  startup_wait_timeout_seconds: ${TRUST_STARTUP_WAIT_TIMEOUT, 10}
+  fail_on_timeout: false
+
+agent_identity:
+  key_mode: auto
+
+# Runtime metrics surface. Off by default (SAM_OBSERVABILITY_ENABLED unset →
+# enabled: false → no Prometheus /metrics mount, no OTLP exporter), so every
+# tier that does not opt in is unaffected. When SAM_OBSERVABILITY_ENABLED=true
+# the AWE management server (:8090) serves /metrics and the OTLP exporter pushes
+# to SAM_OTLP_ENDPOINT when SAM_OTLP_METRICS=true. Shape mirrors
+# configs/examples/otel_exporters_config.yaml.
+management_server:
+  observability:
+    enabled: ${SAM_OBSERVABILITY_ENABLED, false}
+    metric_prefix: ${SAM_METRIC_PREFIX, sam}
+    path: /metrics
+  exporters:
+    - type: otlp
+      endpoint: ${SAM_OTLP_ENDPOINT, http://localhost:4318}
+      protocol: ${SAM_OTLP_PROTOCOL, http}
+      compression: gzip
+      metrics: ${SAM_OTLP_METRICS, false}
+      logs: false
+
+# Process-level tool_config fallbacks (air-gap endpoints etc.). Per-tool
+# tool_config in each agent's app entry wins on key conflict.
+tool_defaults:
+  web_search_google:
+    api_base: "${GOOGLE_SEARCH_API_BASE, https://www.googleapis.com}"
+  deep_research:
+    google_api_base: "${GOOGLE_SEARCH_API_BASE, https://www.googleapis.com}"
+  generate_image_with_gemini:
+    gemini_api_base: "${GEMINI_API_BASE, https://generativelanguage.googleapis.com}"
+  text_to_speech:
+    gemini_api_base: "${GEMINI_API_BASE, https://generativelanguage.googleapis.com}"
+  # The deck look every agent gets unless its own tool_config names one:
+  # neutral (no logo), solace_2025 (Solace brand), or none (plain).
+  pptx_create_presentation:
+    template_profile: "${SAM_PPTX_TEMPLATE_PROFILE, neutral}"
+
+# Process-wide session store, shared by every agent this AWE hosts. Resolved
+# here (not per-agent) because the AWE runs ONE store for all agents — the
+# Orchestrator is no different from any other agent, and all history lives in a
+# single sessions table keyed by (agent_name, user_id, session_id). When no app
+# declares its own session_service, BuildAWERuntimeOptions falls back to this
+# block (mirroring the top-level broker fallback below).
+#
+# DATABASE_URL (shared Postgres on cluster) wins when set; otherwise the default
+# is a single shared SQLite file under SAM_DATA_DIR — durable across restarts,
+# and NOT a per-agent file. Quick-start runs that set neither get an in-memory
+# store with a startup WARN (history will not survive a restart).
+# `:-` (not `,`) so an empty-string env value falls back too — the Helm chart
+# may export DATABASE_URL="" on tiers without shared Postgres, and that must
+# resolve to the shared SQLite default rather than an empty (→ in-memory) URL.
+session_service:
+  type: ${SESSION_SERVICE_TYPE:-sql}
+  database_url: ${DATABASE_URL:-sqlite:///${SAM_DATA_DIR:-/tmp/sam-data}/sessions.db}
+
+# Process-shared volume store for agents that mount SAM volumes. The AWE builds
+# ONE volume service at startup and reuses it for every hosted agent, including
+# those deployed later via the control plane (whose own volume_service block is
+# never re-read) — so the backend must be configured here, not per agent. Only
+# honored when the `volumes` feature flag is enabled (SAM_FEATURE_VOLUMES); the
+# Helm chart mounts the shared volume PVC at this path when volumes are enabled.
+volume_root: ${SAM_VOLUME_ROOT, /app/data/volumes}
+
+# Database holding the volume list (owners, sizes, sessions). It must be the
+# one the gateway's volume_service.database_url names, so every gateway and AWE
+# pod reads and writes one list. Empty keeps it in a SQLite file under
+# volume_root, which is safe only when every process runs on one host.
+volume_database_url: ${SAM_VOLUME_DATABASE_URL:-${DATABASE_URL:-}}
+
+# Top-level broker. On cluster, Helm provides SOLACE_BROKER_URL + credentials
+# and SOLACE_DEV_MODE is unset (default false) → a real Solace connection.
+broker:
+  dev_mode: ${SOLACE_DEV_MODE, false}
+  broker_url: ${SOLACE_BROKER_URL, ws://localhost:8008}
+  broker_username: ${SOLACE_BROKER_USERNAME, default}
+  broker_password: ${SOLACE_BROKER_PASSWORD, default}
+  broker_vpn: ${SOLACE_BROKER_VPN, default}
+  temporary_queue: ${USE_TEMPORARY_QUEUES, true}
+
+# No bundled chat agent — see header. Empty list keeps LoadAppEntriesFromConfig
+# from erroring on a missing `apps` key.
+apps: []

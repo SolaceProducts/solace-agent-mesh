@@ -1,0 +1,19 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+//go:build !solace_id
+
+package edition
+
+import (
+	"log/slog"
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func TestNewLeavesOtherBuildsUngated(t *testing.T) {
+	assert.Nil(t, New(slog.New(slog.DiscardHandler)))
+}

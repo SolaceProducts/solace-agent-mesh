@@ -1,0 +1,18 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "Here is the report."
+      },
+      {
+        "kind": "file",
+        "name": "report.pdf"
+      }
+    ]
+  }
+]

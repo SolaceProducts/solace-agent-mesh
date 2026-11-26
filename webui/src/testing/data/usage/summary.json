@@ -1,0 +1,84 @@
+{
+  "scope": "tenant",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "comparisonWindow": {
+    "startTime": "2026-09-01T00:00:00.000Z",
+    "endTime": "2026-09-15T19:20:00.000Z"
+  },
+  "currency": "USD",
+  "totals": {
+    "cost": "1240.5800000000",
+    "costByBucket": {
+      "uncachedInput": "612.1000000000",
+      "output": "540.2000000000",
+      "cacheRead": "38.0000000000",
+      "cacheWrite": "50.2800000000"
+    },
+    "tokens": {
+      "uncachedInput": 91234567,
+      "output": 12345678,
+      "cacheRead": 4567890,
+      "cacheWrite": 123456
+    },
+    "calls": 182345,
+    "unpricedCalls": 120,
+    "activities": 23011
+  },
+  "costByKind": {
+    "users": "1240.5800000000",
+    "agents": "1102.4700000000",
+    "workflows": "877.4000000000",
+    "models": "1240.5800000000"
+  },
+  "comparison": {
+    "cost": "912.1900000000",
+    "changePercent": 36.000175402054396
+  },
+  "meshBudget": {
+    "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9001",
+    "name": "Mesh",
+    "source": "default",
+    "amount": "2000.0000000000",
+    "warningPercentage": 80,
+    "topUp": {
+      "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9002",
+      "amount": "400.0000000000",
+      "expiresTime": "2026-11-01T00:00:00.000Z"
+    },
+    "effectiveAmount": "2400.0000000000",
+    "periodStart": "2026-10-01T00:00:00.000Z",
+    "periodEnd": "2026-11-01T00:00:00.000Z",
+    "periodSpend": "1240.5800000000",
+    "usagePercent": 51.69083333333333,
+    "status": "ok"
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "55.1200000000",
+      "tokens": {
+        "uncachedInput": 1804800,
+        "output": 466240,
+        "cacheRead": 812160,
+        "cacheWrite": 67680
+      },
+      "activities": 1504
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "61.4000000000",
+      "tokens": {
+        "uncachedInput": 1933200,
+        "output": 499410,
+        "cacheRead": 869940,
+        "cacheWrite": 72495
+      },
+      "activities": 1611
+    }
+  ]
+}

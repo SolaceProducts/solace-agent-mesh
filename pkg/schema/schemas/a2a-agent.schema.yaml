@@ -1,0 +1,149 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "SAM Remote A2A Agent (proxy) configuration",
+  "description": "A remote A2A agent connects an external A2A-over-HTTP agent into the SAM mesh via a proxy. This config mirrors the CreateRemoteAgentRequest body posted to POST /api/v2/platform/remoteAgents.",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["name", "agentUrl", "agentCardLocation", "agentAuthConfig"],
+  "$defs": {
+    "authConfig": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["type"],
+      "description": "Discriminated auth config. The 'type' field selects which credential fields apply. Secrets use <<__SAM_REQUIRED__>> placeholders.",
+      "properties": {
+        "type": { "type": "string", "enum": ["none", "bearer", "apikey", "basic", "oauth2"] },
+        "token": { "type": "string", "description": "bearer: the bearer token" },
+        "apiKey": { "type": "string", "description": "apikey: the API key value" },
+        "headerName": { "type": "string", "description": "apikey: the HTTP header name (e.g. X-API-Key)" },
+        "username": { "type": "string", "description": "basic: username" },
+        "password": { "type": "string", "description": "basic: password" },
+        "clientId": { "type": "string", "description": "oauth2: client id" },
+        "clientSecret": { "type": "string", "description": "oauth2: client secret" },
+        "tokenEndpoint": { "type": "string", "description": "oauth2: token endpoint URL" },
+        "scopes": { "type": "array", "items": { "type": "string" }, "description": "oauth2: scopes" }
+      },
+      "allOf": [
+        { "if": { "properties": { "type": { "const": "bearer" } } }, "then": { "required": ["token"] } },
+        { "if": { "properties": { "type": { "const": "apikey" } } }, "then": { "required": ["apiKey"] } },
+        { "if": { "properties": { "type": { "const": "basic" } } }, "then": { "required": ["username", "password"] } },
+        { "if": { "properties": { "type": { "const": "oauth2" } } }, "then": { "required": ["tokenEndpoint", "clientId", "clientSecret"] } }
+      ]
+    }
+  },
+  "properties": {
+    "name": {
+      "type": "string",
+      "minLength": 3,
+      "maxLength": 40,
+      "description": "Component name. Must be unique among A2A agents."
+    },
+    "agentUrl": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 2048,
+      "pattern": "^https?://",
+      "description": "Base URL of the external A2A agent (e.g. http://host:9000)."
+    },
+    "agentCardLocation": {
+      "type": "string",
+      "enum": ["well_known", "custom", "none"],
+      "description": "Where to find the agent card. well_known = {agentUrl}/.well-known/agent-card.json; custom = explicit agentCardUrl; none = no card (skills must be supplied inline)."
+    },
+    "agentAuthConfig": {
+      "$ref": "#/$defs/authConfig",
+      "description": "Authentication used when forwarding tasks to the remote agent. Use {\"type\": \"none\"} when no auth is required."
+    },
+    "agentCardAuthConfig": {
+      "$ref": "#/$defs/authConfig",
+      "description": "Authentication used when fetching the agent card. Omit to reuse no auth for the card."
+    },
+    "agentAuthType": {
+      "type": "string",
+      "enum": ["none", "bearer", "apikey", "basic", "oauth2"],
+      "description": "Auth scheme for forwarding tasks. Normally derived from agentAuthConfig; state it explicitly to REMOVE an existing credential, which is the only way to express removal — omitting agentAuthConfig keeps the stored one."
+    },
+    "agentCardAuthType": {
+      "type": "string",
+      "enum": ["none", "bearer", "apikey", "basic", "oauth2"],
+      "description": "Auth scheme for fetching the agent card. Same rule as agentAuthType: state it explicitly to remove an existing card credential."
+    },
+    "description": {
+      "type": "string",
+      "maxLength": 1000,
+      "description": "Human-readable description of the remote agent."
+    },
+    "agentCardUrl": {
+      "type": "string",
+      "maxLength": 2048,
+      "description": "Explicit agent-card URL. Required when agentCardLocation is 'custom'."
+    },
+    "agentCardHeaders": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Extra HTTP headers sent when fetching the agent card."
+    },
+    "taskHeaders": {
+      "type": "object",
+      "additionalProperties": { "type": "string" },
+      "description": "Extra HTTP headers sent on every task request."
+    },
+    "requestTimeoutSeconds": {
+      "type": "integer",
+      "minimum": 10,
+      "maximum": 600,
+      "description": "Per-request timeout in seconds. Defaults to 120 when omitted."
+    },
+    "skills": {
+      "type": "array",
+      "description": "Inline skill descriptors. Required when agentCardLocation is 'none' (no card to discover skills from).",
+      "items": {
+        "type": "object",
+        "required": ["name", "description"],
+        "properties": {
+          "name": { "type": "string" },
+          "description": { "type": "string" }
+        }
+      }
+    },
+    "inputModes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Supported input MIME modes (e.g. [\"text\"])."
+    },
+    "outputModes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "Supported output MIME modes (e.g. [\"text\", \"file\"])."
+    },
+    "protocolVersion": {
+      "type": "string",
+      "enum": ["auto", "v1_0", "v0_3"],
+      "description": "A2A version to speak to the remote agent: auto (default, the highest both sides support), v1_0 or v0_3."
+    },
+    "trustedCardJwksUrls": {
+      "type": "array",
+      "maxItems": 10,
+      "items": { "type": "string", "pattern": "^(https://|http://(localhost|127\\.0\\.0\\.1|\\[::1\\])(:|/|$))" },
+      "description": "https URLs (http only on localhost) of JWK Sets whose keys may sign the agent card. A signed card must then verify against them."
+    },
+    "requireSignedCard": {
+      "type": "boolean",
+      "description": "Refuse an unsigned agent card and send no task until a signed one is accepted. Needs trustedCardJwksUrls."
+    }
+  },
+  "allOf": [
+    {
+      "if": { "properties": { "agentCardLocation": { "const": "custom" } } },
+      "then": { "required": ["agentCardUrl"] }
+    },
+    {
+      "if": { "properties": { "agentCardLocation": { "const": "none" } } },
+      "then": { "required": ["skills"], "properties": { "trustedCardJwksUrls": { "maxItems": 0 }, "requireSignedCard": { "const": false } } }
+    },
+    {
+      "if": { "properties": { "requireSignedCard": { "const": true } }, "required": ["requireSignedCard"] },
+      "then": { "required": ["trustedCardJwksUrls"], "properties": { "trustedCardJwksUrls": { "minItems": 1 } } }
+    }
+  ]
+}

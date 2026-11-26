@@ -1,0 +1,146 @@
+version: 1
+
+# volume_fs is a single Go STR binary that registers 11 filesystem
+# tools, each operating against a volume_param the agent has bound to
+# one of its volume slots. Tool naming convention mirrors the
+# artifact tool family (load_artifact, artifact_grep, etc.) — one
+# verb per tool, lowercased, no prefix on the tool name itself
+# (the package routes by name internally).
+#
+# Each tool declares the same single volume_param "workspace" mounted
+# at /workspace. Agent config can bind the workspace param to any
+# volume slot; multiple tools binding the same param-name to the
+# same slot share a volume. Tools that need readwrite (write side)
+# declare mode: readwrite; read-side tools declare readonly to keep
+# the bwrap mount mode honest.
+#
+# Bash + the upcoming `bash` STR tool is a separate, narrower binary
+# for full shell access. volume_fs is the narrow, deterministic,
+# audit-friendly surface — every tool takes a path parameter and
+# the helper layer enforces safejoin + symlink-escape rejection at
+# the operation site.
+tools:
+  # ---------- Read-side: no write lock, idempotent ----------
+
+  volume_read:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to read from"
+        mode: readonly
+        mount_path: /workspace
+
+  volume_list:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to list"
+        mode: readonly
+        mount_path: /workspace
+
+  volume_glob:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to search for files in"
+        mode: readonly
+        mount_path: /workspace
+
+  volume_grep:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 60
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to search file contents in"
+        mode: readonly
+        mount_path: /workspace
+
+  volume_stat:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume containing the path to stat"
+        mode: readonly
+        mount_path: /workspace
+
+  # ---------- Write-side: acquires the volume's write lock ----------
+
+  volume_write:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 60
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to write to"
+        mode: readwrite
+        mount_path: /workspace
+
+  volume_edit:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 60
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume containing the file to edit"
+        mode: readwrite
+        mount_path: /workspace
+
+  volume_append:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume containing the file to append to"
+        mode: readwrite
+        mount_path: /workspace
+
+  volume_delete:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 60
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume containing the path to delete"
+        mode: readwrite
+        mount_path: /workspace
+
+  volume_move:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume containing both source and destination paths"
+        mode: readwrite
+        mount_path: /workspace
+
+  volume_mkdir:
+    runtime: go
+    executable: ./volume_fs
+    timeout_seconds: 30
+    sandbox_profile: standard
+    volume_params:
+      - name: workspace
+        description: "Volume to create the directory in"
+        mode: readwrite
+        mount_path: /workspace

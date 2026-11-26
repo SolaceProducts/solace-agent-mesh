@@ -1,0 +1,6 @@
+version: 1
+tools:
+  pdf_extract_text:
+    runtime: go
+    executable: ./pdf_extract_text
+    timeout_seconds: 120

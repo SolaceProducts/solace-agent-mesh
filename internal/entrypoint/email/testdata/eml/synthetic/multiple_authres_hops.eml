@@ -1,0 +1,10 @@
+From: "Alice Smith" <alice@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Multi-hop test
+Message-ID: <multihop-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+Authentication-Results: mx.upstream-relay.example; spf=pass; dkim=pass; dmarc=pass
+Content-Type: text/plain
+
+Trusted MTA stamped most recently, so its header is at the top.

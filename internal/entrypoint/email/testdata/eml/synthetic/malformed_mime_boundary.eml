@@ -1,0 +1,19 @@
+From: "Jack Reed" <jack@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Malformed multipart boundary
+Message-ID: <malformed-bdy-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary-declared-A"
+
+This is a multi-part message in MIME format.
+--boundary-actually-B
+Content-Type: text/plain; charset=utf-8
+
+Plain-text part with WRONG boundary marker.
+--boundary-actually-B
+Content-Type: text/html; charset=utf-8
+
+<html><body>HTML part with WRONG boundary marker.</body></html>
+--boundary-actually-B--

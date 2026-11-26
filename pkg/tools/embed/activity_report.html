@@ -1,0 +1,671 @@
+<!doctype html>
+<html lang="en"><head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Activity Report — @@window_label@@</title>
+  <!-- Chart.js is vendored (embed/assets/chart.umd.min.js) and inlined here by
+       inlineChartJS at render time — no CDN fetch, so reports render in
+       air-gapped deployments and execute no unpinned third-party payload. The
+       marker below is the exact string that Go replaces. It sits OUTSIDE the
+       ACTIVITY_LIQUID region, so the minified JS is never parsed as a template. -->
+  <script>/*__CHARTJS_INLINE__*/</script>
+  <style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", system-ui, sans-serif;
+  background: #0b1224;
+  color: #e2e8f0;
+  font-size: 14px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+
+.header {
+  background: linear-gradient(135deg, #013a52 0%, #0892ce 100%);
+  color: #f8fafc;
+  padding: 28px 32px 24px;
+  border-bottom: 1px solid #1e293b;
+}
+.header .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 4px;
+}
+.header .brand-mark {
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  background: #00c895;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: #0b1224;
+  font-weight: 700;
+  font-size: 16px;
+}
+.header h1 {
+  font-size: 22px;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+.header .subtitle {
+  font-size: 13px;
+  color: #cbd5e1;
+  margin-bottom: 14px;
+}
+.header .chip-row {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 10px;
+  border-radius: 999px;
+  background: rgba(6, 182, 212, 0.15);
+  color: #67e8f9;
+  font-size: 12px;
+  font-weight: 600;
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+.chip.scope-all { background: rgba(168, 85, 247, 0.15); color: #d8b4fe; border-color: rgba(168, 85, 247, 0.3); }
+.chip.scope-own { background: rgba(34, 197, 94, 0.15); color: #86efac; border-color: rgba(34, 197, 94, 0.3); }
+.chip.filter-chip { background: rgba(251, 146, 60, 0.15); color: #fdba74; border-color: rgba(251, 146, 60, 0.3); }
+
+.container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+section { margin-bottom: 28px; }
+section h2 {
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  border-bottom: 2px solid #1e293b;
+  padding-bottom: 6px;
+  margin-bottom: 16px;
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+}
+.kpi-card {
+  background: #0f1828;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 16px 18px 14px;
+  border-top: 3px solid #00c895;
+  position: relative;
+}
+.kpi-card.good { border-top-color: #22c55e; }
+.kpi-card.warn { border-top-color: #f59e0b; }
+.kpi-card.danger { border-top-color: #ef4444; }
+.kpi-card .kpi-label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #94a3b8;
+  margin-bottom: 6px;
+}
+.kpi-card .kpi-value {
+  font-size: 28px;
+  font-weight: 700;
+  color: #f8fafc;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+.kpi-card.good .kpi-value { color: #4ade80; }
+.kpi-card.warn .kpi-value { color: #fbbf24; }
+.kpi-card.danger .kpi-value { color: #f87171; }
+.kpi-card .kpi-sub {
+  font-size: 11px;
+  color: #64748b;
+  margin-top: 4px;
+}
+.kpi-card .kpi-delta {
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+}
+.kpi-delta.up { color: #4ade80; }
+.kpi-delta.down { color: #f87171; }
+.kpi-delta.flat { color: #64748b; }
+
+.chart-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+  gap: 16px;
+}
+.chart-card {
+  background: #0f1828;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  padding: 16px;
+}
+.chart-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: #cbd5e1;
+  margin-bottom: 10px;
+}
+.chart-canvas-wrap {
+  position: relative;
+  height: 260px;
+}
+.chart-canvas-wrap.chart-canvas-compact {
+  height: 140px;
+}
+.chart-note {
+  margin-top: 10px;
+  font-size: 12px;
+  color: #94a3b8;
+  font-style: italic;
+}
+
+.table-card {
+  background: #0f1828;
+  border: 1px solid #1e293b;
+  border-radius: 10px;
+  /* overflow-x scrolls instead of clipping when the host container (chat
+     preview pane, artifact viewer) is narrower than the table's content —
+     previously overflow:hidden on both axes silently cut off trailing
+     columns (e.g. Feedback's Date) instead of making them reachable.
+     overflow-y stays hidden so the header's background still respects the
+     card's rounded corners. */
+  overflow-x: auto;
+  overflow-y: hidden;
+}
+.table-card table { width: 100%; min-width: max-content; border-collapse: collapse; font-size: 13px; }
+.table-card thead tr { background: #14213d; }
+.table-card thead th {
+  padding: 10px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  color: #cbd5e1;
+}
+/* Hints which column the rows are actually ordered by server-side — purely
+   informational (these tables aren't interactively sortable), not a button. */
+.sort-arrow {
+  display: inline-block;
+  margin-left: 4px;
+  color: #64748b;
+  font-size: 10px;
+  text-transform: none;
+  letter-spacing: normal;
+}
+.table-card tbody tr { border-bottom: 1px solid #1e293b; }
+.table-card tbody tr:last-child { border-bottom: none; }
+.table-card tbody tr:hover { background: #11192c; }
+.table-card tbody td { padding: 10px 14px; vertical-align: middle; color: #e2e8f0; }
+.table-card td.mono { font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace; font-size: 11.5px; color: #94a3b8; }
+.table-card td.num { text-align: right; font-variant-numeric: tabular-nums; }
+.table-card thead th.num { text-align: right; }
+
+.table-card tbody tr.nested-row { background: #0d1424; border-bottom: 1px dotted #1e293b; }
+.table-card tbody tr.nested-row:hover { background: #101a30; }
+.table-card tbody tr.nested-row td { padding: 6px 14px; color: #94a3b8; font-size: 12px; }
+.table-card tbody tr.nested-row td.nested-name { padding-left: 32px; color: #cbd5e1; }
+
+/* Feedback/Users tables: show the first N rows so the section visibly
+   contains a table worth looking at (a fully-collapsed section gave no
+   signal there was anything to expand), with the rest revealed in place by
+   a button rather than starting the whole section collapsed. All rows
+   always render — :nth-child just hides the tail — so this is pure display
+   logic with no data duplication. .expanded (toggled by the button's
+   onclick, see the section markup) wins on specificity via the extra
+   class, no !important needed. */
+.table-card.peek tbody tr:nth-child(n+6) { display: none; }
+.table-card.peek.expanded tbody tr:nth-child(n+6) { display: table-row; }
+.show-more-btn {
+  display: block;
+  width: 100%;
+  padding: 10px 14px;
+  margin-top: -1px;
+  background: #0f1828;
+  border: 1px solid #1e293b;
+  border-radius: 0 0 10px 10px;
+  color: #94a3b8;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: center;
+}
+.show-more-btn:hover { color: #f8fafc; }
+
+.badge {
+  display: inline-block;
+  padding: 2px 9px;
+  border-radius: 12px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+.badge-green { background: rgba(34, 197, 94, 0.15); color: #86efac; }
+.badge-yellow { background: rgba(245, 158, 11, 0.15); color: #fcd34d; }
+.badge-red { background: rgba(239, 68, 68, 0.15); color: #fca5a5; }
+.badge-gray { background: rgba(148, 163, 184, 0.15); color: #cbd5e1; }
+
+.alert {
+  border-left: 4px solid;
+  border-radius: 6px;
+  padding: 12px 16px;
+  margin-bottom: 14px;
+  font-size: 13px;
+}
+.alert strong { display: block; font-weight: 700; margin-bottom: 2px; color: #f8fafc; }
+.alert-info { border-color: #00c895; background: rgba(0, 200, 149, 0.08); color: #ccf7e8; }
+.alert-warn { border-color: #f59e0b; background: rgba(245, 158, 11, 0.08); color: #fde68a; }
+.alert-danger { border-color: #ef4444; background: rgba(239, 68, 68, 0.08); color: #fecaca; }
+.alert-good { border-color: #22c55e; background: rgba(34, 197, 94, 0.08); color: #bbf7d0; }
+
+.failure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 12px;
+}
+.failure-card {
+  background: #0f1828;
+  border: 1px solid #1e293b;
+  border-left: 3px solid #ef4444;
+  border-radius: 8px;
+  padding: 12px 14px;
+  font-size: 12.5px;
+}
+.failure-card .failure-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 6px;
+}
+.failure-card .failure-id {
+  font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  font-size: 11px;
+  color: #94a3b8;
+}
+.failure-card .failure-duration {
+  font-size: 11px;
+  font-weight: 600;
+  color: #fca5a5;
+  font-variant-numeric: tabular-nums;
+}
+.failure-card .failure-meta {
+  font-size: 11px;
+  color: #64748b;
+  margin-bottom: 6px;
+}
+.failure-card .failure-request {
+  color: #cbd5e1;
+  font-size: 12.5px;
+  line-height: 1.45;
+  word-break: break-word;
+}
+.failure-more {
+  grid-column: 1 / -1;
+  text-align: center;
+  padding: 10px;
+  color: #64748b;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.empty-state {
+  background: #0f1828;
+  border: 1px dashed #1e293b;
+  border-radius: 8px;
+  padding: 24px;
+  text-align: center;
+  /* slate-400, not slate-500: #64748b on the #0f1828 panel is 3.7:1, under WCAG AA. */
+  color: #94a3b8;
+  font-size: 13px;
+  font-style: italic;
+}
+
+footer {
+  text-align: center;
+  padding: 18px;
+  font-size: 11px;
+  color: #475569;
+  border-top: 1px solid #1e293b;
+  margin-top: 24px;
+}
+footer .retention-line {
+  margin-top: 4px;
+  color: #64748b;
+  font-style: italic;
+}
+
+/* This report renders inside SAM's artifact preview iframe, which can be as
+   narrow as a resized/default chat side panel — often well under the
+   .container's 1200px design width. 480px matches this codebase's own
+   narrow-panel breakpoint (webui/src/features/chat/ChatSidePanel.tsx and
+   others use the same cutoff via Tailwind's @[480px] container queries).
+   Tightening padding/font-size here reclaims real width for table content
+   before falling back to each .table-card's own horizontal scroll. */
+@media (max-width: 480px) {
+  .header { padding: 16px 16px 14px; }
+  .container { padding: 12px; }
+  .kpi-grid { grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; }
+  .table-card table { font-size: 12px; }
+  .table-card thead th, .table-card tbody td { padding: 8px 10px; }
+}
+  </style>
+</head>
+<body>
+
+<!--ACTIVITY_LIQUID_BEGIN-->
+<header class="header">
+  <div class="brand">
+    <span class="brand-mark">A</span>
+    <h1>Activity Report</h1>
+  </div>
+  <div class="subtitle">@@window_label@@ · Generated @@generated_at@@</div>
+  <div class="chip-row">
+    <span class="chip">@@window_label@@</span>
+    <span class="chip scope-@@scope_key@@">@@scope_label@@</span>
+    {%- capture _user_filter_chip %}@@user_filter_chip@@{% endcapture -%}
+    {%- if _user_filter_chip != "" %}<span class="chip filter-chip">{{ _user_filter_chip }}</span>{% endif -%}
+  </div>
+</header>
+
+<div class="container">
+
+  <section>
+    <h2>Overview</h2>
+    <div class="alert alert-@@verdict_class@@">
+      <strong>@@verdict_emoji@@ @@verdict_label@@</strong>
+      @@verdict_headline@@
+    </div>
+    <div class="kpi-grid">
+      {%- for tile in kpis %}
+      <div class="kpi-card {{ tile.severity }}"{% if tile.label == 'Active background' %} title="@@active_bg_tooltip@@"{% endif %}>
+        <div class="kpi-label">{{ tile.label }}</div>
+        <div class="kpi-value">{{ tile.value }}</div>
+        {%- if tile.subLabel and tile.subLabel != "" %}<div class="kpi-sub">{{ tile.subLabel }}</div>{% endif %}
+        {%- if tile.deltaText and tile.deltaText != "" %}<div class="kpi-delta {{ tile.deltaDir }}">{{ tile.deltaText }} vs prior</div>{% endif %}
+      </div>
+      {%- endfor %}
+    </div>
+  </section>
+
+  <section>
+    <h2>Status Distribution</h2>
+    {%- if statusBreakdown.rows.size > 0 %}
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">Task status (proportional)</div>
+        <div class="chart-canvas-wrap"><canvas id="statusPie"></canvas></div>
+      </div>
+      <div class="table-card">
+        <table>
+          <thead>
+            <tr><th>Status</th><th class="num">Count</th><th class="num">Share</th></tr>
+          </thead>
+          <tbody>
+            {%- for row in statusBreakdown.rows %}
+            <tr>
+              <td><span class="badge {{ row.badgeClass }}">{{ row.status }}</span></td>
+              <td class="num">{{ row.count }}</td>
+              <td class="num">{{ row.share }}</td>
+            </tr>
+            {%- endfor %}
+          </tbody>
+        </table>
+      </div>
+    </div>
+    {%- else %}
+    <div class="empty-state">No tasks in this window.</div>
+    {%- endif %}
+  </section>
+
+  <section>
+    <h2>Duration Distribution</h2>
+    {%- if durationDist.buckets.size > 0 %}
+    <div class="chart-card">
+      <div class="chart-title">Task latency distribution — all agents</div>
+      <div class="chart-canvas-wrap"><canvas id="durationHistogram"></canvas></div>
+      {%- capture _hist_note %}@@histogram_sample_note@@{% endcapture -%}
+      {%- if _hist_note != "" %}
+      <div class="chart-note">{{ _hist_note }}</div>
+      {%- endif %}
+    </div>
+    {%- else %}
+    <div class="empty-state">No completed tasks in this window — histogram unavailable.</div>
+    {%- endif %}
+  </section>
+
+  {%- if tokenTrend and tokenTrend.rows.size > 0 %}
+  <section>
+    <h2>Activity Trend</h2>
+    <div class="chart-card">
+      <div class="chart-title">Daily token consumption (input / output / cached)</div>
+      <div class="chart-canvas-wrap"><canvas id="tokenTrend"></canvas></div>
+    </div>
+    <div class="chart-card" style="margin-top:14px;">
+      <div class="chart-title">Daily task count</div>
+      <div class="chart-canvas-wrap chart-canvas-compact"><canvas id="taskCountTrend"></canvas></div>
+    </div>
+  </section>
+  {%- endif %}
+
+  <section>
+    <h2>By Agent (top 10)</h2>
+    {%- if byAgent.rows.size > 0 %}
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr><th>Agent</th><th class="num">Invocations <span class="sort-arrow" title="Sorted by this column">▼</span></th><th class="num">Errors</th><th>Success</th><th class="num">p95</th><th class="num">Input tokens</th><th class="num">Output tokens</th><th class="num">Cached tokens</th></tr>
+        </thead>
+        <tbody>
+          {%- for row in byAgent.rows %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td class="num">{{ row.invocations }}</td>
+            <td class="num">{{ row.errors }}</td>
+            <td><span class="badge {{ row.badgeClass }}">{{ row.successRate }}</span></td>
+            <td class="num">{{ row.p95 }}</td>
+            <td class="num">{{ row.inputTokens }}</td>
+            <td class="num">{{ row.outputTokens }}</td>
+            <td class="num">{{ row.cachedTokens }}</td>
+          </tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- else %}
+    <div class="empty-state">No agent activity in this window.</div>
+    {%- endif %}
+  </section>
+
+  <section>
+    <h2>By Workflow (top 10)</h2>
+    {%- if byWorkflow.rows.size > 0 %}
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr><th>Workflow</th><th class="num">Invocations <span class="sort-arrow" title="Sorted by this column">▼</span></th><th class="num">Errors</th><th>Success</th><th class="num">p95</th><th class="num">Input tokens</th><th class="num">Output tokens</th><th class="num">Cached tokens</th></tr>
+        </thead>
+        <tbody>
+          {%- for row in byWorkflow.rows %}
+          <tr>
+            <td>{{ row.name }}</td>
+            <td class="num">{{ row.invocations }}</td>
+            <td class="num">{{ row.errors }}</td>
+            <td><span class="badge {{ row.badgeClass }}">{{ row.successRate }}</span></td>
+            <td class="num">{{ row.p95 }}</td>
+            <td class="num">{{ row.inputTokens }}</td>
+            <td class="num">{{ row.outputTokens }}</td>
+            <td class="num">{{ row.cachedTokens }}</td>
+          </tr>
+          {%- for handler in row.nestedHandlers %}
+          <tr class="nested-row">
+            <td class="nested-name">{{ handler.name }}</td>
+            <td class="num">{{ handler.invocations }}</td>
+            <td class="num">{{ handler.errors }}</td>
+            <td><span class="badge {{ handler.badgeClass }}">{{ handler.successRate }}</span></td>
+            <td class="num">—</td>
+            <td class="num">{{ handler.inputTokens }}</td>
+            <td class="num">{{ handler.outputTokens }}</td>
+            <td class="num">{{ handler.cachedTokens }}</td>
+          </tr>
+          {%- endfor %}
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- else %}
+    <div class="empty-state">No workflows ran in this window.</div>
+    {%- endif %}
+  </section>
+
+  <section>
+    <h2>Feedback</h2>
+    {%- if feedback.size > 0 %}
+    <p style="color:#94a3b8;font-size:13px;margin-bottom:10px;">{{ feedbackSummary }}</p>
+    <div class="table-card peek">
+      <table>
+        <thead>
+          <tr><th>Date <span class="sort-arrow" title="Sorted by this column">▼</span></th><th>Rating</th><th>Agent / Workflow</th><th>User</th><th>Comment</th><th>Entrypoint</th><th>Task ID</th></tr>
+        </thead>
+        <tbody>
+          {%- for row in feedback %}
+          <tr>
+            <td>{{ row.updatedAt }}</td>
+            <td><span class="badge {% if row.rating == 'up' %}badge-green{% else %}badge-red{% endif %}">{% if row.rating == 'up' %}👍{% else %}👎{% endif %}</span></td>
+            <td>{{ row.agent }}</td>
+            <td class="mono">{{ row.userId }}</td>
+            <td title="{{ row.commentFull }}">{{ row.comment }}</td>
+            <td>{{ row.entrypointType }}</td>
+            <td class="mono">{{ row.taskId }}</td>
+          </tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- if feedbackOverflow > 0 %}
+    <button type="button" class="show-more-btn" onclick="var c=this.previousElementSibling; c.classList.toggle('expanded'); this.textContent = c.classList.contains('expanded') ? 'Show less' : 'Show {{ feedbackOverflow }} more…';">Show {{ feedbackOverflow }} more…</button>
+    {%- endif %}
+    {%- if feedbackTruncated %}
+    <p style="text-align:center;color:#64748b;font-style:italic;margin-top:10px;">
+      Capped at {{ feedback.size }} rows — more feedback may exist in this window.
+    </p>
+    {%- endif %}
+    {%- else %}
+    <div class="alert alert-info"><strong>No feedback submitted in this window.</strong></div>
+    {%- endif %}
+  </section>
+
+  {%- if topUsers.available and topUsers.rows.size > 0 %}
+  <section>
+    <h2>Users</h2>
+    <p style="color:#94a3b8;font-size:13px;margin-bottom:10px;">{{ topUsersSummary }}</p>
+    <div class="table-card peek">
+      <table>
+        <thead>
+          <tr><th>User</th><th class="num">Tasks</th><th class="num">Total tokens <span class="sort-arrow" title="Sorted by this column">▼</span></th><th class="num">Input tokens</th><th class="num">Output tokens</th></tr>
+        </thead>
+        <tbody>
+          {%- for row in topUsers.rows %}
+          <tr>
+            <td class="mono">{{ row.userId }}</td>
+            <td class="num">{{ row.totalTasks }}</td>
+            <td class="num">{{ row.totalTokens }}</td>
+            <td class="num">{{ row.inputTokens }}</td>
+            <td class="num">{{ row.outputTokens }}</td>
+          </tr>
+          {%- endfor %}
+        </tbody>
+      </table>
+    </div>
+    {%- if topUsersOverflow > 0 %}
+    <button type="button" class="show-more-btn" onclick="var c=this.previousElementSibling; c.classList.toggle('expanded'); this.textContent = c.classList.contains('expanded') ? 'Show less' : 'Show {{ topUsersOverflow }} more…';">Show {{ topUsersOverflow }} more…</button>
+    {%- endif %}
+    {%- if topUsers.truncated %}
+    <p style="text-align:center;color:#64748b;font-style:italic;margin-top:10px;">
+      Capped at {{ topUsers.rows.size }} users — more users may exist in this window.
+    </p>
+    {%- endif %}
+  </section>
+  {%- endif %}
+
+  <section>
+    <h2>Recent Failures</h2>
+    {%- if recentFailures.size > 0 %}
+    <div class="table-card">
+      <table>
+        <thead>
+          <tr><th>Name</th><th>Task ID</th><th>Started <span class="sort-arrow" title="Sorted by this column">▼</span></th><th>Status</th><th class="num">Duration</th><th>Request</th></tr>
+        </thead>
+        <tbody>
+          {%- for row in recentFailures %}
+          <tr>
+            <td>{{ row.agent }}</td>
+            <td class="mono">{{ row.taskId }}</td>
+            <td>{{ row.startTime }}</td>
+            <td><span class="badge badge-red">{{ row.status }}</span></td>
+            <td class="num">{{ row.duration }}</td>
+            <td>{{ row.request }}</td>
+          </tr>
+          {%- endfor %}
+          {%- if extraFailures > 0 %}
+          <tr>
+            <td colspan="6" style="text-align:center;color:#64748b;font-style:italic;padding:10px;">
+              {{ extraFailures }} more failure{% if extraFailures != 1 %}s{% endif %} in this window — ask me to <em>list all failed tasks</em> to see them.
+            </td>
+          </tr>
+          {%- endif %}
+        </tbody>
+      </table>
+    </div>
+    <p style="text-align:center;color:#64748b;font-style:italic;margin-top:10px;">
+      To look into a specific failure, ask me to <em>explain a task</em> by its Task ID above.
+    </p>
+    {%- else %}
+    <div class="alert alert-good"><strong>✅ No failures in this window.</strong>No task entered a failure-class status (failed, error or timeout).</div>
+    {%- endif %}
+  </section>
+
+</div>
+
+<footer>
+  <div>Solace Agent Mesh · Activity Monitor</div>
+  <div>Window: @@window_label@@ · Generated @@generated_at@@</div>
+  {%- capture _retention_footer %}@@retention_days_footer@@{% endcapture -%}
+  {%- if _retention_footer != "" %}
+  <div class="retention-line">{{ _retention_footer }}</div>
+  {%- endif %}
+</footer>
+
+<script>
+if (typeof Chart === 'undefined') {
+  document.querySelectorAll('.chart-canvas-wrap').forEach(function (el) {
+    el.innerHTML = '<div style="padding:1rem;color:#888;font-size:0.9rem;">Charts unavailable — Chart.js failed to load.</div>';
+  });
+} else {
+  // Gate on the canvas, not the config: an empty-state section renders no
+  // <canvas>, but its config is still non-nil. try/catch keeps one failed
+  // chart from aborting the block and blanking the charts below it.
+  var draw = function (id, cfg) {
+    var el = document.getElementById(id);
+    if (!el) { return; }
+    try { new Chart(el, cfg); } catch (e) { /* isolated: siblings still render */ }
+  };
+{%- if chartConfigs.statusPie %}draw('statusPie', {{ chartConfigs.statusPie | json }});{% endif %}
+{%- if chartConfigs.durationHistogram %}draw('durationHistogram', {{ chartConfigs.durationHistogram | json }});{% endif %}
+{%- if chartConfigs.tokenTrend %}draw('tokenTrend', {{ chartConfigs.tokenTrend | json }});{% endif %}
+{%- if chartConfigs.taskCountTrend %}draw('taskCountTrend', {{ chartConfigs.taskCountTrend | json }});{% endif %}
+}
+</script>
+<!--ACTIVITY_LIQUID_END-->
+
+</body></html>

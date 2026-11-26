@@ -1,0 +1,1 @@
+{"model":"openai/gpt-6-luna-decisions-20261006","answers":{"color":{"type":"choice","choice":"red","probabilities":{"red":1,"green":0,"blue":0},"confidence":1}},"usage":{"input_tokens":134,"output_tokens":0,"cost":0.0000134},"id":"gen-dec-1791457597-SyzMvhnnfFC03hLytdPf","provider":"OpenAI"}

@@ -1,0 +1,24 @@
+From: "Dave Wilson" <dave@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Multipart text + html
+Message-ID: <multipart-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary-mp-text-html-001"
+
+This is a multi-part message in MIME format.
+--boundary-mp-text-html-001
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+Hi team,
+
+Plain-text part of the alternative.
+
+--boundary-mp-text-html-001
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<html><body><p>Hi team,</p><p><strong>HTML</strong> part of the alternative.</p></body></html>
+--boundary-mp-text-html-001--

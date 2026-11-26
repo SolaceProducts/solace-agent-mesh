@@ -1,0 +1,440 @@
+# SAM Tool Configuration - JSON Schema (YAML syntax)
+# Each entry in an agent's tools[] array.
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: SAM Tool Config
+description: >
+  Tool definitions for SAM agents. Three types: builtin (any tool shipped
+  with SAM, resolved in-process or via STR based on tool_name), builtin-group
+  (named bundle of builtins), and mcp (MCP server).
+  Peer agents also serve as tools via automatic peer delegation (no config needed).
+
+oneOf:
+  - $ref: "#/$defs/builtin-group"
+  - $ref: "#/$defs/builtin"
+  - $ref: "#/$defs/mcp"
+  - $ref: "#/$defs/openapi"
+
+$defs:
+
+  # =================================================================
+  # Built-in tool group - adds all tools in a named group
+  # =================================================================
+  builtin-group:
+    type: object
+    required: [tool_type, group_name]
+    properties:
+      tool_type: { const: builtin-group }
+      group_name:
+        type: string
+        enum: [artifact_management, general_agent_tools, image_tools, web_tools, builder_tools, data_analysis]
+        description: |
+          Groups:
+            artifact_management  - list_artifacts, load_artifact, delete_artifact, append_to_artifact, artifact_search_and_replace_regex, artifact_grep
+            general_agent_tools  - get_current_time, convert_file_to_markdown, convert_pdf_to_markdown, pdf_extract_text, ask_user_question
+            image_tools          - create_image_from_description, describe_image, describe_audio, edit_image_with_gemini
+            web_tools            - web_request (HTTP GET/POST/PUT/DELETE)
+            data_analysis        - query_data_with_sql, transform_data_with_jmespath, merge_structured_data
+            builder_tools        - validate_component_config, validate_build_manifest, yaml_merge_artifact, platform_list_components, platform_get_component_config, discover_mcp_tools, check_mcp_server_auth, parse_openapi_spec, describe_tools
+      hil:
+        $ref: "#/$defs/hil"
+      effect:
+        $ref: "#/$defs/effect-override"
+
+  # =================================================================
+  # Individual built-in tool
+  #
+  # `builtin` covers every tool that ships with SAM. Dispatch first checks the
+  # in-process (AWE) registry; anything not in-process routes to the Secure
+  # Tool Runtime (STR) for out-of-process execution. Users don't need to know
+  # which path a given tool takes.
+  #
+  # STR-only fields (timeout_seconds, sandbox_profile, parameters,
+  # volume_params, volume_bindings) are silently ignored for in-process tools.
+  # =================================================================
+  builtin:
+    type: object
+    required: [tool_type, tool_name]
+    properties:
+      tool_type: { const: builtin }
+      tool_name:
+        type: string
+        description: |
+          In-process (AWE) tools:
+            list_artifacts, load_artifact, delete_artifact, append_to_artifact,
+            artifact_search_and_replace_regex, artifact_grep,
+            get_current_time, convert_file_to_markdown,
+            ask_user_question (interactive agents only),
+            web_request, create_image_from_description, describe_image,
+            describe_audio, edit_image_with_gemini, generate_image_with_gemini,
+            query_data_with_sql, transform_data_with_jmespath,
+            create_sqlite_db, merge_structured_data,
+            web_search_google, deep_research,
+            validate_component_config, validate_build_manifest, yaml_merge_artifact,
+            platform_list_components, platform_get_component_config,
+            discover_mcp_tools, check_mcp_server_auth, parse_openapi_spec, describe_tools
+          STR-backed tools (resolved dynamically from ~/.sam/tools/ and tools/python/):
+            ffmpeg, ffprobe, image_magick,
+            pptx_create_presentation,
+            execute_python_code, mermaid_diagram_generator,
+            create_chart_from_plotly_config,
+            execute_sql_query, graph_db_query, document_db_query,
+            search_query, query_bedrock_kb
+      tool_description:
+        type: string
+        description: "Override the tool's default description (STR tools)."
+      tool_config:
+        type: object
+        description: Tool-specific config passed to the tool at registration or invocation.
+      timeout_seconds:
+        type: integer
+        default: 30
+        x-sam-system: true
+        description: "STR tools only: broker response timeout."
+      sandbox_profile:
+        type: string
+        enum: [restrictive, standard, permissive]
+        default: standard
+        description: |
+          STR tools only - resource profile:
+            restrictive - 512MB, 60s CPU, network isolated
+            standard    - 1GB, 300s CPU, network access
+            permissive  - 4GB, 600s CPU, full access
+      parameters:
+        type: object
+        description: "STR tools only: declare parameter schema."
+        additionalProperties:
+          type: object
+          required: [type, description]
+          properties:
+            type:
+              type: string
+              description: "JSON type or special: artifact, artifact_list"
+            description: { type: string }
+            required: { type: boolean, default: true }
+            default: {}
+      volume_params:
+        type: array
+        description: "STR tools only: declare volume mount params."
+        items:
+          type: object
+          required: [name, mode, mount_path]
+          properties:
+            name: { type: string }
+            description: { type: string }
+            mode: { type: string, enum: [readonly, readwrite] }
+            mount_path: { type: string }
+      volume_bindings:
+        type: object
+        description: "STR tools only: map tool volume param names to agent volume slot names."
+      hil:
+        $ref: "#/$defs/hil"
+      auth:
+        $ref: "#/$defs/auth"
+      required_scopes:
+        type: array
+        items: { type: string }
+      effect:
+        $ref: "#/$defs/effect-override"
+
+  # =================================================================
+  # MCP tool (Model Context Protocol server)
+  # =================================================================
+  mcp:
+    type: object
+    required: [tool_type, connection_params]
+    properties:
+      tool_type: { const: mcp }
+      connection_params:
+        type: object
+        required: [type]
+        properties:
+          type:
+            type: string
+            enum: [stdio, sse, streamable-http]
+          # stdio transport
+          command: { type: string, description: "Required for stdio." }
+          args:
+            type: array
+            items: { type: string }
+          timeout: { type: integer, default: 30 }
+          env: { type: object }
+          # sse / streamable-http transport
+          url: { type: string, description: "Required for sse/streamable-http." }
+          ssl_config:
+            type: object
+            properties:
+              verify: { type: boolean, default: true }
+              ca_bundle: { type: string }
+      environment_variables:
+        type: object
+        description: Merged with connection_params.env.
+      # Tool filtering (mutually exclusive)
+      tool_name: { type: string }
+      tool_name_prefix: { type: string }
+      allow_list:
+        type: array
+        items: { type: string }
+      deny_list:
+        type: array
+        items: { type: string }
+      tool_config: { type: object }
+      required_scopes:
+        type: array
+        items: { type: string }
+      hil:
+        $ref: "#/$defs/hil"
+      auth:
+        $ref: "#/$defs/auth"
+      effect:
+        $ref: "#/$defs/effect-override"
+      trust_annotations:
+        type: boolean
+        default: false
+        description: >-
+          Honour the MCP server's tool annotations when classifying a tool's
+          effect. Unset or false, a tool the server marks readOnlyHint stays
+          side_effecting (its effect_source reads untrusted_hint) and only a
+          destructiveHint or an openWorldHint of true can make it stricter. True
+          makes a tool read_only only when the server sends readOnlyHint true and
+          openWorldHint false explicitly (an omitted openWorldHint counts as true,
+          the MCP default) with no destructiveHint true; the operator then vouches
+          that the tool meets all three conditions of the effect rule. The tool saves any resource it returns under a fresh generated
+          filename, never one the server's URI chose. An operator
+          effect still wins. Applies to this entry only. A skill's own tools entry
+          cannot set it; the key is ignored with a warning.
+
+  # =================================================================
+  # OpenAPI tool (AWE-native, internal/tool/openapi)
+  #
+  # Loads an OpenAPI specification at agent startup and registers one LLM
+  # tool per operation. Flat keys at the tool-entry level - no tool_config
+  # wrapper. Matches Python SAM's OpenApiToolConfig 1:1 for wire
+  # compatibility (src/solace_agent_mesh/agent/tools/tool_config_types.py).
+  # =================================================================
+  openapi:
+    type: object
+    required: [tool_type]
+    properties:
+      tool_type: { const: openapi }
+      # Specification source - exactly one must be set. Legacy Go keys
+      # (spec_url / spec_file / spec_inline) are accepted as aliases by
+      # ParseToolsetConfig; the Python-spelling keys below are canonical.
+      specification_url:
+        type: string
+        description: "URL to fetch the OpenAPI JSON/YAML spec from."
+      specification_file:
+        type: string
+        description: "Path to a local OpenAPI spec file."
+      specification:
+        type: string
+        description: "Inline OpenAPI spec (JSON or YAML string)."
+      specification_format:
+        type: string
+        enum: [json, yaml]
+        description: "Optional format hint for `specification` (auto-detected when empty)."
+      base_url:
+        type: string
+        description: "Base URL override; replaces the `servers[0].url` from the spec."
+      allow_list:
+        type: array
+        description: "Include only these operationIds. Mutually exclusive with deny_list."
+        items: { type: string }
+      deny_list:
+        type: array
+        description: "Exclude these operationIds."
+        items: { type: string }
+      headers:
+        type: object
+        description: "Static HTTP headers sent with every request."
+        additionalProperties: { type: string }
+      required_scopes:
+        type: array
+        items: { type: string }
+      max_response_size:
+        type: integer
+        minimum: 1
+        maximum: 52428800
+        description: >-
+          HTTP response body limit in bytes (default 10 MiB, maximum 50 MiB). An
+          over-limit successful response is rejected whole rather than shortened;
+          an over-limit HTTP error returns the status with a partial body.
+          ParseToolsetConfig enforces both bounds and fails the toolset, which is
+          what actually gates a value: this schema documents the shape for the
+          assistant and is not consulted when an agent config loads.
+      auth:
+        $ref: "#/$defs/openapi-auth"
+      effect:
+        $ref: "#/$defs/effect-override"
+    # ParseToolsetConfig validates "exactly one spec source"; mirror it here
+    # so schema-level validation catches the error too.
+    oneOf:
+      - required: [specification_url]
+      - required: [specification_file]
+      - required: [specification]
+
+  # =================================================================
+  # Shared: operator effect override. A tool's effect is read_only or
+  # side_effecting; an undeclared tool is side_effecting. Configuration can
+  # only make a tool stricter, so side_effecting is the one accepted value.
+  # An entry that registers several tools applies it to each of them.
+  # =================================================================
+  effect-override:
+    type: string
+    enum: [side_effecting]
+    description: >-
+      A tool is read_only only if all three hold: it cannot change anything outside the run, whatever its input; it fetches no URL chosen by its input or by the content of a file it reads; it writes, deletes or replaces no artifact under a filename chosen by its caller or by the tool itself. The run is the one task that called the tool, and changing something outside it means writing, sending, deleting, posting, publishing or indexing in an external system, another session or user scope, or starting a job. Changing the run's own session, such as the skills it has loaded, is not outside it. A filename is chosen by the caller when it comes from a parameter, and by the tool when its code fixes or derives it, including a name set on a data object it returns. A result the runtime itself saves under a fresh filename it picks, which it does only when a tool returns data with no name set (auto-disposition), is not a write. Sending the caller's query to one fixed external service, as a search or lookup does, is not fetching a chosen URL. Every other tool is side_effecting. Mark every tool this entry registers as side_effecting, overriding a
+      declaration, an OpenAPI GET derivation or an MCP hint that says
+      read_only. Only side_effecting is accepted; a tool cannot be marked
+      read_only here. Not supported on a built-in entry managed through the
+      Builder or the platform, which refuses it.
+
+  # =================================================================
+  # Shared: OpenAPI auth block (flat, matches Python's Jinja template at
+  # agent_yaml_service.py:258-297 and Go's ParseToolsetConfig
+  # authentication/auth section parser).
+  # =================================================================
+  openapi-auth:
+    type: object
+    required: [type]
+    properties:
+      type:
+        type: string
+        enum: [none, bearer, basic, apikey, oauth2, serviceaccount]
+      # bearer
+      token: { type: string }
+      # basic
+      username: { type: string }
+      password: { type: string }
+      # apikey (Python flat fields: in/name/value)
+      in:
+        type: string
+        enum: [header, query, cookie]
+      name: { type: string }
+      value: { type: string }
+      # oauth2 (all flat, matching Python's template output)
+      authorization_url: { type: string }
+      token_url: { type: string }
+      refresh_url: { type: string }
+      client_id: { type: string }
+      client_secret: { type: string }
+      scopes:
+        oneOf:
+          - type: array
+            items: { type: string }
+          - type: string
+            description: "Space-separated scopes (Python convention)."
+      redirect_uri: { type: string }
+      token_endpoint_auth_method:
+        type: string
+        enum: [client_secret_basic, client_secret_post, none]
+      use_pkce: { type: boolean }
+      disable_consent_prompt: { type: boolean }
+      audience: { type: string }
+      resource: { type: string }
+      service_account_json: { type: string }
+      credential_key: { type: string }
+      display_name:
+        type: string
+        description: "Name of the system the sign-in is for, shown in the authentication prompt and the agent's connection list."
+
+  # =================================================================
+  # Shared: HIL (Human-in-the-Loop)
+  # =================================================================
+  hil:
+    type: object
+    properties:
+      require_approval: { type: boolean, default: false }
+      approval_message: { type: string }
+      timeout: { type: string, default: "45m" }
+      show_args: { type: boolean, default: true }
+      require_approval_when:
+        type: array
+        description: "Gate only calls whose arguments match. Each rule is {arg: <name>, <op>: <value>} with op one of eq, in, not_in, exists, not_exists, gt, lt, gte, lte. Rules are OR-ed with require_approval."
+        items:
+          type: object
+          required: [arg]
+          properties:
+            arg: { type: string }
+      approvers:
+        type: object
+        description: "Experimental, behind the hil_approver_sets flag. Who answers the approval prompt instead of the task's own user: any listed user may answer, and the prompt is also posted once in each place. Only a listed user's answer counts, including in a place."
+        additionalProperties: false
+        required: [users]
+        properties:
+          users:
+            type: array
+            minItems: 1
+            maxItems: 20
+            items: { type: string, minLength: 1 }
+          places:
+            type: array
+            maxItems: 5
+            items:
+              type: object
+              additionalProperties: false
+              required: [channel_type, address]
+              properties:
+                channel_type: { type: string, description: "Gateway type that owns the place, such as slack." }
+                address: { type: object, description: "The gateway's channel address, for Slack {channel_id: C0123}." }
+
+  # =================================================================
+  # Shared: Authentication
+  # =================================================================
+  auth:
+    type: object
+    required: [type]
+    properties:
+      type:
+        type: string
+        enum: [oauth2, basic, bearer]
+      credential_key: { type: string }
+      credential:
+        type: object
+        description: |
+          oauth2: client_id, client_secret
+          basic: username, password
+          bearer: token
+      scheme:
+        type: object
+        description: "OAuth2 only: authorization_url, token_url, scopes, token_endpoint_auth_method."
+        properties:
+          authorization_url: { type: string }
+          token_url: { type: string }
+          scopes:
+            type: array
+            items: { type: string }
+          token_endpoint_auth_method:
+            type: string
+            enum: [client_secret_post, client_secret_basic, none]
+            default: client_secret_post
+          disable_consent_prompt: { type: boolean }
+
+# --- STR Manifest (tools/manifest.yaml, separate from agent config) ---
+# version: 1
+# tools:
+#   my_tool:
+#     module: "my_package.my_module"
+#     function: "my_tool_function"
+#     package: "my-package"
+#     version: ">=1.0,<2.0"
+#     sandbox_profile: "standard"
+#     timeout_seconds: 30
+
+# --- Examples ---
+# Mixed tool types:
+#   tools:
+#     - tool_type: builtin-group
+#       group_name: artifact_management
+#     - tool_type: builtin
+#       tool_name: web_request             # resolves in-process (AWE)
+#       hil: { require_approval: true, timeout: "5m" }
+#     - tool_type: builtin
+#       tool_name: mermaid_diagram_generator   # resolves via STR
+#       timeout_seconds: 120
+#     - tool_type: mcp
+#       connection_params:
+#         type: stdio
+#         command: "npx"
+#         args: ["-y", "@modelcontextprotocol/server-postgres"]
+#         env: { DATABASE_URL: "${DATABASE_URL}" }
+#       allow_list: [query, list_tables]

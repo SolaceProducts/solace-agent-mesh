@@ -1,0 +1,6 @@
+version: 1
+tools:
+  event_mesh_request:
+    runtime: go
+    executable: ./event-mesh
+    timeout_seconds: 120

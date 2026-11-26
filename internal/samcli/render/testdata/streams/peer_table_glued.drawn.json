@@ -1,0 +1,14 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "Now I'm asking NW Inventory for the WH-EAST stock list.| SKU | Qty |\n|---|---|\n| SKU-1 | 4 |\n| SKU-2 | 0 |\n| SKU-3 | 9 |\n\n\nHere is the list:\n\n| SKU | Quantity |\n|---|---|\n| SKU-1 | 4 |\n| SKU-2 | 0 |\n| SKU-3 | 9 |\n"
+      }
+    ]
+  }
+]

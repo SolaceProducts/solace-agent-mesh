@@ -1,0 +1,8 @@
+version: 1
+capabilities:
+  profileProvider: true
+tools:
+  enrich_authenticated_user:
+    runtime: go
+    executable: ./event_mesh_profile_provider
+    timeout_seconds: 35

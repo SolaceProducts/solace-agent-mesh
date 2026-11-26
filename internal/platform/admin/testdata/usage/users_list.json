@@ -1,0 +1,195 @@
+{
+  "data": [
+    {
+      "id": "01a10c9e-2222-7e77-be6a-3cdc8d0b9201",
+      "name": "Parminder Procurement",
+      "bookedName": null,
+      "cost": "412.3000000000",
+      "activities": 120,
+      "costPerActivity": "3.4358333333",
+      "shareOfSpend": 33.234454851762884,
+      "costByBucket": {
+        "uncachedInput": "203.1000000000",
+        "output": "190.2000000000",
+        "cacheRead": "11.0000000000",
+        "cacheWrite": "8.0000000000"
+      },
+      "tokens": {
+        "uncachedInput": 30310000,
+        "output": 2536000,
+        "cacheRead": 1375000,
+        "cacheWrite": 64000
+      },
+      "calls": 3011,
+      "unpricedCalls": 2,
+      "daily": null,
+      "user": {
+        "email": "parminder@example.com",
+        "isSystemUser": false
+      },
+      "budget": {
+        "id": "01a10c9e-f47a-7e77-be6a-3cdc8d0b976d",
+        "name": "Procurement",
+        "source": "assigned",
+        "amount": "450.0000000000",
+        "warningPercentage": 80,
+        "topUp": null,
+        "effectiveAmount": "450.0000000000",
+        "periodStart": "2026-10-01T00:00:00.000Z",
+        "periodEnd": "2026-11-01T00:00:00.000Z",
+        "periodSpend": "412.3000000000",
+        "usagePercent": 91.62222222222223,
+        "status": "approaching"
+      },
+      "budgetUsage": {
+        "windowBudget": "450.0000000000",
+        "usagePercent": 91.62222222222223
+      }
+    },
+    {
+      "id": "01a10c9e-2222-7e77-be6a-3cdc8d0b9202",
+      "name": "Nightly Pipeline",
+      "bookedName": null,
+      "cost": "130.5000000000",
+      "activities": 3200,
+      "costPerActivity": "0.0407812500",
+      "shareOfSpend": 10.519273243160457,
+      "costByBucket": {
+        "uncachedInput": "80.0000000000",
+        "output": "40.5000000000",
+        "cacheRead": "6.0000000000",
+        "cacheWrite": "4.0000000000"
+      },
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "calls": 9400,
+      "unpricedCalls": 0,
+      "daily": null,
+      "user": {
+        "email": null,
+        "isSystemUser": true
+      },
+      "budget": {
+        "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9003",
+        "name": "Standard",
+        "source": "default",
+        "amount": "100.0000000000",
+        "warningPercentage": 80,
+        "topUp": {
+          "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9004",
+          "amount": "25.0000000000",
+          "expiresTime": "2026-11-01T00:00:00.000Z"
+        },
+        "effectiveAmount": "125.0000000000",
+        "periodStart": "2026-10-01T00:00:00.000Z",
+        "periodEnd": "2026-11-01T00:00:00.000Z",
+        "periodSpend": "130.5000000000",
+        "usagePercent": 104.4,
+        "status": "exceeded"
+      },
+      "budgetUsage": {
+        "windowBudget": "125.0000000000",
+        "usagePercent": 104.4
+      }
+    },
+    {
+      "id": "01a10c9e-2222-7e77-be6a-3cdc8d0b9203",
+      "name": "Uma Unlimited",
+      "bookedName": null,
+      "cost": "88.0000000000",
+      "activities": 41,
+      "costPerActivity": "2.1463414634",
+      "shareOfSpend": 7.093456286575633,
+      "costByBucket": {
+        "uncachedInput": "50.0000000000",
+        "output": "38.0000000000",
+        "cacheRead": "0.0000000000",
+        "cacheWrite": "0.0000000000"
+      },
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "calls": 610,
+      "unpricedCalls": 0,
+      "daily": null,
+      "user": {
+        "email": "uma@example.com",
+        "isSystemUser": false
+      },
+      "budget": {
+        "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9005",
+        "name": "Research",
+        "source": "assigned",
+        "amount": null,
+        "warningPercentage": null,
+        "topUp": null,
+        "effectiveAmount": null,
+        "periodStart": "2026-10-01T00:00:00.000Z",
+        "periodEnd": "2026-11-01T00:00:00.000Z",
+        "periodSpend": "88.0000000000",
+        "usagePercent": null,
+        "status": "unlimited"
+      },
+      "budgetUsage": null
+    },
+    {
+      "id": null,
+      "name": null,
+      "bookedName": null,
+      "cost": "3.1000000000",
+      "activities": 4,
+      "costPerActivity": "0.7750000000",
+      "shareOfSpend": 0.2498831191861871,
+      "costByBucket": {
+        "uncachedInput": "2.0000000000",
+        "output": "1.1000000000",
+        "cacheRead": "0.0000000000",
+        "cacheWrite": "0.0000000000"
+      },
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "calls": 41,
+      "unpricedCalls": 0,
+      "daily": null,
+      "user": null,
+      "budget": {
+        "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9003",
+        "name": "Standard",
+        "source": "default",
+        "amount": "100.0000000000",
+        "warningPercentage": 80,
+        "topUp": null,
+        "effectiveAmount": "100.0000000000",
+        "periodStart": "2026-10-01T00:00:00.000Z",
+        "periodEnd": "2026-11-01T00:00:00.000Z",
+        "periodSpend": "3.1000000000",
+        "usagePercent": 3.1,
+        "status": "ok"
+      },
+      "budgetUsage": {
+        "windowBudget": "100.0000000000",
+        "usagePercent": 3.1
+      }
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "pageNumber": 1,
+      "count": 4,
+      "pageSize": 25,
+      "nextPage": null,
+      "totalPages": 1
+    }
+  }
+}

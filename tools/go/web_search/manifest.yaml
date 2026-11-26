@@ -1,0 +1,6 @@
+version: 1
+tools:
+  web_search:
+    runtime: go
+    executable: ./web_search
+    timeout_seconds: 220

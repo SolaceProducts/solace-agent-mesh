@@ -1,0 +1,35 @@
+# Built-in Orchestrator agent — seeded into the platform DB on first run
+# (empty agents table) by SeedBuiltinAgents and deployed everywhere (desktop
+# + cluster). This file is the single, byte-identical source of the seeded
+# agent's prose: ParseAgentYAML reads display_name, agent_card.description,
+# instruction, model_provider, and the toolset refs. The structured extras
+# the parser does not model (skillRefs, agent_card.welcome, and the
+# allow_list that makes the orchestrator able to delegate) are layered on in
+# builtin_agent_seed.go.
+apps:
+  - app_config:
+      display_name: "Orchestrator"
+      # Resolved against the platform "general" alias, which ensureDefaultAliases
+      # always creates (placeholder until LLM_SERVICE_* env is present, real
+      # once it is) — so seeding succeeds on a fresh install with no model env.
+      model_provider:
+        - general
+
+      instruction: |
+        You coordinate a team of agents. For each request:
+        - If one agent's description covers all of it, delegate it to that agent.
+        - Otherwise plan which agent handles each part, in what order, and what each passes to the next; then make those calls, running independent ones in parallel.
+        - Take only the actions the request asks for: skip an agent or workflow that would also do something it did not ask for, and make a conditional call ("if one is overdue, tell the buyer") only when the answers show the condition holds.
+        Base your answer on what the agents return, and never report an action an agent did not confirm.
+        For questions about Solace Agent Mesh itself, load the sam-knowledge or sam-docs skill and answer from it. Load sam-build-redirect only when the user wants to create an Agent Mesh agent, workflow, entrypoint or connector.
+
+      agent_card:
+        description: "The Orchestrator — your AI workforce manager. Coordinates tasks across the agent mesh, delegates to peer agents, and answers questions about building with Solace Agent Mesh."
+        defaultInputModes: ["text"]
+        defaultOutputModes: ["text", "file"]
+        # Advertise at least one capability so the agent is discoverable and
+        # routable over A2A (without this it publishes no routable skills).
+        skills:
+          - id: general
+            name: General
+            description: General conversation, task orchestration, and getting started with Solace Agent Mesh.

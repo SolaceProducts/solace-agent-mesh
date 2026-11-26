@@ -1,0 +1,19 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "artifact",
+        "name": "memo.md",
+        "status": "completed"
+      },
+      {
+        "kind": "text",
+        "text": "I saved the memo as "
+      }
+    ]
+  }
+]

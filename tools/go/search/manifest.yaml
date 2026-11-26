@@ -1,0 +1,6 @@
+version: 1
+tools:
+  search_query:
+    runtime: go
+    executable: ./search
+    timeout_seconds: 60

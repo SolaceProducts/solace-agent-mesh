@@ -1,0 +1,4 @@
+azure-ai-agentserver-core==2.1.0
+azure-ai-agentserver-invocations==1.1.0
+strands-agents[openai]>=1.61.1
+websockets>=13

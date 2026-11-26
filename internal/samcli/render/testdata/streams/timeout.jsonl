@@ -1,0 +1,2 @@
+{"seq": 1, "event": "message", "data": {"jsonrpc": "2.0", "id": "req-1", "result": {"kind": "status-update", "taskId": "t1", "contextId": "s1", "final": false, "status": {"state": "working", "message": {"kind": "message", "role": "agent", "messageId": "m", "parts": [{"kind": "text", "text": "Working on it."}]}}}}}
+{"seq": 2, "event": "message", "data": {"jsonrpc": "2.0", "id": "req-1", "error": {"code": -32001, "message": "The request timed out. Please try again."}}}

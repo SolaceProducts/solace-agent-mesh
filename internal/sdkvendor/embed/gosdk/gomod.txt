@@ -1,0 +1,3 @@
+module github.com/SolaceProducts/solace-agent-mesh/pkg/samtoolsdk
+
+go 1.26

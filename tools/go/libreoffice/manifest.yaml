@@ -1,0 +1,6 @@
+version: 1
+tools:
+  libreoffice_convert:
+    runtime: go
+    executable: ./libreoffice
+    timeout_seconds: 180

@@ -1,0 +1,6 @@
+version: 1
+tools:
+  mermaid_diagram_generator:
+    runtime: go
+    executable: ./mermaid
+    timeout_seconds: 120

@@ -1,0 +1,6 @@
+version: 1
+tools:
+  imagemagick_tools:
+    runtime: go
+    executable: ./imagemagick
+    timeout_seconds: 120

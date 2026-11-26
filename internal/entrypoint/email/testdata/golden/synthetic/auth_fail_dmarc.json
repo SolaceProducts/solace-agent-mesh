@@ -1,0 +1,54 @@
+{
+  "MessageID": "\u003cspoof-001@attacker.example\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cspoof-001@attacker.example\u003e",
+  "From": {
+    "Address": "ceo@example.org",
+    "DisplayName": "Pretend CEO"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Wire transfer please",
+  "BodyText": "Wire $1M to my new account please.\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "fail",
+    "DKIM": "none",
+    "DMARC": "fail",
+    "AlignedFromDomain": "",
+    "RawHeader": "protection.outlook.com; spf=fail smtp.mailfrom=attacker.example; dkim=none; dmarc=fail header.from=example.org"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.925207-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=fail smtp.mailfrom=attacker.example; dkim=none; dmarc=fail header.from=example.org"
+    ],
+    "Content-Type": [
+      "text/plain"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Pretend CEO\" \u003cceo@example.org\u003e"
+    ],
+    "Message-Id": [
+      "\u003cspoof-001@attacker.example\u003e"
+    ],
+    "Subject": [
+      "Wire transfer please"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

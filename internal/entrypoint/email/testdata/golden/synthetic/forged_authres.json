@@ -1,0 +1,54 @@
+{
+  "MessageID": "\u003cforged-001@attacker.example\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cforged-001@attacker.example\u003e",
+  "From": {
+    "Address": "alice@vendor.com",
+    "DisplayName": "Pretend Alice"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Trust me bro",
+  "BodyText": "Hi, this email is totally legit.\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "none",
+    "DKIM": "none",
+    "DMARC": "none",
+    "AlignedFromDomain": "",
+    "RawHeader": "mx.attacker.example; spf=pass; dkim=pass; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.925162-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "mx.attacker.example; spf=pass; dkim=pass; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "text/plain"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Pretend Alice\" \u003calice@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cforged-001@attacker.example\u003e"
+    ],
+    "Subject": [
+      "Trust me bro"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

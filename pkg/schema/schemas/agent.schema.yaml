@@ -1,0 +1,475 @@
+# SAM Agent Configuration — JSON Schema (YAML syntax)
+# Top-level: apps[].app_config
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: SAM Agent Config
+description: Configuration schema for a SAM agent within the apps[] array.
+
+type: object
+required: [agent_name, description, model, agent_card]
+properties:
+
+  # --- Identity ---
+  agent_name:
+    type: string
+    minLength: 3
+    maxLength: 40
+    description: Unique identifier for broker topics and A2A routing.
+  display_name:
+    type: string
+    x-sam-system: true
+    description: Human-friendly name shown in UIs and agent cards.
+  namespace:
+    type: string
+    x-sam-system: true
+    description: Broker namespace for topic construction.
+  description:
+    type: string
+    minLength: 10
+    maxLength: 1000
+  version:
+    type: string
+  agent_type:
+    type: string
+    enum: [standard, workflow]
+    default: standard
+
+  # --- LLM Model ---
+  # Can be a string ("openai/gpt-4o") or a map with model/api_base/api_key.
+  # Do NOT include "/v1" in api_base — the client appends it automatically.
+  model:
+    x-sam-system: true
+    oneOf:
+      - type: string
+        description: "Model name, optionally with provider prefix (e.g., openai/gpt-4o)."
+      - type: object
+        required: [model]
+        properties:
+          model:
+            type: string
+            description: "Model name with optional provider prefix. Providers: openai, anthropic, google, vertex, gemini, bedrock, azure, cohere, mistral, groq, perplexity, cerebras, openrouter, huggingface, ollama, nebius, xai, replicate."
+          api_base:
+            type: string
+            description: "API endpoint URL. Do NOT include /v1."
+          api_key:
+            type: string
+          cache_strategy:
+            type: string
+            enum: ["none", "5m", "1h"]
+            default: "5m"
+
+  model_provider:
+    oneOf:
+      - type: array
+        maxItems: 1
+        items:
+          type: string
+          minLength: 1
+      - type: string
+        minLength: 1
+      - type: "null"
+    description: "The agent's model: one name (the alias on the Models page) of a chat model the platform has configured, for example [\"planning\"]. platform_list_components with component_type \"model\" lists the names. Leave it out on a new agent to use the platform default; on an existing agent, leaving it out keeps the current model, and [] returns it to the platform default. This is the only key that sets an agent's model; a model: key is not saved."
+
+  supports_streaming:
+    type: boolean
+    default: false
+    description: "Advertises streaming support on the agent card. Defaults to false."
+  max_tokens:
+    type: integer
+    default: 0
+    description: Max LLM response tokens. 0 = the model's own output ceiling for Claude 5.x on the Anthropic, Bedrock, Vertex and Azure providers, otherwise the provider default.
+  max_llm_calls_per_task:
+    type: integer
+    minimum: 1
+    default: 30
+    description: "Model calls allowed per task; stops runaway tool-calling loops. Defaults to 30. Raise it (about 60) for an agent that gathers data and then builds a document."
+  max_concurrent_tasks:
+    type: integer
+    x-deprecated: true
+    x-sam-system: true
+    description: "UNSUPPORTED. Accepted so existing configs still load, but ignored at runtime; a WARN log fires at startup if set. Omit it from new configs."
+  enable_auto_continuation:
+    type: boolean
+
+  # --- Instruction & Prompt ---
+  instruction:
+    type: string
+    minLength: 1
+    maxLength: 32000
+    description: "System prompt — defines role, expertise, constraints. Most important field for agent quality."
+  global_instruction:
+    type: string
+    x-sam-system: true
+    description: Shared instruction prepended to all agents in the deployment.
+  inject_current_time:
+    type: boolean
+    description: >-
+      Stamp each user turn with the current weekday, date, time and IANA
+      timezone, so the agent can answer "what day is it?" and resolve relative
+      dates without calling a tool. Rendered in the user's timezone when the
+      originating gateway supplies one, otherwise the gateway's
+      default_user_timezone.
+    default: true
+  inject_system_purpose:
+    type: boolean
+    x-sam-system: true
+    default: false
+  inject_response_format:
+    type: boolean
+    x-sam-system: true
+    default: false
+  inject_user_profile:
+    type: boolean
+    x-sam-system: true
+    default: false
+
+  # --- Agent Card (public identity for discovery) ---
+  # Required: every agent needs an agent_card to be discoverable by the gateway.
+  # Without it the agent is invisible to users and other agents.
+  agent_card:
+    type: object
+    required: [description, skills]
+    properties:
+      description:
+        type: string
+      version:
+        type: string
+      defaultInputModes:
+        type: array
+        items: { type: string, enum: [text, file, data] }
+        default: [text]
+      defaultOutputModes:
+        type: array
+        items: { type: string, enum: [text, file, data] }
+        default: [text]
+      documentationUrl:
+        type: string
+      # "skills" here = capabilities (A2A protocol naming), NOT knowledge-bundle skills.
+      skills:
+        type: array
+        items:
+          type: object
+          required: [id, name, description]
+          properties:
+            id: { type: string }
+            name: { type: string }
+            description: { type: string }
+            tags:
+              type: array
+              items: { type: string }
+            examples:
+              type: array
+              items: { type: string }
+      provider:
+        type: object
+        properties:
+          organization: { type: string }
+          url: { type: string }
+
+  agent_card_publishing:
+    type: object
+    x-sam-system: true
+    properties:
+      interval_seconds:
+        type: integer
+        default: 60
+        description: "Set to 5 for reliable discovery during development. 0 = publish once."
+
+  # --- Agent Discovery & Peer Delegation ---
+  agent_discovery:
+    type: object
+    x-sam-system: true
+    properties:
+      enabled: { type: boolean }
+      health_check_ttl_seconds: { type: integer, default: 300 }
+      health_check_interval_seconds: { type: integer, default: 60 }
+
+  inter_agent_communication:
+    type: object
+    properties:
+      allow_list:
+        type: array
+        items: { type: string }
+        description: 'Glob patterns for allowed peers. ["*"] = allow all.'
+      deny_list:
+        type: array
+        items: { type: string }
+      request_timeout_seconds:
+        type: integer
+        default: 120
+        description: >-
+          Timeout for one delegation to a peer agent. When set, it also becomes
+          the default for the two keys below.
+      workflow_request_timeout_seconds:
+        type: integer
+        default: 600
+        description: >-
+          Timeout for delegating to a workflow, which runs a whole DAG rather
+          than one exchange.
+      sub_task_timeout_seconds:
+        type: integer
+        default: 600
+        description: Timeout for a self-delegated sub-task, which runs a nested agent loop.
+
+  max_call_depth:
+    type: integer
+    default: 10
+    description: Max A2A recursion depth to prevent infinite delegation loops.
+
+  # --- Skills (knowledge bundles, NOT agent_card.skills) ---
+  skills_base_path:
+    type: string
+    description: Directory where skills are looked up by name.
+  skills_cache_path:
+    type: string
+  skills:
+    type: array
+    maxItems: 20
+    items:
+      type: object
+      properties:
+        name: { type: string }
+        path: { type: string, x-sam-system: true }
+      description: "Specify the name of a skill on the platform."
+
+  # --- Tools ---
+  # For full tool schemas see tool.schema.yaml.
+  tools:
+    type: array
+    items:
+      type: object
+      required: [tool_type]
+      properties:
+        tool_type:
+          type: string
+          enum: [builtin, builtin-group, mcp]
+
+  # --- Session Service ---
+  session_service:
+    type: object
+    x-sam-system: true
+    properties:
+      type:
+        type: string
+        enum: [memory, sql]
+      database_url:
+        type: string
+        description: 'SQLite: "sqlite:///path.db", PostgreSQL: "postgresql://..."'
+      default_behavior:
+        type: string
+        enum: [PERSISTENT, RUN_BASED]
+        default: PERSISTENT
+
+  # --- Artifact Service ---
+  artifact_service:
+    type: object
+    x-sam-system: true
+    properties:
+      type:
+        type: string
+        enum: [filesystem, memory, s3, gcs]
+      base_path: { type: string }
+      artifact_scope:
+        type: string
+        enum: [namespace, global]
+        default: namespace
+      bucket_name: { type: string }
+      region: { type: string }
+      endpoint_url: { type: string }
+      credentials_file: { type: string }
+
+  # --- Artifact Handling ---
+  artifact_handling_mode:
+    type: string
+    enum: [ignore, embed, reference]
+    default: ignore
+    description: "Defaults to ignore."
+  text_artifact_content_max_length:
+    type: integer
+    default: 32768
+  enable_embed_resolution:
+    type: boolean
+    description: >-
+      Unset, it is on for an agent that has the load_artifact tool and off
+      otherwise. Whether the system prompt teaches the model to forward a peer agent's
+      unresolved embeds for a gateway to resolve. Prompt guidance only: the agent
+      always resolves its own early embeds (status_update, math, datetime, uuid,
+      artifact_meta), and late embeds are resolved by the gateway under the
+      gateway's own enable_embed_resolution, which is the setting that decides
+      whether resolution happens at all. Set this false for a caller with no
+      resolving gateway. With headless true the peer-relay guidance is withheld
+      regardless of this setting; this flag then controls only whether the embed
+      documentation itself is included.
+  enable_artifact_content_instruction:
+    type: boolean
+    description: >-
+      Whether the system prompt documents the artifact_content embed. Unset, it
+      is on for an agent that has the load_artifact tool and off otherwise. Prompt
+      guidance only; a gateway resolves the embed either way.
+  enable_template_instructions:
+    type: boolean
+    description: >-
+      Whether the system prompt documents template_liquid blocks. Unset, it is on
+      for an agent that has the load_artifact tool when the user's gateway shows
+      templates, and off otherwise. Prompt guidance only: the runtime parses and
+      renders a template_liquid block the model emits regardless, so this controls
+      what the model is told exists, not what works.
+  headless:
+    type: boolean
+    default: false
+    description: >-
+      Declares that this agent's output is consumed by an API caller rather than
+      drawn by a chat UI. Withholds the prompt guidance that only a chat UI pays
+      off — Liquid template authoring, the conversation-flow rules and the
+      peer-embed relay. Embed documentation is untouched, because the agent
+      resolves the early embeds itself and MCP and the SSE streaming path resolve
+      the late ones. Prompt guidance only: nothing here changes what the runtime
+      parses or what a gateway resolves. An explicit enable_template_instructions
+      overrides the template half; enable_embed_resolution does not restore the
+      chat-shaped guidance.
+  enable_examples:
+    type: boolean
+    default: false
+    description: >-
+      Whether the system prompt includes the worked embed and template examples.
+      The largest single block of prompt guidance; turning it off is the biggest
+      prompt-size saving available here.
+
+  # --- Tool Output Handling ---
+  tool_result_auto_artifact_threshold_bytes:
+    type: integer
+    default: 8192
+    description: >-
+      Text results at or below this size are shown to the LLM inline and also
+      saved; larger results are saved as an artifact and the LLM gets a
+      reference instead. Alias: tool_output_save_threshold_bytes.
+  tool_result_inline_truncation_bytes:
+    type: integer
+    default: 65536
+    description: >-
+      Absolute ceiling on anything returned to the LLM inline. Alias:
+      tool_output_llm_return_max_bytes.
+  tool_output_save_threshold_bytes:
+    type: integer
+    default: 8192
+    description: Legacy alias of tool_result_auto_artifact_threshold_bytes.
+  tool_output_llm_return_max_bytes:
+    type: integer
+    default: 65536
+    description: Legacy alias of tool_result_inline_truncation_bytes.
+  mcp_tool_response_save_threshold_bytes:
+    type: integer
+    default: 2048
+  mcp_tool_llm_return_max_bytes:
+    type: integer
+    default: 4096
+  mcp_intelligent_processing:
+    type: object
+  schema_max_keys:
+    type: integer
+    default: 200
+  schema_inference_depth:
+    type: integer
+    default: 4
+
+  # --- Structured Invocation (for workflow nodes) ---
+  input_schema:
+    type: object
+    description: JSON Schema for structured input.
+  output_schema:
+    type: object
+    description: "JSON Schema for structured output. Leaving it out keeps the stored value; `null` removes it."
+  validation_max_retries:
+    type: integer
+    default: 2
+
+  # Human-in-the-Loop is configured per tool, on the tool's own entry under
+  # `tools:` — never here. An agent-level `hil` block was planned and never
+  # built: nothing reads one, so it would gate no calls. Do not reintroduce
+  # this property without an implementation behind it.
+
+  # --- Streaming & Output ---
+  stream_batching_threshold_bytes:
+    type: integer
+    default: 100
+  max_message_size_bytes:
+    type: integer
+    default: 10000000
+
+  # --- Volumes ---
+  volumes:
+    type: array
+    description: "Platform-managed: the Builder does not save this key and keeps the stored value."
+    items:
+      type: object
+      required: [name, provision]
+      properties:
+        name: { type: string }
+        description: { type: string }
+        provision:
+          type: string
+          enum: [static, auto_create, prompt_user]
+        volume_id: { type: string }
+        ttl: { type: string }
+
+# --- Examples ---
+# Minimal agent (agent_card is required for discovery):
+#   apps:
+#     - name: helper
+#       app_config:
+#         agent_name: Helper
+#         namespace: solace-agent-mesh
+#         model: "openai/gpt-4o"
+#         instruction: "You are a helpful assistant."
+#         tools:
+#           - tool_type: builtin-group
+#             group_name: general_agent_tools
+#         agent_card:
+#           description: "General-purpose helpful assistant."
+#           skills:
+#             - id: general
+#               name: General Help
+#               description: "Answer questions and assist with tasks."
+#         agent_card_publishing: { interval_seconds: 5 }
+#         agent_discovery: { enabled: true }
+#
+# Agent with skills and peer delegation:
+#   apps:
+#     - name: expert
+#       app_config:
+#         agent_name: Expert
+#         namespace: solace-agent-mesh
+#         supports_streaming: true
+#         model:
+#           model: "anthropic/claude-4-5-sonnet"
+#           api_base: "${LLM_SERVICE_ENDPOINT}"
+#           api_key: "${LLM_SERVICE_API_KEY}"
+#         instruction: |
+#           You are an expert assistant with access to reference skills.
+#           Load skills on demand with load_skill, search with grep_skill_resources.
+#         skills_base_path: "${SAM_DATA_DIR}/skills"
+#         skills:
+#           - name: api-reference
+#           - name: tutorials
+#         tools:
+#           - tool_type: builtin-group
+#             group_name: artifact_management
+#           - tool_type: builtin-group
+#             group_name: general_agent_tools
+#         session_service:
+#           type: sql
+#           database_url: "sqlite:///${SAM_DATA_DIR}/sam.db"
+#         artifact_service:
+#           type: filesystem
+#           base_path: "${SAM_DATA_DIR, ./sam-data}"
+#         artifact_handling_mode: reference
+#         agent_card:
+#           description: "Expert assistant with deep knowledge."
+#           skills:
+#             - id: help
+#               name: Help
+#               description: "Answer questions using reference material."
+#         agent_card_publishing: { interval_seconds: 5 }
+#         agent_discovery: { enabled: true }
+#         inter_agent_communication:
+#           allow_list: ["*"]
+#           request_timeout_seconds: 120

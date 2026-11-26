@@ -1,0 +1,119 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+import { memo, useCallback, useState } from "react";
+import { Download, FolderOpen, MessageCircle, X } from "lucide-react";
+
+import { type ArtifactWithSession, isProjectArtifact } from "@/api/artifacts";
+
+import { formatBytes } from "@/utils/format";
+
+import { Button, Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/ui";
+import { formatTimestamp } from "@/utils";
+
+import { FilePreviewBody } from "./FilePreviewBody";
+import { ProjectBadge } from "./ProjectBadge";
+import { useArtifactSource } from "./useFileAttachmentSource";
+
+interface StandaloneArtifactPreviewProps {
+    artifact: ArtifactWithSession;
+    onClose: () => void;
+    onDownload: (artifact: ArtifactWithSession) => Promise<void>;
+    onGoToChat: (artifact: ArtifactWithSession) => void;
+    onGoToProject?: (artifact: ArtifactWithSession) => void;
+}
+
+export const StandaloneArtifactPreview = memo(function StandaloneArtifactPreview({ artifact, onClose, onDownload, onGoToChat, onGoToProject }: StandaloneArtifactPreviewProps) {
+    const source = useArtifactSource(artifact);
+    const [downloading, setDownloading] = useState(false);
+
+    const handleDownload = useCallback(async () => {
+        setDownloading(true);
+        try {
+            await onDownload(artifact);
+        } finally {
+            setDownloading(false);
+        }
+    }, [onDownload, artifact]);
+
+    const handleVersionChange = useCallback(
+        (version: string) => {
+            source.setCurrentVersion(parseInt(version, 10));
+        },
+        [source]
+    );
+
+    const showGoToProject = isProjectArtifact(artifact) && !!onGoToProject && !!artifact.projectId;
+    const showGoToChat = !isProjectArtifact(artifact);
+
+    return (
+        <div className="flex h-full flex-col">
+            <div className="flex items-center gap-3 border-b px-3 py-2">
+                <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                        <h3 className="truncate text-sm font-semibold" title={artifact.filename}>
+                            {artifact.filename}
+                        </h3>
+                        {artifact.projectName && <ProjectBadge text={artifact.projectName} className="flex-shrink-0" />}
+                        {source.availableVersions.length > 1 && source.currentVersion !== null && (
+                            <Select value={source.currentVersion.toString()} onValueChange={handleVersionChange}>
+                                <SelectTrigger className="h-[16px] py-0 text-xs shadow-none">
+                                    <SelectValue placeholder="Version" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {source.availableVersions.map(version => (
+                                        <SelectItem key={version} value={version.toString()}>
+                                            Version {version}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        )}
+                    </div>
+                    <div className="mt-0.5 flex items-center gap-2 text-xs text-(--secondary-text-wMain)">
+                        <span>{formatBytes(artifact.size)}</span>
+                        <span>•</span>
+                        <span>{formatTimestamp(artifact.lastModified)}</span>
+                    </div>
+                </div>
+
+                <div className="flex flex-shrink-0 items-center gap-1">
+                    <Button variant="ghost" size="sm" disabled={downloading} onClick={handleDownload} tooltip="Download">
+                        <Download className="h-4 w-4 md:mr-1" />
+                        <span className="hidden md:inline">Download</span>
+                    </Button>
+                    {showGoToProject && onGoToProject && (
+                        <Button variant="ghost" size="sm" onClick={() => onGoToProject(artifact)} tooltip="Go to Project">
+                            <FolderOpen className="h-4 w-4 md:mr-1" />
+                            <span className="hidden md:inline">Go to Project</span>
+                        </Button>
+                    )}
+                    {showGoToChat && (
+                        <Button variant="ghost" size="sm" onClick={() => onGoToChat(artifact)} tooltip="Go to Chat">
+                            <MessageCircle className="h-4 w-4 md:mr-1" />
+                            <span className="hidden md:inline">Go to Chat</span>
+                        </Button>
+                    )}
+                    <Button variant="ghost" size="icon" onClick={onClose} className="h-8 w-8" tooltip="Close">
+                        <X className="h-4 w-4" />
+                    </Button>
+                </div>
+            </div>
+
+            <FilePreviewBody
+                fileContent={source.fileContent}
+                isLoading={source.isLoading}
+                error={source.error}
+                setError={source.setError}
+                canPreview={source.canPreview}
+                rendererType={source.rendererType}
+                mimeType={artifact.mimeType}
+                filename={artifact.filename}
+                onDownload={handleDownload}
+                downloadDisabled={downloading}
+            />
+        </div>
+    );
+});

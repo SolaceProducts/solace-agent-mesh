@@ -1,0 +1,4 @@
+manifest:
+  - id: oops
+    name: oops
+    description: This file's root is a map, not a list.

@@ -1,0 +1,102 @@
+=== schema: event_mesh ===
+## type: event_mesh
+
+**Event Mesh**
+
+Connect agents to your Solace event brokers to process real-time events
+
+> ⚠ Configure the Solace event broker to source events from. In embedded or desktop mode you may leave the broker fields empty to use the local system broker.
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `broker_url` | `string` | yes |  | matches regex | The host URI of the event broker (e.g., tcps://broker.example.com:55443) |
+| `broker_vpn` | `string` | yes |  |  | (no description) |
+| `broker_username` | `string` | yes |  |  | (no description) |
+| `broker_password` | `password (secret)` | yes |  | secret | Required. Enter the broker password explicitly — it is never inherited from the Agent Mesh broker. |
+| `tls_skip_verify` | `select` |  | `false` | one of: false, true | Controls whether the broker's TLS certificate is validated. Skip verification is insecure — development and testing only. |
+| `event_rules` | `event_rules` | yes | `[]` |  | Define rules that process incoming events from the broker and route them to agents. |
+| `systemPurpose` | `textarea` |  |  | max len 4000 | [advanced] Describes to agents what this entrypoint is for. Stamped onto every task this entrypoint submits and available to agent prompts as system_purpose. |
+| `responseFormat` | `textarea` |  |  | max len 4000 | [advanced] Tells agents how to shape their replies for this entrypoint (length, tone, markdown support). Stamped onto every task this entrypoint submits and available to agent prompts as response_format. |
+
+**Inner schema for `event_rules` (`event_rules`)**:
+
+List of event-routing rules. Each rule subscribes to one or more topics and routes messages to a target agent or workflow.
+
+Each entry is an object with:
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `name` | `string` | yes |  | matches regex | Unique rule identifier within this entrypoint. Case-insensitive uniqueness applies. |
+| `subscriptions` | `array<object>` |  |  |  | Topics this rule listens on. Required unless existingQueueName is set (then the queue's owner manages subscriptions). |
+| `existingQueueName` | `string` |  |  |  | [advanced] Bind to a broker queue that already exists instead of letting Agent Mesh create one. The queue's owner provisions it and manages its topic subscriptions; Agent Mesh only consumes. Mutually exclusive with subscriptions. Undeploy leaves the queue in place. |
+| `messageFormat` | `select` |  | `json` | one of: json, text, xml, raw_bytes, protobuf, structured | Inbound payload encoding. Drives how the entrypoint decodes incoming broker messages before invoking the target. |
+| `payloadEncoding` | `string` |  | `utf-8` |  | [advanced] Character encoding for text-shaped payloads. Defaults to utf-8. |
+| `eventFilter` | `object` |  |  |  | [advanced] Deterministic test on each incoming message, evaluated before any task starts. A message it does not match is acknowledged and dropped: no task, no model call. Written as a sacexpr invoke: {function, params: {positional: [...]}}, where each param is a literal, "evaluate_expression(<expr>)" reading input.payload, input.topic, input.topic_levels, input.user_properties or static, or a nested {invoke: {...}}. Functions: equal, not_equal, greater_than, less_than, greater_than_or_equal, less_than_or_equal, and_op, or_op, not_op, in_op, if_else, subtract, multiply, divide, modulus, negate, power. and_op/or_op stop at the first operand that decides, and if_else evaluates only its chosen branch. A message the filter cannot decide is delivered, not dropped, and logged at WARN, whatever function the filter uses: a field it reads is missing or null, the payload is empty, a field is read from a payload that is not a JSON object, the compared values are of different kinds (text, number, boolean, list or object; in_op against a list needs the kind of the list items), in_op looks inside a number or boolean, a calculation (subtract, multiply, divide, modulus, negate or power) gives a result that is not a finite number, such as the square root of a negative number or an overflow, or and_op, or_op, not_op, an if_else condition or the filter itself yields something other than true or false (nothing counts as true or false by truthiness). To test that a key is present, use in_op with the key and evaluate_expression(input.payload:) or evaluate_expression(input.user_properties:); a field that is absent and not guarded this way is delivered. The input.payload: form needs a JSON object payload: on a text payload in_op searches the text for the key; on a JSON list it looks for the key among the text items, so an empty list, a list of only nulls or a mixed list like ["a", 1] gives false when the key is not there, while a list holding only numbers, booleans, objects or lists cannot be decided and the message is delivered. The filter is a cost control, not an admission boundary. A param that mentions evaluate_expression but is not written exactly as evaluate_expression(<expr>), a bare input.payload:<path> without the wrapper, a comparison of two literals, a null param and a NaN or infinite number are refused when the rule is saved. Unset: every message starts a task. |
+| `targetAgent` | `string` |  |  |  | Name of the agent that handles messages matching this rule. Mutually exclusive with targetWorkflowName. |
+| `targetWorkflowName` | `string` |  |  |  | Name of the workflow that handles messages matching this rule. Mutually exclusive with targetAgent. |
+| `promptTemplate` | `textarea` |  |  |  | Required for agent targets, including a rule with no target (it routes to the Orchestrator). Not used for workflow targets — they take inputExpression instead. Template rendered against the incoming message to build the agent input. {payload} and {topic} are expanded; other {payload.path.to.field} forms extract from the JSON payload. |
+| `responseFormat` | `textarea` |  |  |  | [advanced] Appended to this rule's prompt as literal text, for agent targets in this rule only (workflow targets ignore it). Distinct from the entrypoint-level responseFormat, which is stamped as task metadata and reaches only agents with inject_response_format enabled. |
+| `inputExpression` | `string` |  |  |  | [advanced] Raw sacexpr expression used to build the input to a workflow target. "input.payload:" delivers the payload as the workflow's text input (workflow.input.text): a payload that parses as JSON is re-serialized as JSON text, any other payload passes through as-is. If the workflow declares an input_schema, it reads a JSON object payload as its input fields, unless the schema also accepts the payload as text and the object fails the schema or names an undeclared field. A payload the schema accepts neither way fails the run before any node runs. Set it on every workflow target: without it the workflow receives empty input. Not used for agent targets. |
+| `defaultUserIdentity` | `string` |  |  |  | Static identity to attribute incoming events to (e.g. "sfdc_event_user"). Used for RBAC and audit. Overridden by userIdentityExpression when both are set. |
+| `userIdentityExpression` | `string` |  |  |  | sacexpr expression that resolves to the user identity per message (e.g. "input.user_properties.requester"). |
+| `runAs` | `system_user_select` |  |  |  | [advanced] Service account this rule's events run as when no per-message identity resolves. Leave empty for the built-in default service account; name a scoped service account to narrow what this rule can reach. |
+| `forwardContext` | `object` |  |  |  | Map of context-key → sacexpr expression. Evaluated against the incoming message and forwarded to the output handler's expression context (accessible via user_data.forward_context). |
+| `structuredInvocation` | `object` |  |  |  | Schema-validated invocation for agent targets. The agent validates its output against outputSchema, retrying on failure, and the result is published as structured_output; a failed validation goes to errorOutput. The validated result is carried only in structured_output, so it is published with responseType structured, the default for such a rule; text is empty and full holds only a reference to the result. A workflow target ignores these schemas and applies its own. |
+| `acknowledgmentPolicy` | `object` |  |  |  | When to acknowledge the broker. Object form for full control; string shorthand ("on_receive" / "on_completion") expands to {mode: <string>}. |
+| `successOutput` | `object` |  |  |  | How to publish the target's successful response. |
+| `errorOutput` | `object` |  |  |  | How to publish errors from the target. |
+| `artifactProcessing` | `object` |  |  |  | [advanced] Extract artifacts from the incoming message and attach them to the dispatched task. See sacexpr docs for expression syntax. |
+
+
+=== example: event_mesh ===
+kind: entrypoint
+name: example_event_mesh
+description: "Example event_mesh entrypoint. Replace with a real description (10+ chars)."
+spec:
+  type: event_mesh
+  values:
+    broker_url: "tcps://broker.example.com:55443"
+    broker_vpn: "default"
+    broker_username: "solace-client"
+    broker_password: ${EXAMPLE_EVENT_MESH_BROKER_PASSWORD}  # secret — provide via env var
+    # optional: tls_skip_verify: "false"
+    event_rules:
+      - name: route_orders
+        subscriptions:
+          - topic: "events/orders/>"
+        targetAgent: Orchestrator
+        promptTemplate: "Process this order event from {topic}: {payload}"
+        acknowledgmentPolicy:
+          mode: on_completion
+          timeoutSeconds: 300
+        messageFormat: json
+        successOutput:
+          enabled: true
+          topic: "events/orders/responses"
+          topicType: static
+          # Advanced output knobs (UI doesn't render these — YAML authors only):
+          # responseType: custom           # publish customExpression, a sacexpr expression
+          # customExpression: "input.payload:data[0]"  # a workflow target's result
+          # format: json
+          # outputSchema: { ... }          # JSON Schema; payload validated before publish
+          # onValidationError: log         # log | drop
+          # deliveryMode: guaranteed       # direct (default) | guaranteed: wait for the broker ack
+          # headers:                       # Solace headers, named as in the Micro-Integration reference
+          #   solace_dmqEligible: true     # dmqEligible, timeToLive and expiration need guaranteed
+          #   solace_timeToLive: 30000     # milliseconds
+          #   solace_priority: 7           # 0-255
+          #   solace_correlationId: "{{text://user_data.forward_context:correlationId}}"  # needs forwardContext: {correlationId: "input.user_properties:correlationId"} on the rule
+          # userProperties:                # literal, or a template when it contains {{...}}
+          #   source: sam
+        errorOutput:
+          enabled: true
+          topic: "events/orders/errors"
+          topicType: static
+      # Workflow target instead of an agent (separate rule; targetAgent and targetWorkflowName are mutually exclusive):
+      # - name: route_payments
+      #   subscriptions:
+      #     - topic: "events/payments/>"
+      #   targetWorkflowName: PaymentReview
+      #   inputExpression: "input.payload:"   # set on every workflow target (omitted = empty input); no promptTemplate
+    # optional: systemPurpose: "..."
+    # optional: responseFormat: "..."

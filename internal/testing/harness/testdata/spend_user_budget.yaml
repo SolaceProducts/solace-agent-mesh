@@ -1,0 +1,30 @@
+test_case_id: "spend_user_budget_001"
+description: "Each answered request books priced spend to the user who sent it; the test drives the requests itself."
+tags: ["spend", "budget"]
+skip_intermediate_events: true
+
+gateway_input:
+  target_agent_name: "TestAgent"
+  prompt:
+    parts:
+      - text: "Summarize the report."
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "The first answer, which spends the user's whole budget."
+      usage: {prompt_tokens: 100, completion_tokens: 10, total_tokens: 110}
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "Another user's answer."
+      usage: {prompt_tokens: 100, completion_tokens: 10, total_tokens: 110}
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "The answer once the user's limit was raised."
+      usage: {prompt_tokens: 100, completion_tokens: 10, total_tokens: 110}

@@ -1,0 +1,14 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "file",
+        "name": "stock.csv"
+      }
+    ]
+  }
+]

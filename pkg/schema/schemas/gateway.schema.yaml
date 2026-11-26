@@ -1,0 +1,385 @@
+# SAM Gateway Configuration — JSON Schema (YAML syntax)
+# Covers both HTTP SSE Gateway and Event Mesh Gateway.
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: SAM Gateway Config
+description: >
+  Two gateway types: HTTP SSE (interactive chat) and Event Mesh (autonomous event-driven).
+
+type: object
+required: [namespace]
+properties:
+
+  # --- Identity ---
+  namespace:
+    type: string
+    x-sam-system: true
+    description: Broker namespace. Must match agents in the same deployment.
+  gateway_id:
+    type: string
+    x-sam-system: true
+    description: 'Unique gateway ID. Auto-generated as "gw-{UUID[:8]}" if omitted.'
+  gateway_uuid:
+    type: string
+    x-sam-system: true
+    description: Platform row id of a deployed entrypoint, stamped on its tasks for spend attribution. Defaults to the app name when that is a lowercase canonical UUID.
+  run_as_user_uuids:
+    type: object
+    additionalProperties: { type: string }
+    x-sam-system: true
+    description: Platform user row id of each custom run_as system user, keyed by its system principal and stamped on the tasks that run as it for spend attribution.
+  session_secret_key:
+    type: string
+    x-sam-system: true
+    description: Secret for signing web session cookies.
+
+  # --- HTTP Server ---
+  fastapi_host:
+    type: string
+    x-sam-system: true
+    default: "127.0.0.1"
+  fastapi_port:
+    type: integer
+    x-sam-system: true
+    default: 8800
+  cors_allowed_origins:
+    type: array
+    x-sam-system: true
+    items: { type: string }
+  sse_max_queue_size:
+    type: integer
+    x-sam-system: true
+    default: 200
+
+  # --- User Identity & Auth ---
+  default_user_identity:
+    type: string
+    x-sam-system: true
+    default: sam_dev_user
+  default_user_timezone:
+    type: string
+    description: >-
+      IANA timezone used when a request carries no per-user timezone of its own.
+      The web UI resolves the browser's zone and scheduled tasks use the task's
+      own zone; other gateways (MCP, event mesh, Teams) have no per-user
+      zone and fall back to this. Agents use it to tell the model the current
+      local date and time, and the get_current_time tool reports in it. An
+      invalid value is ignored with a warning and UTC is used.
+    default: UTC
+  force_user_identity:
+    type: string
+    x-sam-system: true
+    description: Override all user identities (development only).
+  frontend_use_authorization:
+    type: boolean
+    x-sam-system: true
+    default: false
+  external_auth_service_url:
+    type: string
+    x-deprecated: true
+    description: |
+      UNSUPPORTED. This field is accepted for migration compatibility
+      but is ignored at runtime; a WARN log fires at startup if set.
+      Configure a `providers:` catalog at the GWE config root instead.
+      This field will be removed in a future release.
+    x-sam-system: true
+  external_auth_provider:
+    type: string
+    x-sam-system: true
+    description: |
+      Name of the auth provider. When using a `providers:` catalog, this
+      must match a catalog key. Omit for single-entry catalogs to
+      auto-select. No default is applied at runtime — the legacy
+      "generic" default was removed when the OAuth2 proxy path was
+      retired.
+  external_auth_callback_uri: { type: string, x-sam-system: true }
+  frontend_auth_login_url: { type: string, x-sam-system: true }
+  frontend_redirect_url: { type: string, x-sam-system: true }
+  frontend_server_url: { type: string, x-sam-system: true }
+
+  # --- Session Service ---
+  session_service:
+    type: object
+    x-sam-system: true
+    properties:
+      type: { type: string, enum: [memory, sql] }
+      database_url: { type: string }
+      default_behavior: { type: string, enum: [PERSISTENT, RUN_BASED], default: PERSISTENT }
+
+  # --- Artifact Service ---
+  artifact_service:
+    type: object
+    x-sam-system: true
+    properties:
+      type: { type: string, enum: [filesystem, memory, s3, gcs] }
+      base_path: { type: string }
+      artifact_scope: { type: string, enum: [namespace, app, custom], default: namespace }
+      bucket_name: { type: string }
+      region: { type: string }
+
+  # --- Agent Interaction ---
+  system_purpose: { type: string, x-sam-system: true }
+  response_format: { type: string, x-sam-system: true }
+  enable_embed_resolution: { type: boolean, x-sam-system: true, default: true }
+  gateway_artifact_content_limit_bytes: { type: integer, x-sam-system: true, default: 10000000 }
+  card_publish_interval_seconds: { type: integer, x-sam-system: true, default: 30 }
+
+  # --- Task Logging ---
+  task_logging:
+    type: object
+    x-sam-system: true
+    properties:
+      enabled: { type: boolean }
+  task_logger_queue_size: { type: integer, x-sam-system: true, default: 600 }
+
+  # --- LLM (for title generation) ---
+  model:
+    x-sam-system: true
+    description: "Optional model for chat title generation. Same format as agent model."
+
+  # --- Upload Limits ---
+  gateway_max_upload_size_bytes: { type: integer, x-sam-system: true, default: 50000000 }
+  gateway_max_project_size_bytes: { type: integer, x-sam-system: true, default: 50000000 }
+  gateway_max_batch_upload_size_bytes: { type: integer, x-sam-system: true, default: 50000000 }
+
+  # --- Project Limits ---
+  gateway_max_project_description_chars: { type: integer, x-sam-system: true, default: 1000, minimum: 1 }
+  gateway_max_project_instructions_chars: { type: integer, x-sam-system: true, default: 32000, minimum: 1 }
+
+  # --- Frontend ---
+  frontend_welcome_message: { type: string, x-sam-system: true }
+  frontend_app_name: { type: string, x-sam-system: true }
+  frontend_collect_feedback: { type: boolean, x-sam-system: true, default: false }
+  frontend_disclaimer_text: { type: string, x-sam-system: true, maxLength: 800 }
+  frontend_logo_url: { type: string, x-sam-system: true }
+  frontend_small_logo_url: { type: string, x-sam-system: true }
+
+  # --- Platform Service ---
+  # Optional frontend override. Set `url` only when the platform runs on a
+  # separate origin; empty/omitted means same-origin (platform behind this proxy).
+  platform_service:
+    type: object
+    x-sam-system: true
+    properties:
+      url: { type: string }
+
+  # =====================================================================
+  # EVENT MESH GATEWAY (additional fields)
+  # =====================================================================
+
+  # --- Data Plane Broker ---
+  # Separate Solace broker for external events (not SAM control plane).
+  event_mesh_broker_config:
+    type: object
+    required: [broker_url]
+    properties:
+      broker_url:
+        type: string
+        description: "Protocols: tcp://, tcps://, ws://, wss://"
+      broker_vpn: { type: string, default: default }
+      broker_username: { type: string }
+      broker_password: { type: string }
+
+  # --- Acknowledgment Policy ---
+  acknowledgment_policy:
+    type: object
+    properties:
+      mode:
+        type: string
+        enum: [on_receive, on_completion]
+        default: on_receive
+      timeout_seconds: { type: integer, default: 300 }
+      on_failure:
+        type: object
+        properties:
+          action: { type: string, enum: [nack, ack] }
+          nack_outcome: { type: string, enum: [rejected, failed] }
+
+  # --- Event Handlers ---
+  event_handlers:
+    type: array
+    items:
+      type: object
+      required: [name]
+      oneOf:
+        - required: [subscriptions]
+        - required: [existing_queue_name]
+      properties:
+        name: { type: string }
+        existing_queue_name:
+          type: string
+          description: >
+            Bind to a broker queue that already exists, in consume-only
+            mode: Agent Mesh does not create the queue, add subscriptions,
+            or deprovision it on undeploy. Mutually exclusive with
+            subscriptions. One of subscriptions or existing_queue_name
+            is required.
+        subscriptions:
+          type: array
+          items:
+            type: object
+            required: [topic]
+            properties:
+              topic: { type: string, description: "Solace wildcard: * = one level, > = one or more." }
+              qos: { type: integer, enum: [0, 1] }
+        input_expression:
+          type: string
+          description: |
+            SAC expression to extract agent input.
+            "input.payload:field" — JSON path
+            "template:Text {{...}}" — Liquid template
+            "static:fixed text" — literal
+        payload_format: { type: string, enum: [json, text, yaml, csv], default: json }
+        payload_encoding: { type: string, default: utf-8 }
+        event_filter:
+          type: object
+          required: [function, params]
+          description: |
+            Deterministic test on each incoming message, evaluated before
+            identity resolution and task submission. A message it does not
+            match is acknowledged and dropped (no task, no model call).
+            Written as a SAC invoke: function plus params.positional, each
+            param a literal, "evaluate_expression(<expr>)" over input.payload,
+            input.topic, input.topic_levels, input.user_properties or static,
+            or a nested {invoke: {...}}. A message the filter cannot decide
+            (a field it reads is missing or null, the payload is empty, a
+            field is read from a payload that is not a JSON object, the
+            compared values are of different kinds, in_op looks
+            inside a number or boolean or looks for a value of another kind
+            than the items of a list, a calculation (subtract, multiply, divide,
+            modulus, negate or power) gives a result that is not a finite
+            number, such as the square root of a negative number or an
+            overflow, or and_op, or_op, not_op, an if_else
+            condition or the filter itself yields something other than true
+            or false) is delivered and logged at WARN, whatever function the
+            filter uses; the filter is a cost control, not an admission
+            boundary. To test that a key is present, use in_op with the key
+            and evaluate_expression(input.payload:) or
+            evaluate_expression(input.user_properties:). The input.payload:
+            form needs a JSON object payload: on a text payload in_op
+            searches the text for the key; on a JSON list it looks for the
+            key among the text items, so an empty list, a list of only nulls
+            or a mixed list like ["a", 1] gives false when the key is not
+            there, while a list holding only numbers, booleans, objects or
+            lists cannot be decided and the message is delivered. A filter that does not compile, including a
+            malformed evaluate_expression param, a bare
+            input.payload:<path> without the wrapper, a comparison of two
+            literals, a null param, or a NaN or infinite number, stops the entrypoint at load.
+          properties:
+            function:
+              type: string
+              enum: [equal, not_equal, greater_than, less_than, greater_than_or_equal, less_than_or_equal, and_op, or_op, not_op, in_op, if_else, subtract, multiply, divide, modulus, negate, power]
+            module: { type: string, description: Accepted for SAC compatibility and ignored. }
+            params:
+              type: object
+              required: [positional]
+              properties:
+                positional: { type: array }
+        # Target routing (use one)
+        target_agent_name: { type: string }
+        target_agent_name_expression: { type: string }
+        target_workflow_name: { type: string }
+        target_workflow_name_expression: { type: string }
+        # Identity
+        user_identity_expression: { type: string }
+        default_user_identity: { type: string }
+        # Response routing
+        on_success: { type: string, description: Output handler name. }
+        on_error: { type: string }
+        # Context forwarding
+        forward_context: { type: object }
+        # Artifact extraction
+        artifact_processing:
+          type: object
+          properties:
+            extract_artifacts_expression: { type: string }
+            artifact_definition:
+              type: object
+              properties:
+                filename: { type: string }
+                content: { type: string }
+                mime_type: { type: string }
+                content_encoding: { type: string, enum: [base64, utf-8] }
+        acknowledgment_policy: { type: object }
+        structured_invocation:
+          type: object
+          properties:
+            input_schema: { type: object }
+            output_schema: { type: object }
+
+  # --- Output Handlers ---
+  output_handlers:
+    type: array
+    items:
+      type: object
+      required: [name, topic_expression]
+      properties:
+        name: { type: string }
+        topic_expression:
+          type: string
+          description: |
+            Topic for publishing response. Supports expressions:
+            "static:topic/path" or "template:topic/{{text://user_data.forward_context:id}}"
+        payload_expression: { type: string }
+        payload_format: { type: string, default: json }
+        delivery_mode:
+          type: string
+          enum: [direct, guaranteed]
+          default: direct
+          description: |
+            direct publishes without a broker acknowledgement. guaranteed publishes
+            a guaranteed message and waits for the broker to acknowledge it.
+        headers:
+          type: object
+          description: |
+            Solace message headers keyed by Micro-Integration header name
+            (solace_dmqEligible, solace_timeToLive, solace_expiration, solace_priority,
+            solace_correlationId, solace_applicationMessageId, solace_applicationMessageType,
+            solace_senderId, solace_sequenceNumber, solace_httpContentEncoding). A number or
+            boolean is a literal; a string is an expression ("static:..." for a literal string).
+            solace_dmqEligible, solace_timeToLive and solace_expiration need delivery_mode guaranteed.
+        user_properties:
+          type: object
+          additionalProperties: { type: [string, number, boolean] }
+          description: |
+            User properties keyed by name. A number or boolean is a literal; a string is an
+            expression ("static:..." for a literal string).
+        output_transforms:
+          type: array
+          items:
+            type: object
+            required: [type]
+            properties:
+              type: { type: string, enum: [copy, accumulate, filter] }
+              source_expression: { type: string }
+              dest_expression: { type: string }
+
+# --- Examples ---
+# Development HTTP SSE gateway:
+#   apps:
+#     - name: dev_gw
+#       app_config:
+#         namespace: solace-agent-mesh
+#         fastapi_port: 8800
+#         session_service: { type: memory }
+#         artifact_service: { type: memory }
+#         card_publish_interval_seconds: 5
+#
+# Event mesh gateway:
+#   apps:
+#     - name: em_gw
+#       app_config:
+#         namespace: solace-agent-mesh
+#         event_mesh_broker_config:
+#           broker_url: "${BROKER_URL}"
+#           broker_vpn: default
+#         event_handlers:
+#           - name: orders
+#             subscriptions:
+#               - topic: "orders/created/>"
+#             input_expression: "template:New order: {{text://input.payload:description}}"
+#             target_agent_name: OrderAgent
+#             on_success: order_response
+#         output_handlers:
+#           - name: order_response
+#             topic_expression: "static:orders/processed"
+#             payload_expression: "input.payload:text"

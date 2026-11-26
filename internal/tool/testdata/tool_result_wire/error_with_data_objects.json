@@ -1,0 +1,35 @@
+{
+  "_schema": "ToolResult",
+  "_schema_version": "1.0",
+  "data": null,
+  "data_objects": [
+    {
+      "content": "error diagnostic\ncol1,col2\n1,2",
+      "description": "Partial output before failure",
+      "disposition": "auto",
+      "is_binary": false,
+      "metadata": null,
+      "mime_type": "text/csv",
+      "name": "partial_rows.csv",
+      "preview": null
+    },
+    {
+      "content": null,
+      "description": "Logs from the failed run",
+      "disposition": "artifact",
+      "is_binary": false,
+      "metadata": null,
+      "mime_type": "text/plain",
+      "name": "run.log",
+      "preview": null,
+      "artifact_ref": {
+        "filename": "run.log",
+        "version": 3,
+        "size_bytes": 1024
+      }
+    }
+  ],
+  "error_code": "PARTIAL_FAILURE",
+  "message": "Aggregation failed on row 4; partial output saved",
+  "status": "error"
+}

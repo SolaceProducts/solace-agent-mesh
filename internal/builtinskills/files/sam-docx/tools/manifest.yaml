@@ -1,0 +1,7 @@
+version: 1
+tools:
+  docx_create_document:
+    runtime: go
+    executable: docx
+    tool_dir: docx
+    timeout_seconds: 120

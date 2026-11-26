@@ -1,0 +1,40 @@
+version = 1
+revision = 5
+requires-python = ">=3.10"
+
+[options]
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer-span = "P7D"
+
+[[package]]
+name = "sam-tool-sdk"
+version = "0.1.3"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/99/26/2da6f05c2cb8d43403468d99e444fbe57c21976e4b7ac2c9a378bd3122a5/sam_tool_sdk-0.1.3.tar.gz", hash = "sha256:5a63dd2c8ae857e785ceda188eff1f95b37a9299f2f4050f5da4b7773d1f22fb", size = 64383, upload-time = "2026-09-10T14:54:37.778Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/37/b8/339d93ab25ae3b8a9a0e541c6e0e8de233a03ade781bb099dee08b310465/sam_tool_sdk-0.1.3-py3-none-any.whl", hash = "sha256:0b337cb4ff78402dda868e09fcc96632497958cae0bf9178e45d397910f4de3c", size = 54507, upload-time = "2026-09-10T14:54:36.501Z" },
+]
+
+[[package]]
+name = "sla-clock"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "sam-tool-sdk" },
+    { name = "tzdata" },
+]
+
+[package.metadata]
+requires-dist = [
+    { name = "sam-tool-sdk", specifier = ">=0.1,<0.2" },
+    { name = "tzdata", specifier = ">=2024.1" },
+]
+
+[[package]]
+name = "tzdata"
+version = "2026.5"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/d9/68/f1b440335057bfce71b6e50a9d09445aa2ecbd08359a337976627b8409e7/tzdata-2026.5.tar.gz", hash = "sha256:8cc73c0a0bfca7dbfa59235d60b2eff82231dee33f53d206db1acd9173cfc0a7", size = 200404, upload-time = "2026-10-03T09:23:14.143Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/94/21/1e5995a1c920cce14e4bffae20c665ec10e7ed03ab25e006cd741092b718/tzdata-2026.5-py2.py3-none-any.whl", hash = "sha256:b683bd1b6659ddcd810ff02ad09ba821d4bf1065072805063eb35c49617905ac", size = 347996, upload-time = "2026-10-03T09:23:12.535Z" },
+]

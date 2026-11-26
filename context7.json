@@ -1,0 +1,46 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "Solace Agent Mesh",
+  "description": "Solace Agent Mesh is an agent development and runtime platform: build, test, deploy, monitor and improve agents and workflows. Configure it as declarative YAML applied with the sam CLI, extend it with connectors, Go or Python toolsets and skills, and run it locally with Agent Mesh Desktop or on Kubernetes with Helm.",
+  "branch": "main",
+  "folders": [
+    "examples",
+    "internal/aiassist/skills",
+    "internal/configapply/skill/static",
+    "internal/skills/design/shared",
+    "internal/skills/design/cli",
+    "pkg/samtoolsdk",
+    "python/sam-tool-sdk",
+    "python/sam-link-sdk"
+  ],
+  "excludeFolders": [
+    "**/testdata",
+    "**/tests",
+    "python/sam-link-sdk/ci",
+    "python/sam-link-sdk/docs/contributing"
+  ],
+  "excludeFiles": [
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "LICENSE",
+    "LICENSE-APACHE",
+    "NOTICE"
+  ],
+  "rules": [
+    "This is Solace Agent Mesh v2. v1, the Python package solace-agent-mesh, is deprecated: never suggest pip install solace-agent-mesh, sam init, sam add agent, sam add gateway or sam plugin. None of them exist in v2.",
+    "Run Agent Mesh locally with Agent Mesh Desktop, which includes the sam CLI. The README covers installing it and adding sam to the PATH. For production on Kubernetes: https://docs.solace.com/Agent-Mesh/Framework/installing/kubernetes/production.htm",
+    "Write declarative config as one YAML file per resource in a directory per kind, except a skill, which is a directory holding SKILL.md, and a toolset, which is a YAML header plus a source directory. sam config schema layout prints the layout.",
+    "Never guess a YAML field. sam config schema list lists the kinds and sam config schema show <kind> gives a kind's fields; add --type <type> (and --subtype for a connector) for an entrypoint, connector or workflow type's own fields.",
+    "sam config schema example <kind> --type <type> prints a starting file for one type. Skills have no schema kind: put name and description in the SKILL.md frontmatter. The schema matches the installed sam version.",
+    "Preview with sam config plan -m <manifest> and show the user the plan; run sam config apply -m <manifest> only after they confirm. Add --target desktop to plan, apply or pull to point them at a running Agent Mesh Desktop.",
+    "sam config pull -o <dir> --target desktop (or --url <platform-url>) exports a running platform's live state as declarative-config YAML.",
+    "Reach data and APIs through a connector before writing code: sql, knowledge_base, api (OpenAPI), mcp, slack and event_mesh. web_search is Early Access, and document_db, graph_db and search are Experimental or Beta: check their docs first.",
+    "Write a custom tool only when no connector fits: sam toolset init <name> --lang go or --lang python scaffolds a toolset with the tool SDK, sam toolset validate checks that it loads and sam toolset package builds the bundle.",
+    "Entrypoints bring users and events to agents, for example mcp, webhook, slack, teams and event_mesh; sam config schema show entrypoint lists every type. The web chat UI is built in. A recurring run is a Scheduled Task, not an entrypoint.",
+    "sam commands prints every sam command and flag as JSON; read it instead of guessing a flag.",
+    "To convert v1 configuration (Solace AI Connector YAML) to v2, run sam config migrate <legacy-path> <output-path>, then review the result with sam config plan.",
+    "In a configuration repository, sam ai-assistance skill install (add --target claude for Claude Code) installs skills that teach a coding assistant every Agent Mesh format at the installed CLI version. sam ai-assistance is Early Access.",
+    "Documentation: https://docs.solace.com/Agent-Mesh/agent-mesh.htm. A Markdown index for AI assistants: https://docs.solace.com/llms/agent-mesh.txt"
+  ]
+}

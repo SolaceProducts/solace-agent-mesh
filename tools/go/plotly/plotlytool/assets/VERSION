@@ -1,0 +1,8 @@
+version: 2.35.2
+upstream: https://cdn.plot.ly/plotly-2.35.2.min.js
+license: MIT (https://github.com/plotly/plotly.js/blob/master/LICENSE)
+
+To upgrade: download the new https://cdn.plot.ly/plotly-<version>.min.js into
+plotly.min.js and update the version/upstream fields above. Then rerun the
+chromedp render tests to confirm the Plotly.newPlot / Plotly.toImage API
+contract has not changed.

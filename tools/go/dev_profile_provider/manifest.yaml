@@ -1,0 +1,16 @@
+version: 1
+capabilities:
+  profileProvider: true
+tools:
+  enrich_authenticated_user:
+    runtime: go
+    executable: ./dev_profile_provider
+    timeout_seconds: 10
+  search_users:
+    runtime: go
+    executable: ./dev_profile_provider
+    timeout_seconds: 10
+  get_user_profile:
+    runtime: go
+    executable: ./dev_profile_provider
+    timeout_seconds: 10

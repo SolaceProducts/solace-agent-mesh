@@ -1,0 +1,93 @@
+{
+  "scope": "self",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "id": null,
+  "name": null,
+  "user": null,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "totals": {
+    "cost": "0.0000000000",
+    "activities": 0,
+    "costPerActivity": null,
+    "shareOfSpend": null,
+    "costByBucket": {
+      "uncachedInput": "0.0000000000",
+      "output": "0.0000000000",
+      "cacheRead": "0.0000000000",
+      "cacheWrite": "0.0000000000"
+    },
+    "tokens": {
+      "uncachedInput": 0,
+      "output": 0,
+      "cacheRead": 0,
+      "cacheWrite": 0
+    },
+    "calls": 0,
+    "unpricedCalls": 0
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "0.0000000000",
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "activities": 0
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "0.0000000000",
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "activities": 0
+    }
+  ],
+  "budget": {
+    "id": "01a10c9e-0000-7e77-be6a-3cdc8d0b9003",
+    "name": "Standard",
+    "source": "default",
+    "amount": "100.0000000000",
+    "warningPercentage": 80,
+    "topUp": null,
+    "effectiveAmount": "100.0000000000",
+    "periodStart": "2026-10-01T00:00:00.000Z",
+    "periodEnd": "2026-11-01T00:00:00.000Z",
+    "periodSpend": "0.0000000000",
+    "usagePercent": 0,
+    "status": "ok"
+  },
+  "topRoots": [],
+  "otherCost": "0.0000000000",
+  "otherShareOfUser": 0,
+  "months": [
+    {
+      "month": "2026-08",
+      "cost": "3.1000000000",
+      "budgetAmount": "100.0000000000",
+      "partialFromDate": null
+    },
+    {
+      "month": "2026-09",
+      "cost": "0.0000000000",
+      "budgetAmount": "100.0000000000",
+      "partialFromDate": null
+    },
+    {
+      "month": "2026-10",
+      "cost": "0.0000000000",
+      "budgetAmount": "100.0000000000",
+      "partialFromDate": null
+    }
+  ]
+}

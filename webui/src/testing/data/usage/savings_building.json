@@ -1,0 +1,15 @@
+{
+  "scope": "tenant",
+  "dataAsOf": null,
+  "historyComplete": false,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "currency": "USD",
+  "avoidedInputTokens": null,
+  "avoidedCost": null,
+  "calls": 0,
+  "measuredCalls": 0,
+  "unpricedCalls": 0
+}

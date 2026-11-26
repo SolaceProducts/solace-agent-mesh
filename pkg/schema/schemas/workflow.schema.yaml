@@ -1,0 +1,480 @@
+# SAM Workflow Configuration — JSON Schema (YAML syntax)
+# Top-level: apps[].app_config (with agent_type: workflow)
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: SAM Workflow Config
+description: >
+  Workflows are DAGs of nodes with deterministic control flow.
+  They publish an agent card and look like any other agent to the system.
+  All fields support both snake_case and camelCase.
+
+type: object
+required: [agent_name, agent_type, nodes, output_mapping]
+properties:
+
+  agent_name:
+    type: string
+    minLength: 3
+    maxLength: 80
+    description: Unique workflow identifier.
+  agent_type:
+    type: string
+    const: workflow
+  namespace:
+    type: string
+    x-sam-system: true
+  description:
+    type: string
+    minLength: 10
+    maxLength: 2000
+  version:
+    type: string
+
+  # --- I/O Schemas ---
+  input_schema:
+    type: object
+    description: JSON Schema for workflow input validation.
+  output_schema:
+    type: object
+    description: JSON Schema for workflow output validation.
+
+  # --- Output Mapping (required) ---
+  # Maps workflow output fields to template expressions referencing node outputs.
+  # Template syntax: {{node_id.output.field}}
+  # Special forms: coalesce (first non-nil), concat (string join).
+  output_mapping:
+    type: object
+    description: "Maps output fields to {{node_id.output.field}} templates."
+
+  # --- Timeouts ---
+  workflow_timeout:
+    type: string
+    description: 'Max workflow duration. Go duration: "30s", "5m", "1h", "1d".'
+  default_node_timeout:
+    type: string
+    description: Default timeout for all nodes (unless overridden per-node).
+
+  # --- Execution Control ---
+  fail_fast:
+    type: boolean
+    default: true
+    description: Stop workflow on first node failure.
+  max_call_depth:
+    type: integer
+    default: 10
+
+  # --- Retry Strategy (workflow-level default) ---
+  # Exponential backoff: delay = min(duration * factor^n, max_duration)
+  retry_strategy:
+    type: object
+    properties:
+      limit:
+        type: integer
+        default: 0
+        description: Max retries. Total executions = limit + 1.
+      retry_policy:
+        type: string
+        enum: [OnFailure, OnError, Always]
+        default: OnFailure
+      backoff:
+        type: object
+        properties:
+          duration: { type: string, default: "1s" }
+          factor: { type: number, default: 2.0 }
+          max_duration: { type: string }
+
+  # --- Decision Provider ---
+  # Required by any type: decision node. Decision nodes send their input to a
+  # third-party model, so there is no default provider and no default key.
+  # Gated by the workflow_decision_node feature flag.
+  decision:
+    type: object
+    description: "Provider that type decision nodes evaluate against. Use model_alias for any workflow saved to the platform; the inline api_base/api_key/model form is for file-loaded configs only."
+    properties:
+      provider:
+        type: string
+        enum: [typesafe, openai, google_ai_studio]
+        default: typesafe
+        description: "File-loaded configs only. typesafe is TypeSafe AI's Jev; openai is OpenAI's Decisions API (gpt-6-luna, a public beta); google_ai_studio is Google's Gemini Decisions API (gemini-decision-1). A model_alias takes its provider from the registered model."
+      model_alias:
+        type: string
+        description: "Alias of a model registered in the model registry (Models API or sam config apply) with modelType decision (provider typesafe, openai or google_ai_studio). The registry holds the provider, endpoint and key, so no secret appears in the workflow. Excludes api_base, api_key and model."
+      api_base:
+        type: string
+        description: "File-loaded configs only. Defaults to the provider's hosted API: https://api.typesafe.ai (which may be replaced by https://openrouter.ai/api or another /v1/systemone pass-through), https://api.openai.com/v1 or https://generativelanguage.googleapis.com/v1beta."
+      api_key:
+        type: string
+        description: 'File-loaded configs only, as an env reference such as "${TYPESAFE_API_KEY}". A workflow saved to the platform stores this literally and it is never expanded; use model_alias instead.'
+      model:
+        type: string
+        description: "File-loaded configs only. Pin a version (e.g. jev-1.13.0). Defaults to jev-latest for typesafe, which can change routing under a deployed workflow, gpt-6-luna for openai and gemini-decision-1 for google_ai_studio."
+      timeout_seconds:
+        type: integer
+        default: 10
+        description: Per-call budget across retries.
+      max_state_bytes:
+        type: integer
+        default: 131072
+        description: Largest resolved node input sent as the decision state.
+      max_images:
+        type: integer
+        minimum: 0
+        maximum: 128
+        default: 5
+        description: "Most images one decision call sends; 0 uses the default. More fails the call as input_too_large, and more literal (non-template) images entries than this fail the workflow when it loads."
+      max_image_bytes:
+        type: integer
+        minimum: 0
+        maximum: 67108864
+        default: 20971520
+        description: "Most image bytes one decision call sends, counted after downscaling; 0 uses the default. An image artifact stored larger than this, or images that together exceed it, fail the call as input_too_large."
+
+  # --- Exit Handlers ---
+  # Nodes that run after workflow completion. Can be a string (always) or object.
+  on_exit:
+    oneOf:
+      - type: string
+        description: Node ID to always run on exit.
+      - type: object
+        properties:
+          always: { type: string }
+          on_success: { type: string }
+          on_failure: { type: string }
+          on_cancel: { type: string }
+
+  # --- Agent Card ---
+  card_publish_interval_seconds:
+    type: integer
+    default: 60
+  agent_card:
+    type: object
+    properties:
+      description: { type: string }
+      skills:
+        type: array
+        items:
+          type: object
+          required: [id, name, description]
+          properties:
+            id: { type: string }
+            name: { type: string }
+            description: { type: string }
+  # The card skills a workflow advertises, alongside `nodes:` rather than under
+  # `agent_card:`. The loader reads them from here (config.go: cfg.Skills =
+  # getMapSlice(raw, "skills")) and every workflow config in this repo writes
+  # them here, so a schema that omitted the key called all of them invalid.
+  skills:
+    type: array
+    items:
+      type: object
+      required: [id, name, description]
+      properties:
+        id: { type: string }
+        name: { type: string }
+        description: { type: string }
+        tags:
+          type: array
+          items: { type: string }
+        examples:
+          type: array
+          items: { type: string }
+
+  # --- Tools, Toolsets & Connectors (optional) ---
+  # Tools, toolsets and connectors available to `type: tool` nodes. They share
+  # one namespace: a `type: tool` node's tool_name must match a tool declared
+  # here (a tools[] entry, a tool of a listed toolset, or the send-tool a
+  # connector produces).
+  tools:
+    type: array
+    description: "Tools invokable by type: tool nodes (same shape as an agent's tools)."
+    items:
+      type: object
+      required: [tool_type]
+      properties:
+        tool_type:
+          type: string
+          enum: [builtin, builtin-group, mcp, openapi]
+        hil:
+          type: object
+          description: >
+            Per-tool human-in-the-loop approval, the same block an agent's tool
+            entry takes. A gated tool node pauses for approval and runs only
+            once a human approves; where the workflow cannot reach a human it
+            fails instead of running the tool. With
+            SAM_FEATURE_WORKFLOW_TOOL_APPROVAL_ENFORCEMENT=false the node runs
+            the tool without asking anyone.
+          properties:
+            require_approval: { type: boolean, default: false }
+            approval_message: { type: string }
+            timeout: { type: string, default: "45m" }
+            show_args: { type: boolean, default: true }
+            require_approval_when:
+              type: array
+              items:
+                type: object
+                required: [arg]
+                properties:
+                  arg: { type: string }
+  connectors:
+    type: array
+    description: >
+      Inline engine connectors ({name, type, subtype, config}) whose produced
+      tools are invokable by type: tool nodes. A connector from the platform
+      connector store is not listed here; bind it with a tool node's connector:
+      instead.
+    items:
+      type: object
+      required: [name, type]
+      properties:
+        name: { type: string }
+        type: { type: string }
+        subtype: { type: string }
+  toolsets:
+    type: array
+    description: >
+      Toolsets whose tools are invokable by type: tool nodes, by name (an uploaded
+      toolset or a built-in tool group — the same names an agent's toolsets take).
+      The platform expands each into tools: entries at deploy. An uploaded
+      toolset's tools keep their namespaced name (<Toolset>__<tool>) as the
+      node's tool_name and get the toolset's configuration, credentials and
+      approval settings. A built-in group's tools keep their bare names
+      (web_request, not web_tools__web_request).
+    uniqueItems: true
+    items:
+      type: string
+      minLength: 1
+
+  # --- Nodes (required) ---
+  nodes:
+    type: array
+    minItems: 1
+    items:
+      type: object
+      required: [id, type]
+      properties:
+        id:
+          type: string
+          description: Unique node identifier within the workflow.
+        type:
+          type: string
+          enum: [agent, switch, map, loop, workflow, tool, decision]
+        depends_on:
+          type: array
+          items: { type: string }
+          default: []
+        when:
+          type: string
+          description: Condition expression. Node skipped if false, and also skipped when a reference to a field an existing upstream node did not produce could have changed the answer (logged as a warning).
+        timeout:
+          type: string
+          description: Node-specific timeout (overrides default_node_timeout).
+        retry_strategy:
+          type: object
+          description: Node-specific retry (overrides workflow-level).
+
+        # --- Agent node fields ---
+        agent_name:
+          type: string
+          description: "Required for type: agent. Agent to invoke."
+        input:
+          type: object
+          description: "Input data passed to agent. Values can be {{template}} expressions."
+        instruction:
+          type: string
+          description: Additional instruction appended for this invocation.
+        input_schema_override:
+          type: object
+        output_schema_override:
+          type: object
+
+        # --- Switch node fields ---
+        cases:
+          type: array
+          description: "Required for type: switch. Evaluated in order, first match wins."
+          items:
+            type: object
+            properties:
+              condition: { type: string, description: "Expression. Aliases: when. A case does not match when a reference to a field an existing upstream node did not produce could have changed its answer; see cases_unresolved in the switch output." }
+              node: { type: string, description: "Target node ID. Aliases: then" }
+        default:
+          type: string
+          description: Default target if no case matches.
+
+        # --- Map node fields ---
+        # node: template node ID (required for map)
+        # items: "{{expression}}" for collection to iterate (alternatives: with_items, with_param)
+        # with_items: literal list alternative
+        node:
+          type: string
+          description: "Required for type: map/loop. Template/body node ID."
+        items:
+          description: "Template expression for collection. Supply exactly one of items, with_items or with_param."
+        with_items:
+          type: array
+        max_items:
+          type: integer
+          default: 100
+        concurrency_limit:
+          type: integer
+          default: 0
+          description: "Max concurrent map executions. 0 = unlimited."
+
+        # --- Loop node fields ---
+        condition:
+          type: string
+          description: "Required for type: loop. Continue while true. If a reference to a field an existing upstream node did not produce could have changed the answer, the loop stops with stopped_reason: condition_unresolved."
+        max_iterations:
+          type: integer
+          default: 100
+        delay:
+          type: string
+          description: Delay between loop iterations.
+
+        # --- Workflow node fields ---
+        workflow_name:
+          type: string
+          description: "Required for type: workflow. Nested workflow to invoke."
+
+        # --- Tool node fields ---
+        tool_name:
+          type: string
+          description: >
+            For type: tool, supply either tool_name or a node-level connector:
+            (with optional tool:). tool_name names the tool to invoke directly
+            (no agent in the loop), and must match a tool produced by the
+            workflow-level tools:, toolsets: or connectors: lists, or a tool of a
+            connector bound by a tool node's connector:. An API connector's
+            tools are named by the snake_cased operationId (getPet → get_pet);
+            other connector tools carry a per-connector suffix unless the
+            connector emits a custom tool_name as-is (event_mesh suffixes even
+            a custom name), so name those with connector: plus tool: on the
+            node instead. Arguments come from the node's input: mapping; the
+            tool result becomes the node output.
+
+        # --- Decision node fields ---
+        # One call to the workflow's decision provider answers every question
+        # about the node's input (its state). Output:
+        #   answers.<key>: boolean {value, probability} | choice {choice,
+        #     probabilities, confidence} | score {score, legend, probabilities,
+        #     confidence}
+        #   selected_branch, routed_branch, escalated, escalation_reason, model,
+        #   usage, duration_ms
+        questions:
+          type: object
+          description: "Required for type: decision. Map of question key to question; reference answers as {{node.output.answers.<key>.<field>}}."
+          additionalProperties:
+            type: object
+            required: [type, instructions]
+            properties:
+              type:
+                type: string
+                enum: [boolean, choice, score]
+              instructions:
+                type: string
+                description: What to decide. Refer to input fields by name, e.g. `ticket.subject`.
+              criteria:
+                description: "Required for choice (2-255 options) and score (2-10 levels): option -> description. Score levels must be a list, lowest first (- low: ...), because a map does not keep its order. Optional for boolean: when given, it must describe both true and false (and no other key); otherwise leave it out."
+                oneOf:
+                  - type: object
+                    additionalProperties: { type: string }
+                  - type: array
+                    items:
+                      type: object
+                      minProperties: 1
+                      maxProperties: 1
+                      additionalProperties: { type: string }
+        route_on:
+          type: string
+          description: "The choice question whose answer selects the branch. Required with routes."
+        routes:
+          type: object
+          description: "Choice option -> target node ID. Every target must list this node in depends_on; unselected targets are skipped."
+          additionalProperties: { type: string }
+        min_confidence:
+          type: number
+          exclusiveMinimum: 0
+          maximum: 1
+          description: Below this confidence on route_on, the node routes to escalate instead.
+        escalate:
+          type: string
+          description: Target node ID for a low-confidence answer or, with on_provider_error escalate, a transient provider failure or an input too large for the call (over the model's context limit, or images over the decision block's limits).
+        escalation_mode:
+          type: string
+          enum: [reroute, handoff]
+          default: reroute
+          description: "What happens after an escalation. reroute (the default): the escalate target answers the route_on question and that answer picks the route, as if the model had answered confidently. The answer is read from the escalate target's output field named after route_on (for a decision escalate target, its own answer to a choice question of that name), so declare that field in an agent target's output schema as a required enum of the route_on options. An option with a route runs that route, any other option runs default; an answer that is missing, not a string, or not an option fails the escalate node, and is retried, for an agent or workflow escalate target, under its node-level or workflow-level retry_strategy. Every route and default waits for the escalate target without listing it in depends_on, and none may be the escalate target itself. handoff: the escalate target's reply is the result and no route runs; use it when the escalate target finishes the work itself, such as a human-review step or an agent that answers the request."
+        on_provider_error:
+          type: string
+          enum: [fail, escalate]
+          default: fail
+          description: "escalate covers transient failures (timeout, rate limit, unreachable or 5xx provider, invalid response) and an input too large for the call (a 413, a 4xx with error type max_tokens_exceeded, or images over max_images or max_image_bytes or too large to downscale). A refusal escalates too: an OpenAI refusal, or a Gemini safety block (a 400 with a safety code). Rejected credentials (401 or 403, or Gemini's 400 with reason API_KEY_INVALID), any other 4xx such as a 422, a redirect to a Location that is not a URL, a Google AI Studio redirect to another origin or past 10 hops, and configuration errors always fail the node."
+        model:
+          type: string
+          description: Overrides the provider model for this node.
+        images:
+          type: array
+          description: "Only for a decision model that reads images: a Jev model, on TypeSafe's own API or through OpenRouter, an OpenAI or Gemini decision model, or openai/gpt-6-luna-decisions through OpenRouter. Image artifacts sent with the input in the same call: each entry is an artifact reference (name, name:version or an artifact:// URI) or a template resolving to one or to a list of them, such as {{workflow.input.photo}}. PNG, JPEG and WebP images are accepted; one whose longer side is over 8000 px is downscaled to 8000 px, and one that also declares more than 40 megapixels fails the call as input_too_large. An entry that resolves to nothing is skipped, such as an omitted optional input, a null or empty output field, a node that completed without returning any output, or a node the workflow pruned because its when condition was false or its branch was not taken. A missing, non-image or unreadable artifact fails the node. So does an entry that reads a node that failed, a node skipped because an upstream node failed or a when or switch condition referenced an output field its node did not return, the target of a switch case that could not be evaluated (even when the switch took another branch), an output field the node did not return, or a node that has not run and is not upstream of the decision node. An entry that embeds a template in other text, such as {{workflow.input.photo}}:2, is skipped or fails the node as a whole. Any other TypeSafe model reads only text and rejects a node with images. For a Jev model on TypeSafe's own API, any image over 40 megapixels fails as input_too_large."
+          items:
+            type: string
+
+# --- Template Expressions ---
+# {{workflow.input}}             — entire workflow input
+# {{workflow.input.field}}       — specific input field
+# {{workflow.status}}            — workflow status (exit handlers)
+# {{workflow.error.message}}     — error message (exit handlers)
+# {{node_id.output}}             — entire node output
+# {{node_id.output.field}}       — specific output field
+# {{_map_item}}, {{_map_index}}  — map iteration variables
+# {{_loop_iteration}}            — loop counter
+#
+# Type preservation: "{{x}}" preserves type; "text {{x}}" returns string.
+# Missing values return nil (safe for coalesce) ONLY for an unknown node or an
+# unsupplied workflow input. A field an existing node did not produce is an error:
+# it fails a node input; in a condition it does not match, unless the parts that
+# did resolve already settle the answer either way.
+
+# --- Condition Expressions ---
+# Uses expr-lang/expr. Operators: ==, !=, <, >, <=, >=, and, or, not, in.
+# Quote string templates in conditions: '{{node.output.name}}' == 'admin'
+
+# --- Examples ---
+# Linear pipeline:
+#   apps:
+#     - name: pipeline
+#       app_config:
+#         agent_name: Pipeline
+#         agent_type: workflow
+#         namespace: solace-agent-mesh
+#         output_mapping:
+#           result: "{{step3.output}}"
+#         nodes:
+#           - id: step1
+#             type: agent
+#             agent_name: Extractor
+#             input: { data: "{{workflow.input.raw}}" }
+#           - id: step2
+#             type: agent
+#             agent_name: Analyzer
+#             depends_on: [step1]
+#             input: { data: "{{step1.output}}" }
+#           - id: step3
+#             type: agent
+#             agent_name: Summarizer
+#             depends_on: [step2]
+#             input: { analysis: "{{step2.output}}" }
+#
+# Fan-out with map:
+#   nodes:
+#     - id: split
+#       type: agent
+#       agent_name: Splitter
+#       input: { data: "{{workflow.input.batch}}" }
+#     - id: process_all
+#       type: map
+#       depends_on: [split]
+#       node: process_one
+#       items: "{{split.output.items}}"
+#       concurrency_limit: 10
+#     - id: process_one
+#       type: agent
+#       agent_name: Processor
+#       input: { item: "{{_map_item}}" }

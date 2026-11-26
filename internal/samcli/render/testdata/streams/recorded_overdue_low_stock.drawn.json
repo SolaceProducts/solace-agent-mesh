@@ -1,0 +1,18 @@
+[
+  {
+    "taskId": "01a1ac8d-5898-7c8a-b5f9-fb76e9ad848c",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "\n\n| SKU | Product name | On hand | Reorder point |\n|---|---|---|---|\n| SKU-0004 | Chemicals item 4 | 35 | 50 |\n| SKU-0038 | Office item 38 | 19 | 200 |\n| SKU-0062 | Tools item 62 | 45 | 50 |\n| SKU-0071 | Electrical item 71 | 41 | 200 |\n| SKU-0089 | Safety item 89 | 19 | 100 |\n| SKU-0126 | Office item 126 | 89 | 100 |\n| SKU-0138 | Cabling item 138 | 20 | 50 |\n| SKU-0143 | Fasteners item 143 | 46 | 50 |\n| SKU-0146 | Chemicals item 146 | 49 | 50 |\n| SKU-0147 | Tools item 147 | 11 | 20 |\n| SKU-0158 | Electrical item 158 | 38 | 200 |\n| SKU-0189 | Tools item 189 | 82 | 200 |\n| SKU-0244 | Electrical item 244 | 34 | 100 |\n| SKU-0249 | Fasteners item 249 | 2 | 50 |\n| SKU-0255 | Safety item 255 | 70 | 100 |\n| SKU-0261 | Fasteners item 261 | 41 | 50 |\n| SKU-0262 | Packaging item 262 | 18 | 100 |\n| SKU-0288 | Office item 288 | 15 | 20 |\n| SKU-0289 | Tools item 289 | 42 | 50 |\n| SKU-0290 | Electrical item 290 | 36 | 200 |\n| SKU-0303 | Cabling item 303 | 116 | 200 |\n| SKU-0317 | Office item 317 | 19 | 50 |\n| SKU-0336 | Chemicals item 336 | 94 | 200 |\n| SKU-0341 | Tools item 341 | 0 | 200 |\n| SKU-0344 | Office item 344 | 15 | 100 |\n| SKU-0365 | Packaging item 365 | 19 | 20 |\n| SKU-0366 | Cabling item 366 | 87 | 100 |\n| SKU-0386 | Safety item 386 | 57 | 100 |\n| SKU-0396 | Tools item 396 | 39 | 50 |\n| SKU-0399 | Electrical item 399 | 135 | 200 |\n| SKU-0401 | Fasteners item 401 | 19 | 20 |\n| SKU-0432 | Tools item 432 | 25 | 50 |\n| SKU-0434 | Chemicals item 434 | 12 | 20 |\n| SKU-0456 | Chemicals item 456 | 60 | 100 |\n| SKU-0458 | Packaging item 458 | 69 | 100 |\n| SKU-0486 | Cabling item 486 | 32 | 200 |\n\n\n\n\n**Total overdue invoice amount: 1,854,963.33**\n- This covers 219 overdue invoices as of the business date 2026-10-01.\n- An invoice counts as overdue when its status is `open` and its due date is before 2026-10-01.\n- The invoice data has no currency column, so I can't tell you the currency.\n\n**WH-EAST SKUs below reorder point: 36 of the 500 SKUs stocked there**\n- The table above shows the full list with on-hand quantity and reorder point for each.\n- The check is strictly below the reorder point, so SKUs exactly at it aren't included.\n- SKU-0341 (Tools item 341) is the most serious case, with 0 on hand against a reorder point of 200.\n- I didn't check open purchase orders, so I can't say whether any replenishment is already on order.\n\n"
+      },
+      {
+        "kind": "file",
+        "name": "wh_east_below_reorder.csv"
+      }
+    ]
+  }
+]

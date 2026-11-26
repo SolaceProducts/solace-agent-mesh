@@ -1,0 +1,51 @@
+# Baked into the SAM binary and merged into RBAC resolution unconditionally by
+# internal/rbac.EmbeddedDefaults — it needs no operator-mounted file and no DB
+# row, so it resolves identically in cloud and self-hosted. Ships the default
+# service account that gateway entrypoints run as when run_as is unset, so machine
+# entrypoints (webhook, event-mesh, ...) carry real scopes instead of failing
+# closed under enforced RBAC. The role grants agent:*:invoke and workflow:*:invoke
+# so an entrypoint can reach both agents and deployed workflows (agent:*:invoke
+# does not cover the workflow: category). This is deliberately broad: the default
+# service account can invoke any agent/workflow that does not declare required_scopes.
+# inter_agent_communication does NOT constrain this — that allow-list governs only
+# agent-to-agent peer delegation, not the gateway's direct submit. The controls
+# for narrowing reach are per-agent required_scopes and, to scope an entrypoint to
+# a specific set of agents, a custom service account + role (declarative config) with
+# only the needed invoke scopes referenced by that entrypoint's run_as. Keep the
+# values in sync with the internal/rbac constants (a test enforces this).
+roles:
+  system_agent_invoke:
+    description: "Default role the built-in default service account (system:default) holds; gateway entrypoints run as it when run_as is unset."
+    scopes:
+      - "agent:*:invoke"
+      - "workflow:*:invoke"
+  # Preserves the privilege level of the removed channel_user role so a config
+  # still naming "channel-user" keeps the reach it had, instead of inheriting
+  # the broad default.
+  system_channel_invoke:
+    description: "Orchestrator-only role the built-in channel service account (system:channel) holds; the like-for-like replacement for the removed channel_user role."
+    scopes:
+      - "agent:Orchestrator:invoke"
+  # tool:*:* on top of the default's invoke scopes, because an eval's downstream
+  # tool calls authorize under the eval principal rather than a human's identity.
+  # Matches the reach the pre-run_as eval runner already had.
+  system_eval_invoke:
+    description: "Role the built-in eval service account (system:eval) holds; evaluation experiments run as it unless they name another service account."
+    inherits:
+      - system_agent_invoke
+    scopes:
+      - "tool:*:*"
+users:
+  "system:default":
+    roles:
+      - system_agent_invoke
+  "system:channel":
+    roles:
+      - system_channel_invoke
+  "system:eval":
+    roles:
+      - system_eval_invoke
+  # The evidence services book their model spend to it; nothing runs as it, so
+  # it holds no role.
+  "system:evidence":
+    roles: []

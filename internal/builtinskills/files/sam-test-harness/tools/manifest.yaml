@@ -1,0 +1,24 @@
+version: 1
+# A single Go binary registers both tools. The STR invokes the binary with
+# the tool name as the first arg; samtoolsdk dispatches internally.
+#
+# timeout_seconds has a hard floor here, it is not a tuning knob. Both tools make
+# one blocking non-streaming LLM call, and samtoolsdk caps a tool's own LLM call
+# at 4 minutes (defaultLLMCallTimeout, pkg/samtoolsdk/ipc.go) specifically so the
+# cap sits BELOW the sandbox kill and the tool gets a graceful, catchable error.
+# Any value at or under 240 inverts that: the sandbox SIGKILLs while the tool
+# still has LLM budget left, so the graceful path becomes unreachable and the
+# failure surfaces as TOOL_TIMEOUT instead (a value of 90 killed an
+# Opus-tier call that needed ~106s). Stated explicitly rather than omitted so
+# lowering the STR's default_timeout_seconds cannot silently re-break it.
+tools:
+  generate_test_plan:
+    runtime: go
+    executable: test_harness
+    tool_dir: test_harness
+    timeout_seconds: 300
+  generate_recommendations:
+    runtime: go
+    executable: test_harness
+    tool_dir: test_harness
+    timeout_seconds: 300

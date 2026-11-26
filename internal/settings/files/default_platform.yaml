@@ -1,0 +1,72 @@
+# Default SAM platform service — created automatically when no configs exist.
+#
+# Companion to default_gateway.yaml. Bundling it (rather than relying on the
+# embedded inline defaults) is what lets RBAC be driven purely by environment
+# variables in `sam run --embedded`, mirroring configs/gwe/platform.yaml:
+#   AUTHORIZATION_TYPE=default_rbac + ROLE_DEFINITIONS_PATH + USER_ROLES_PATH
+#     turn on RBAC (this service is the authority; the gateway calls it).
+#   TRUST_MANAGER_ENABLED=true enables the gateway<->platform JWT exchange that
+#     default_rbac relies on.
+# Default behavior is unchanged: auth off, Orchestrator seeded.
+
+# Mirrors default_gateway.yaml so the platform participates in the signing-key
+# card exchange. Without this block the platform cannot verify gateway-minted
+# JWTs ("unknown issuer") and 401s every /api/v1/platform/* call whenever
+# TRUST_MANAGER_ENABLED=true.
+trust_manager:
+  enabled: ${TRUST_MANAGER_ENABLED, false}
+  card_publish_interval_seconds: ${TRUST_CARD_PUBLISH_INTERVAL, 10}
+  card_expiration_days: 7
+  verification_mode: "strict"
+  clock_skew_tolerance_seconds: 300
+  jwt_default_ttl_seconds: 3600
+  jwt_max_ttl_seconds: 86400
+  startup_wait_timeout_seconds: ${TRUST_STARTUP_WAIT_TIMEOUT, 10}
+  fail_on_timeout: false
+
+apps:
+  - name: default_platform
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, true}
+      broker_url: ${SOLACE_BROKER_URL}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+    app_config:
+      component_type: platform
+      namespace: ${NAMESPACE, solace-agent-mesh}
+      # Empty default → the platform falls back to sqlite under SAM_DATA_DIR
+      # (matching embedded behavior). Set PLATFORM_DATABASE_URL for Postgres.
+      database_url: ${PLATFORM_DATABASE_URL, }
+
+      # Evidence store population (feature evidence_store, off by default via
+      # SAM_FEATURE_EVIDENCE_STORE). The platform database and the gateway
+      # database the gateway serves it from are each Postgres or SQLite; on
+      # SQLite the evidence tables live in a file next to the platform's.
+      evidence: {}
+
+      frontend_use_authorization: ${FRONTEND_USE_AUTHORIZATION, false}
+      external_auth_provider: ${EXTERNAL_AUTH_PROVIDER, default}
+
+      # Default true: seeds the editable Orchestrator into the platform DB on a
+      # first-run (empty) DB. Set SEED_BUILTIN_AGENTS=false to manage agents
+      # purely via `sam config apply` instead.
+      seed_builtin_agents: ${SEED_BUILTIN_AGENTS, true}
+
+      # RBAC authority. Shares AUTHORIZATION_TYPE with the gateway's nested
+      # block — under default_rbac the gateway calls this service, so the two
+      # must track each other. The role/user paths are empty by default (no
+      # files shipped); point them at your own YAML to enable RBAC, the same
+      # way configs/gwe does via ROLE_DEFINITIONS_PATH / USER_ROLES_PATH.
+      # Modes: none / deny_all / default_rbac.
+      #
+      # default_roles is the blanket role set every authenticated user receives.
+      # Comma-separated (e.g. DEFAULT_ROLES=sam_user,viewer); empty by default.
+      # Each name MUST be defined in ROLE_DEFINITIONS_PATH — listing a role that
+      # isn't defined fails the RBAC composer on boot — so set it together with
+      # a role file, never on its own.
+      authorization_service:
+        type: ${AUTHORIZATION_TYPE, none}
+        role_to_scope_definitions_path: ${ROLE_DEFINITIONS_PATH, }
+        user_to_role_assignments_path: ${USER_ROLES_PATH, }
+        default_roles: ${DEFAULT_ROLES, }

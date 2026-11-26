@@ -1,0 +1,6 @@
+version: 1
+tools:
+  concatenate_audio:
+    runtime: go
+    executable: ./concatenate_audio
+    timeout_seconds: 180

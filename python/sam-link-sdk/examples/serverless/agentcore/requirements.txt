@@ -1,0 +1,4 @@
+bedrock-agentcore>=1.25
+boto3>=1.40
+strands-agents[openai]>=1.61.1
+websockets>=13

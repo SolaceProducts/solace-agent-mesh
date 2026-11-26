@@ -1,0 +1,7 @@
+version: 1
+tools:
+  mark_changes_applied:
+    runtime: go
+    executable: build_apply
+    tool_dir: build_apply
+    timeout_seconds: 30

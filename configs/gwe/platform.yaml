@@ -1,0 +1,124 @@
+# Trust manager — mirrors configs/gwe/gwe.yaml / str.yaml so the platform
+# participates in the signing-key card exchange. Without this block
+# LoadTrustConfig falls back to DefaultConfig{Enabled:false} and the platform
+# cannot verify gateway-minted JWTs ("unknown issuer: <gateway>"), 401-ing every
+# /api/v2/platform/* call whenever TRUST_MANAGER_ENABLED=true elsewhere.
+trust_manager:
+  enabled: ${TRUST_MANAGER_ENABLED, false}
+  card_publish_interval_seconds: ${TRUST_CARD_PUBLISH_INTERVAL, 10}
+  card_expiration_days: 7
+  verification_mode: "strict"
+  clock_skew_tolerance_seconds: 300
+  jwt_default_ttl_seconds: 3600
+  jwt_max_ttl_seconds: 86400
+  startup_wait_timeout_seconds: ${TRUST_STARTUP_WAIT_TIMEOUT, 10}
+  fail_on_timeout: false
+
+apps:
+  - name: platform_service_app
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, false}
+      broker_url: ${SOLACE_BROKER_URL, ws://localhost:8008}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+      temporary_queue: ${USE_TEMPORARY_QUEUES, true}
+    app_config:
+      component_type: platform
+      namespace: ${NAMESPACE, solace-agent-mesh}
+      database_url: ${PLATFORM_DATABASE_URL}
+
+      # Notification service (broker-driven notifications + per-user inbox + the
+      # delivery surface for HIL prompts). Gated by SAM_FEATURE_NOTIFY_SERVICE
+      # (on by default): cmd/gateway reads this block ONLY when that flag is on,
+      # so it is inert in a flag-off deployment. The DB
+      # reuses the platform Postgres — notify tracks its own goose version table
+      # (notify_goose_version), so there is no migration collision — and is
+      # overridable via NOTIFY_DATABASE_URL. Required for workflow HIL
+      # pause/resume, which routes its input prompt solely through this service
+      # (no live-task fallback). Recipient channels are user-managed via the
+      # Notifications inbox/preferences UI; no static directory here.
+      notify:
+        database_url: ${NOTIFY_DATABASE_URL:- ${PLATFORM_DATABASE_URL}}
+        retention_days: ${NOTIFY_RETENTION_DAYS, 30}
+        # No longer used: channels turn on with one click, so no message carries a
+        # confirmation link. Still accepted so existing configuration starts.
+        confirm_base_url: ${NOTIFY_CONFIRM_BASE_URL}
+
+      # Evidence store population (feature evidence_store, off by default via
+      # SAM_FEATURE_EVIDENCE_STORE). The evidence schema always lives in the
+      # platform database. Population runs only when this platform config is
+      # loaded into the gateway process (sam-gwe --platform-config, or
+      # embedded mode) and reads that gateway's task history in-process; a
+      # standalone sam-platform reports gateway_unconfigured. Inert when the
+      # flag is off. tenant_id is stamped on every trace as it is derived and
+      # defaults to this mesh's namespace; each mesh has its own namespace and
+      # platform database. Set EVIDENCE_TENANT_ID only to override it.
+      #
+      # semantic_policy is whose task content the cause judge (feature
+      # evidence_judge, off by default via SAM_FEATURE_EVIDENCE_JUDGE) may
+      # read: disabled, consent (only what a user shared with their feedback),
+      # or tenant (every trace of the tenants listed). Under tenant, set
+      # EVIDENCE_SEMANTIC_TENANT to this mesh's tenant, its namespace unless
+      # EVIDENCE_TENANT_ID overrides it. The judge calls the model configured
+      # under the evidence-judge alias, or general while that is unset.
+      evidence:
+        lookback: ${EVIDENCE_LOOKBACK, 720h}
+        poll_interval: ${EVIDENCE_POLL_INTERVAL, 30s}
+        findings_interval: ${EVIDENCE_FINDINGS_INTERVAL, 1h}
+        tenant_id: ${EVIDENCE_TENANT_ID}
+        semantic_policy: ${EVIDENCE_SEMANTIC_POLICY, disabled}
+        semantic_tenants:
+          - "${EVIDENCE_SEMANTIC_TENANT}"
+
+      resource_store:
+        type: ${OBJECT_STORAGE_TYPE, filesystem}
+        bucket_name: ${CONNECTOR_SPEC_BUCKET_NAME}
+        endpoint_url: ${S3_ENDPOINT_URL}
+        base_path: ${SAM_DATA_DIR, ./sam-data}
+      str_store:
+        type: ${OBJECT_STORAGE_TYPE, filesystem}
+        bucket_name: ${STR_BUCKET_NAME}
+        endpoint_url: ${S3_ENDPOINT_URL}
+        base_path: ${SAM_DATA_DIR, ./sam-data}
+      fastapi_host: ${PLATFORM_API_HOST, 0.0.0.0}
+      fastapi_port: ${PLATFORM_API_PORT, 8001}
+      frontend_use_authorization: ${FRONTEND_USE_AUTHORIZATION, false}
+      # Default true: seeds the built-in Orchestrator on a first-run (empty) DB.
+      # Config-defined deployments set false so the Orchestrator is
+      # created purely via `sam config apply`. Env-driven so local-cluster users
+      # can opt out without editing this file.
+      seed_builtin_agents: ${SEED_BUILTIN_AGENTS, true}
+      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL}
+      external_auth_provider: ${EXTERNAL_AUTH_PROVIDER, azure}
+      external_auth_claim_key: ${EXTERNAL_AUTH_CLAIM_KEY, groups}
+      max_message_size_bytes: ${MAX_MESSAGE_SIZE_BYTES, 10000000}
+      # Caps every platform request body and the compressed size of skill and
+      # toolset packages. Default 100 MB. Toolset packages are also capped at
+      # 500 MB uncompressed, so a value above that does not help them.
+      max_upload_bytes: ${PLATFORM_MAX_UPLOAD_BYTES, 104857600}
+      cors_allowed_origins:
+        - "${FRONTEND_SERVER_URL}"
+        - "http://localhost:3000"
+        - "http://127.0.0.1:3000"
+        - "http://localhost:8800"
+      cors_allowed_origin_regex: ${CORS_ALLOWED_ORIGIN_REGEX}
+
+      # RBAC authority lives in the platform service.
+      # Gateways with type: default_rbac call this service over the broker
+      # at token-mint time and bake the returned scopes into the JWT, so
+      # this is the single source of truth for role definitions, user
+      # assignments, and default roles.
+      authorization_service:
+        # Shares AUTHORIZATION_TYPE with the gateway's nested block in
+        # configs/gwe/gwe.yaml — under default_rbac the gateway
+        # calls this service, so the two must track each other. Splitting
+        # them across separate env vars only ever produced the
+        # "gateway boots, every request denied" failure mode.
+        type: ${AUTHORIZATION_TYPE, none}
+        role_to_scope_definitions_path: ${ROLE_DEFINITIONS_PATH, config/auth/role-to-scope-definitions.yaml}
+        user_to_role_assignments_path: ${USER_ROLES_PATH, config/auth/user-to-role-assignments.yaml}
+        # default_roles is deliberately not set here. YAML defaults are
+        # invisible to the RBAC API; manage default roles in the DB via
+        # `sam config apply` (platform.defaultRoles) or
+        # PUT /api/v2/platform/rbac/defaultRoles so they stay editable.

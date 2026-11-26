@@ -1,0 +1,1870 @@
+{
+  "generator": "bm25s",
+  "bm25_params": {
+    "method": "lucene",
+    "k1": 1.5,
+    "b": 0.75,
+    "delta": 0.5
+  },
+  "stopwords": [
+    "a",
+    "an",
+    "and",
+    "are",
+    "as",
+    "at",
+    "be",
+    "but",
+    "by",
+    "for",
+    "if",
+    "in",
+    "into",
+    "is",
+    "it",
+    "no",
+    "not",
+    "of",
+    "on",
+    "or",
+    "such",
+    "that",
+    "the",
+    "their",
+    "then",
+    "there",
+    "these",
+    "they",
+    "this",
+    "to",
+    "was",
+    "will",
+    "with"
+  ],
+  "token_pattern": "(?u)\\b\\w\\w+\\b",
+  "test_cases": [
+    {
+      "name": "basic_corpus",
+      "corpus": [
+        "The quick brown fox jumps over the lazy dog",
+        "A fast red fox leaps above the sleepy hound",
+        "The dog sat on the mat and watched the fox",
+        "Machine learning is a subset of artificial intelligence"
+      ],
+      "tokenized_docs": [
+        [
+          "quick",
+          "brown",
+          "fox",
+          "jumps",
+          "over",
+          "lazy",
+          "dog"
+        ],
+        [
+          "fast",
+          "red",
+          "fox",
+          "leaps",
+          "above",
+          "sleepy",
+          "hound"
+        ],
+        [
+          "dog",
+          "sat",
+          "mat",
+          "watched",
+          "fox"
+        ],
+        [
+          "machine",
+          "learning",
+          "subset",
+          "artificial",
+          "intelligence"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "quick fox",
+          "query_tokens": [
+            "quick",
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "scores": [
+            0.5807061195373535,
+            0.1542378067970276,
+            0.13271625339984894,
+            0.0
+          ]
+        },
+        {
+          "query": "machine learning intelligence",
+          "query_tokens": [
+            "machine",
+            "learning",
+            "intelligence"
+          ],
+          "ranked_doc_indices": [
+            3,
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            1.5619107484817505,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "dog mat",
+          "query_tokens": [
+            "dog",
+            "mat"
+          ],
+          "ranked_doc_indices": [
+            2,
+            0,
+            3,
+            1
+          ],
+          "scores": [
+            0.8203762769699097,
+            0.2579152286052704,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "fox",
+          "query_tokens": [
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            2,
+            0,
+            1,
+            3
+          ],
+          "scores": [
+            0.1542378067970276,
+            0.13271625339984894,
+            0.13271625339984894,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "single_doc",
+      "corpus": [
+        "The quick brown fox jumps over the lazy dog"
+      ],
+      "tokenized_docs": [
+        [
+          "quick",
+          "brown",
+          "fox",
+          "jumps",
+          "over",
+          "lazy",
+          "dog"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "quick fox",
+          "query_tokens": [
+            "quick",
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            0
+          ],
+          "scores": [
+            0.230145663022995
+          ]
+        },
+        {
+          "query": "cat",
+          "query_tokens": [
+            "cat"
+          ],
+          "ranked_doc_indices": [
+            0
+          ],
+          "scores": [
+            0.0
+          ]
+        },
+        {
+          "query": "brown dog",
+          "query_tokens": [
+            "brown",
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            0
+          ],
+          "scores": [
+            0.230145663022995
+          ]
+        }
+      ]
+    },
+    {
+      "name": "duplicate_terms",
+      "corpus": [
+        "fox fox fox fox fox",
+        "fox dog fox dog fox",
+        "dog dog dog dog dog",
+        "cat cat cat cat cat"
+      ],
+      "tokenized_docs": [
+        [
+          "fox",
+          "fox",
+          "fox",
+          "fox",
+          "fox"
+        ],
+        [
+          "fox",
+          "dog",
+          "fox",
+          "dog",
+          "fox"
+        ],
+        [
+          "dog",
+          "dog",
+          "dog",
+          "dog",
+          "dog"
+        ],
+        [
+          "cat",
+          "cat",
+          "cat",
+          "cat",
+          "cat"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "fox",
+          "query_tokens": [
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            0,
+            1,
+            3,
+            2
+          ],
+          "scores": [
+            0.533190131187439,
+            0.4620981216430664,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "dog",
+          "query_tokens": [
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            3,
+            0
+          ],
+          "scores": [
+            0.533190131187439,
+            0.39608410000801086,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "fox dog",
+          "query_tokens": [
+            "fox",
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            1,
+            0,
+            2,
+            3
+          ],
+          "scores": [
+            0.8581821918487549,
+            0.533190131187439,
+            0.533190131187439,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "overlapping_vocab",
+      "corpus": [
+        "apple banana cherry date elderberry",
+        "banana cherry date elderberry fig",
+        "cherry date elderberry fig grape",
+        "date elderberry fig grape honeydew"
+      ],
+      "tokenized_docs": [
+        [
+          "apple",
+          "banana",
+          "cherry",
+          "date",
+          "elderberry"
+        ],
+        [
+          "banana",
+          "cherry",
+          "date",
+          "elderberry",
+          "fig"
+        ],
+        [
+          "cherry",
+          "date",
+          "elderberry",
+          "fig",
+          "grape"
+        ],
+        [
+          "date",
+          "elderberry",
+          "fig",
+          "grape",
+          "honeydew"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "apple",
+          "query_tokens": [
+            "apple"
+          ],
+          "ranked_doc_indices": [
+            0,
+            3,
+            2,
+            1
+          ],
+          "scores": [
+            0.481589138507843,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "cherry",
+          "query_tokens": [
+            "cherry"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1,
+            3
+          ],
+          "scores": [
+            0.14266997575759888,
+            0.14266997575759888,
+            0.14266997575759888,
+            0.0
+          ]
+        },
+        {
+          "query": "fig grape",
+          "query_tokens": [
+            "fig",
+            "grape"
+          ],
+          "ranked_doc_indices": [
+            3,
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.4199288487434387,
+            0.4199288487434387,
+            0.14266997575759888,
+            0.0
+          ]
+        },
+        {
+          "query": "banana elderberry",
+          "query_tokens": [
+            "banana",
+            "elderberry"
+          ],
+          "ranked_doc_indices": [
+            0,
+            1,
+            3,
+            2
+          ],
+          "scores": [
+            0.3194030821323395,
+            0.3194030821323395,
+            0.042144205421209335,
+            0.042144205421209335
+          ]
+        }
+      ]
+    },
+    {
+      "name": "stopword_query",
+      "corpus": [
+        "The quick brown fox",
+        "A lazy brown dog"
+      ],
+      "tokenized_docs": [
+        [
+          "quick",
+          "brown",
+          "fox"
+        ],
+        [
+          "lazy",
+          "brown",
+          "dog"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "the a an is",
+          "query_tokens": [],
+          "ranked_doc_indices": [
+            1,
+            0
+          ],
+          "scores": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "quick brown",
+          "query_tokens": [
+            "quick",
+            "brown"
+          ],
+          "ranked_doc_indices": [
+            0,
+            1
+          ],
+          "scores": [
+            0.3501874804496765,
+            0.07292862236499786
+          ]
+        }
+      ]
+    },
+    {
+      "name": "longer_docs",
+      "corpus": [
+        "Natural language processing is a subfield of linguistics computer science and artificial intelligence concerned with the interactions between computers and human language",
+        "Deep learning is part of a broader family of machine learning methods based on artificial neural networks with representation learning",
+        "Computer vision is an interdisciplinary scientific field that deals with how computers can gain high level understanding from digital images or videos",
+        "Reinforcement learning is an area of machine learning concerned with how intelligent agents ought to take actions in an environment in order to maximize cumulative reward"
+      ],
+      "tokenized_docs": [
+        [
+          "natural",
+          "language",
+          "processing",
+          "subfield",
+          "linguistics",
+          "computer",
+          "science",
+          "artificial",
+          "intelligence",
+          "concerned",
+          "interactions",
+          "between",
+          "computers",
+          "human",
+          "language"
+        ],
+        [
+          "deep",
+          "learning",
+          "part",
+          "broader",
+          "family",
+          "machine",
+          "learning",
+          "methods",
+          "based",
+          "artificial",
+          "neural",
+          "networks",
+          "representation",
+          "learning"
+        ],
+        [
+          "computer",
+          "vision",
+          "interdisciplinary",
+          "scientific",
+          "field",
+          "deals",
+          "how",
+          "computers",
+          "can",
+          "gain",
+          "high",
+          "level",
+          "understanding",
+          "from",
+          "digital",
+          "images",
+          "videos"
+        ],
+        [
+          "reinforcement",
+          "learning",
+          "area",
+          "machine",
+          "learning",
+          "concerned",
+          "how",
+          "intelligent",
+          "agents",
+          "ought",
+          "take",
+          "actions",
+          "environment",
+          "order",
+          "maximize",
+          "cumulative",
+          "reward"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "machine learning",
+          "query_tokens": [
+            "machine",
+            "learning"
+          ],
+          "ranked_doc_indices": [
+            1,
+            3,
+            2,
+            0
+          ],
+          "scores": [
+            0.7671523690223694,
+            0.6539294719696045,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "computer science artificial intelligence",
+          "query_tokens": [
+            "computer",
+            "science",
+            "artificial",
+            "intelligence"
+          ],
+          "ranked_doc_indices": [
+            0,
+            1,
+            2,
+            3
+          ],
+          "scores": [
+            1.5509302616119385,
+            0.2918514311313629,
+            0.2676982283592224,
+            0.0
+          ]
+        },
+        {
+          "query": "neural networks deep learning",
+          "query_tokens": [
+            "neural",
+            "networks",
+            "deep",
+            "learning"
+          ],
+          "ranked_doc_indices": [
+            1,
+            3,
+            2,
+            0
+          ],
+          "scores": [
+            1.9961086511611938,
+            0.38623127341270447,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "vision images",
+          "query_tokens": [
+            "vision",
+            "images"
+          ],
+          "ranked_doc_indices": [
+            2,
+            3,
+            1,
+            0
+          ],
+          "scores": [
+            0.9299651980400085,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "numbers_and_special",
+      "corpus": [
+        "version 123 release_notes update",
+        "error_code 404 not_found handler",
+        "user_id 42 session_token abc123"
+      ],
+      "tokenized_docs": [
+        [
+          "version",
+          "123",
+          "release_notes",
+          "update"
+        ],
+        [
+          "error_code",
+          "404",
+          "not_found",
+          "handler"
+        ],
+        [
+          "user_id",
+          "42",
+          "session_token",
+          "abc123"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "123",
+          "query_tokens": [
+            "123"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.39233168959617615,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "error_code 404",
+          "query_tokens": [
+            "error_code",
+            "404"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "user_id session_token",
+          "query_tokens": [
+            "user_id",
+            "session_token"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "unicode_accented",
+      "corpus": [
+        "caf\u00e9 menu with r\u00e9sum\u00e9 and na\u00efve staff",
+        "\u00fcber sch\u00f6n m\u00e4dchen auf dem stra\u00dfe",
+        "Tokenize \u6587\u5b57 na\u00efve caf\u00e9"
+      ],
+      "tokenized_docs": [
+        [
+          "caf\u00e9",
+          "menu",
+          "r\u00e9sum\u00e9",
+          "na\u00efve",
+          "staff"
+        ],
+        [
+          "\u00fcber",
+          "sch\u00f6n",
+          "m\u00e4dchen",
+          "auf",
+          "dem",
+          "stra\u00dfe"
+        ],
+        [
+          "tokenize",
+          "\u6587\u5b57",
+          "na\u00efve",
+          "caf\u00e9"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "caf\u00e9 r\u00e9sum\u00e9",
+          "query_tokens": [
+            "caf\u00e9",
+            "r\u00e9sum\u00e9"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.5803331136703491,
+            0.20659500360488892,
+            0.0
+          ]
+        },
+        {
+          "query": "m\u00e4dchen sch\u00f6n",
+          "query_tokens": [
+            "m\u00e4dchen",
+            "sch\u00f6n"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.7198746800422668,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "caf\u00e9 na\u00efve",
+          "query_tokens": [
+            "caf\u00e9",
+            "na\u00efve"
+          ],
+          "ranked_doc_indices": [
+            2,
+            0,
+            1
+          ],
+          "scores": [
+            0.41319000720977783,
+            0.3760029077529907,
+            0.0
+          ]
+        },
+        {
+          "query": "\u6587\u5b57",
+          "query_tokens": [
+            "\u6587\u5b57"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.4311337172985077,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cjk_runs",
+      "corpus": [
+        "hello \u4f60\u597d world \u4e16\u754c caf\u00e9",
+        "\u673a\u5668 \u5b66\u4e60 \u4eba\u5de5 \u667a\u80fd",
+        "data \u6570\u636e science \u79d1\u5b66"
+      ],
+      "tokenized_docs": [
+        [
+          "hello",
+          "\u4f60\u597d",
+          "world",
+          "\u4e16\u754c",
+          "caf\u00e9"
+        ],
+        [
+          "\u673a\u5668",
+          "\u5b66\u4e60",
+          "\u4eba\u5de5",
+          "\u667a\u80fd"
+        ],
+        [
+          "data",
+          "\u6570\u636e",
+          "science",
+          "\u79d1\u5b66"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "\u4f60\u597d \u4e16\u754c",
+          "query_tokens": [
+            "\u4f60\u597d",
+            "\u4e16\u754c"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.7338578701019287,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "\u673a\u5668 \u5b66\u4e60",
+          "query_tokens": [
+            "\u673a\u5668",
+            "\u5b66\u4e60"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.8127987384796143,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "\u6570\u636e \u79d1\u5b66",
+          "query_tokens": [
+            "\u6570\u636e",
+            "\u79d1\u5b66"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.8127987384796143,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "\u667a\u80fd",
+          "query_tokens": [
+            "\u667a\u80fd"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.40639936923980713,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "punctuation_splits",
+      "corpus": [
+        "don't forget to state-of-the-art U.S.A. tools",
+        "hello, world! It's a bright day.",
+        "multi-word phrases get split into pieces."
+      ],
+      "tokenized_docs": [
+        [
+          "don",
+          "forget",
+          "state",
+          "art",
+          "tools"
+        ],
+        [
+          "hello",
+          "world",
+          "bright",
+          "day"
+        ],
+        [
+          "multi",
+          "word",
+          "phrases",
+          "get",
+          "split",
+          "pieces"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "state art",
+          "query_tokens": [
+            "state",
+            "art"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "hello world",
+          "query_tokens": [
+            "hello",
+            "world"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.8622674345970154,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "multi word",
+          "query_tokens": [
+            "multi",
+            "word"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.7198746800422668,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "bright",
+          "query_tokens": [
+            "bright"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.4311337172985077,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "mixed_case",
+      "corpus": [
+        "The QUICK Brown FOX Jumps",
+        "A Lazy Dog Runs Fast",
+        "Hello World HELLO world"
+      ],
+      "tokenized_docs": [
+        [
+          "quick",
+          "brown",
+          "fox",
+          "jumps"
+        ],
+        [
+          "lazy",
+          "dog",
+          "runs",
+          "fast"
+        ],
+        [
+          "hello",
+          "world",
+          "hello",
+          "world"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "QUICK FOX",
+          "query_tokens": [
+            "quick",
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "Lazy DOG",
+          "query_tokens": [
+            "lazy",
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "hello HELLO",
+          "query_tokens": [
+            "hello",
+            "hello"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            1.1209477186203003,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "Brown fox",
+          "query_tokens": [
+            "brown",
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.7846633791923523,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "single_char_drop",
+      "corpus": [
+        "a b cat dog e f",
+        "I am x y zebra",
+        "1 2 345 six 78"
+      ],
+      "tokenized_docs": [
+        [
+          "cat",
+          "dog"
+        ],
+        [
+          "am",
+          "zebra"
+        ],
+        [
+          "345",
+          "six",
+          "78"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "cat dog",
+          "query_tokens": [
+            "cat",
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.8385715484619141,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "zebra",
+          "query_tokens": [
+            "zebra"
+          ],
+          "ranked_doc_indices": [
+            1,
+            2,
+            0
+          ],
+          "scores": [
+            0.41928577423095703,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "345",
+          "query_tokens": [
+            "345"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.3476356863975525,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "ab cd",
+          "query_tokens": [
+            "ab",
+            "cd"
+          ],
+          "ranked_doc_indices": [
+            2,
+            1,
+            0
+          ],
+          "scores": [
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "missing_terms_query",
+      "corpus": [
+        "apple banana cherry",
+        "pear grape orange"
+      ],
+      "tokenized_docs": [
+        [
+          "apple",
+          "banana",
+          "cherry"
+        ],
+        [
+          "pear",
+          "grape",
+          "orange"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "kiwi mango",
+          "query_tokens": [
+            "kiwi",
+            "mango"
+          ],
+          "ranked_doc_indices": [
+            1,
+            0
+          ],
+          "scores": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "xylophone quasar",
+          "query_tokens": [
+            "xylophone",
+            "quasar"
+          ],
+          "ranked_doc_indices": [
+            1,
+            0
+          ],
+          "scores": [
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "apple kiwi",
+          "query_tokens": [
+            "apple",
+            "kiwi"
+          ],
+          "ranked_doc_indices": [
+            0,
+            1
+          ],
+          "scores": [
+            0.27725887298583984,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "decimal_numbers",
+      "corpus": [
+        "version 3.14 release with 2.71 fix",
+        "upgrade to v1.2.3 immediately",
+        "pi is roughly 3.14159 and e is 2.71828"
+      ],
+      "tokenized_docs": [
+        [
+          "version",
+          "14",
+          "release",
+          "71",
+          "fix"
+        ],
+        [
+          "upgrade",
+          "v1",
+          "immediately"
+        ],
+        [
+          "pi",
+          "roughly",
+          "14159",
+          "71828"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "3.14",
+          "query_tokens": [
+            "14"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.3526577055454254,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "2.71",
+          "query_tokens": [
+            "71"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.3526577055454254,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "version release",
+          "query_tokens": [
+            "version",
+            "release"
+          ],
+          "ranked_doc_indices": [
+            0,
+            2,
+            1
+          ],
+          "scores": [
+            0.7053154110908508,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    },
+    {
+      "name": "medium_corpus",
+      "corpus": [
+        "the fox",
+        "quick brown fox jumps",
+        "a fox jumps over a lazy dog and another dog watches",
+        "machine learning and artificial intelligence power modern systems",
+        "neural networks are a class of machine learning models",
+        "deep learning uses neural networks with many layers",
+        "gradient descent optimizes the loss function iteratively",
+        "the quick brown fox jumps over the lazy dog",
+        "reinforcement learning trains agents through rewards and penalties",
+        "natural language processing analyses text using statistical models",
+        "computer vision recognizes objects in digital images and videos",
+        "speech recognition converts audio waves into textual transcripts",
+        "transformers use self attention to process sequences in parallel",
+        "generative models can synthesize novel text images and audio",
+        "data science combines statistics programming and domain expertise",
+        "python and go are popular programming languages for engineers",
+        "clusters of servers handle large scale distributed workloads",
+        "caching layers improve latency for repeated read heavy queries",
+        "observability relies on metrics logs and distributed traces",
+        "security teams monitor logs for suspicious activity patterns"
+      ],
+      "tokenized_docs": [
+        [
+          "fox"
+        ],
+        [
+          "quick",
+          "brown",
+          "fox",
+          "jumps"
+        ],
+        [
+          "fox",
+          "jumps",
+          "over",
+          "lazy",
+          "dog",
+          "another",
+          "dog",
+          "watches"
+        ],
+        [
+          "machine",
+          "learning",
+          "artificial",
+          "intelligence",
+          "power",
+          "modern",
+          "systems"
+        ],
+        [
+          "neural",
+          "networks",
+          "class",
+          "machine",
+          "learning",
+          "models"
+        ],
+        [
+          "deep",
+          "learning",
+          "uses",
+          "neural",
+          "networks",
+          "many",
+          "layers"
+        ],
+        [
+          "gradient",
+          "descent",
+          "optimizes",
+          "loss",
+          "function",
+          "iteratively"
+        ],
+        [
+          "quick",
+          "brown",
+          "fox",
+          "jumps",
+          "over",
+          "lazy",
+          "dog"
+        ],
+        [
+          "reinforcement",
+          "learning",
+          "trains",
+          "agents",
+          "through",
+          "rewards",
+          "penalties"
+        ],
+        [
+          "natural",
+          "language",
+          "processing",
+          "analyses",
+          "text",
+          "using",
+          "statistical",
+          "models"
+        ],
+        [
+          "computer",
+          "vision",
+          "recognizes",
+          "objects",
+          "digital",
+          "images",
+          "videos"
+        ],
+        [
+          "speech",
+          "recognition",
+          "converts",
+          "audio",
+          "waves",
+          "textual",
+          "transcripts"
+        ],
+        [
+          "transformers",
+          "use",
+          "self",
+          "attention",
+          "process",
+          "sequences",
+          "parallel"
+        ],
+        [
+          "generative",
+          "models",
+          "can",
+          "synthesize",
+          "novel",
+          "text",
+          "images",
+          "audio"
+        ],
+        [
+          "data",
+          "science",
+          "combines",
+          "statistics",
+          "programming",
+          "domain",
+          "expertise"
+        ],
+        [
+          "python",
+          "go",
+          "popular",
+          "programming",
+          "languages",
+          "engineers"
+        ],
+        [
+          "clusters",
+          "servers",
+          "handle",
+          "large",
+          "scale",
+          "distributed",
+          "workloads"
+        ],
+        [
+          "caching",
+          "layers",
+          "improve",
+          "latency",
+          "repeated",
+          "read",
+          "heavy",
+          "queries"
+        ],
+        [
+          "observability",
+          "relies",
+          "metrics",
+          "logs",
+          "distributed",
+          "traces"
+        ],
+        [
+          "security",
+          "teams",
+          "monitor",
+          "logs",
+          "suspicious",
+          "activity",
+          "patterns"
+        ]
+      ],
+      "queries": [
+        {
+          "query": "machine learning",
+          "query_tokens": [
+            "machine",
+            "learning"
+          ],
+          "ranked_doc_indices": [
+            4,
+            3,
+            5,
+            8,
+            19,
+            18,
+            1,
+            2,
+            6,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            0
+          ],
+          "scores": [
+            1.5250985622406006,
+            1.4234628677368164,
+            0.5976995229721069,
+            0.5976995229721069,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "fox dog",
+          "query_tokens": [
+            "fox",
+            "dog"
+          ],
+          "ranked_doc_indices": [
+            2,
+            7,
+            0,
+            1,
+            19,
+            18,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            3
+          ],
+          "scores": [
+            1.695702075958252,
+            1.4234628677368164,
+            0.9959200620651245,
+            0.7470552921295166,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "neural networks deep learning",
+          "query_tokens": [
+            "neural",
+            "networks",
+            "deep",
+            "learning"
+          ],
+          "ranked_doc_indices": [
+            5,
+            4,
+            3,
+            8,
+            19,
+            18,
+            1,
+            2,
+            6,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            0
+          ],
+          "scores": [
+            3.2731924057006836,
+            2.4098215103149414,
+            0.5976995229721069,
+            0.5976995229721069,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "distributed systems logs",
+          "query_tokens": [
+            "distributed",
+            "systems",
+            "logs"
+          ],
+          "ranked_doc_indices": [
+            18,
+            3,
+            19,
+            16,
+            8,
+            1,
+            2,
+            4,
+            5,
+            6,
+            7,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            17,
+            0
+          ],
+          "scores": [
+            1.7694461345672607,
+            1.0239659547805786,
+            0.8257634043693542,
+            0.8257634043693542,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "python programming",
+          "query_tokens": [
+            "python",
+            "programming"
+          ],
+          "ranked_doc_indices": [
+            15,
+            14,
+            19,
+            8,
+            1,
+            2,
+            3,
+            4,
+            5,
+            6,
+            7,
+            9,
+            18,
+            10,
+            11,
+            12,
+            13,
+            16,
+            17,
+            0
+          ],
+          "scores": [
+            1.9818004369735718,
+            0.8257634043693542,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        },
+        {
+          "query": "the quick brown fox",
+          "query_tokens": [
+            "quick",
+            "brown",
+            "fox"
+          ],
+          "ranked_doc_indices": [
+            1,
+            7,
+            0,
+            2,
+            19,
+            18,
+            4,
+            5,
+            6,
+            8,
+            9,
+            10,
+            11,
+            12,
+            13,
+            14,
+            15,
+            16,
+            17,
+            3
+          ],
+          "scores": [
+            2.811272621154785,
+            2.2492263317108154,
+            0.9959200620651245,
+            0.5603562593460083,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0,
+            0.0
+          ]
+        }
+      ]
+    }
+  ]
+}

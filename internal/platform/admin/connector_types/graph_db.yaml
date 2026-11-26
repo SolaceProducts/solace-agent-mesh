@@ -1,0 +1,252 @@
+type: graph_db
+subtypes:
+  - subtype: neo4j
+    name: "Neo4j"
+    description: "Connect to a Neo4j graph database"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions."
+    usage_guidance: |
+      Use the Neo4j connector when the user wants an agent to query a Neo4j
+      graph database with Cypher. The user provides the host, a scheme
+      (bolt / bolt+s / neo4j / neo4j+s), username, password, and optionally a
+      database name (defaults to "neo4j"). For the builder, use
+      <<__SAM_REQUIRED__>> for the password.
+    field_schema:
+      - name: scheme
+        type: select
+        label: "Scheme"
+        required: false
+        order: 1
+        default: "neo4j"
+        hint: "Connection protocol and encryption mode."
+        options:
+          - label: "neo4j (routing)"
+            value: "neo4j"
+            description: "Cluster-aware routing without TLS"
+          - label: "neo4j+s (routing, TLS)"
+            value: "neo4j+s"
+            description: "Cluster-aware routing with TLS encryption"
+          - label: "bolt (direct)"
+            value: "bolt"
+            description: "Direct single-instance connection without TLS"
+          - label: "bolt+s (direct, TLS)"
+            value: "bolt+s"
+            description: "Direct single-instance connection with TLS encryption"
+      - name: hostname
+        type: string
+        label: "Host"
+        required: true
+        order: 2
+        placeholder: "my-neo4j.example.com"
+        hint: "Neo4j host or IP address (without scheme or port)."
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+          error_msg: "Host must be a valid hostname or IPv4 address"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 7687
+        placeholder: "7687"
+        hint: "Bolt port. Defaults to 7687."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: database
+        type: string
+        label: "Database Name"
+        required: false
+        order: 6
+        default: "neo4j"
+        placeholder: "neo4j"
+        hint: "Defaults to 'neo4j' when not specified."
+        validation:
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_.\\-]*$"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `neo4j_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`neo4j_query`). `{}` removes them."
+
+  - subtype: neptune
+    name: "Amazon Neptune"
+    description: "Connect to an Amazon Neptune graph database"
+    warning: "Agents using this connector run queries with the configured AWS credentials. Use a least-privilege IAM role or user scoped to specific clusters."
+    usage_guidance: |
+      Use the Neptune connector when the user wants an agent to query an
+      Amazon Neptune graph database with openCypher. Provide the cluster
+      endpoint (typically ending in .neptune.amazonaws.com), AWS region,
+      and either AWS Access Keys or an IAM Role to assume.
+
+      Always use <<__SAM_REQUIRED__>> for the access key, secret key, and
+      external ID fields since these are AWS credentials that should never
+      appear in artifacts.
+    field_schema:
+      - name: scheme
+        type: select
+        label: "Scheme"
+        required: false
+        order: 1
+        default: "bolt+s"
+        hint: "Connection protocol and encryption mode."
+        options:
+          - label: "bolt+s (TLS)"
+            value: "bolt+s"
+            description: "Direct connection with TLS (recommended for Neptune)"
+          - label: "neo4j+s (routing, TLS)"
+            value: "neo4j+s"
+            description: "Cluster-aware routing with TLS encryption"
+          - label: "bolt"
+            value: "bolt"
+            description: "Direct connection without TLS (not recommended for Neptune)"
+          - label: "neo4j"
+            value: "neo4j"
+            description: "Cluster-aware routing without TLS (not recommended for Neptune)"
+      - name: hostname
+        type: string
+        label: "Cluster Endpoint"
+        required: true
+        order: 2
+        placeholder: "my-cluster.cluster-abc.us-east-1.neptune.amazonaws.com"
+        hint: "Neptune cluster endpoint host (without scheme or port). Neptune authenticates via the AWS credentials configured below."
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+          error_msg: "Cluster Endpoint must be a valid hostname or IPv4 address"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 8182
+        placeholder: "8182"
+        hint: "Neptune port. Defaults to 8182."
+        validation:
+          min: 1
+          max: 65535
+      - name: database
+        type: string
+        label: "Database Name"
+        required: false
+        order: 4
+        hint: "Optional. Most Neptune clusters do not require a database name."
+        validation:
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_.\\-]*$"
+      - name: region
+        type: string
+        label: "AWS Region"
+        required: true
+        order: 5
+        default: "us-east-1"
+        placeholder: "us-east-1"
+        validation:
+          min_length: 1
+          max_length: 50
+          pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          error_msg: "AWS Region must be a valid region name (e.g., us-east-1, eu-west-1)"
+      - name: auth_type
+        type: select
+        label: "Authentication Scheme"
+        required: true
+        order: 6
+        default: "access_key"
+        hint: "How the connector authenticates with AWS."
+        options:
+          - label: "AWS Access Key"
+            value: "access_key"
+            description: "Authenticate with a static access key ID and secret key pair"
+          - label: "AWS IAM Role Chaining"
+            value: "iam"
+            description: "Assume an IAM role via the node's instance credentials (requires SAM running on AWS)"
+      - name: aws_access_key_id
+        type: password
+        label: "AWS Access Key ID"
+        required: true
+        secret: true
+        order: 7
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 16
+          max_length: 128
+      - name: aws_secret_access_key
+        type: password
+        label: "AWS Secret Access Key"
+        required: true
+        secret: true
+        order: 8
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 30
+          max_length: 255
+      - name: role_arn
+        type: string
+        label: "Role ARN"
+        required: true
+        order: 9
+        placeholder: "arn:aws:iam::123456789012:role/SolaceNeptuneAccess"
+        hint: "ARN of the IAM role with permissions to query the Neptune cluster."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 20
+          max_length: 2048
+          pattern: "^arn:aws[a-zA-Z\\-]*:iam::\\d+:role/.+$"
+          error_msg: "Role ARN must look like arn:aws:iam::<account>:role/<name>"
+      - name: session_name
+        type: string
+        label: "Session Name"
+        required: false
+        order: 10
+        placeholder: "solace-neptune-session"
+        hint: "Session name for auditing the assumed role in AWS CloudTrail logs. Defaults to 'solace-neptune-session'."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 64
+      - name: external_id
+        type: password
+        label: "External ID"
+        required: false
+        secret: true
+        order: 11
+        placeholder: "solace-sam-abc-123"
+        hint: "Optional security token for cross-account access. Required if configured in the IAM role's trust policy."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 1224
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `neptune_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`neptune_query`). `{}` removes them."

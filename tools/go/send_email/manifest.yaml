@@ -1,0 +1,5 @@
+version: 1
+tools:
+  send_email:
+    runtime: go
+    executable: ./send_email

@@ -1,0 +1,54 @@
+{
+  "MessageID": "\u003cempty-subject-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cempty-subject-001@vendor.com\u003e",
+  "From": {
+    "Address": "frank@vendor.com",
+    "DisplayName": "Frank Owens"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "",
+  "BodyText": "Subject header is present but empty. Normalizer should accept this.\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.925209-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "text/plain; charset=utf-8"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Frank Owens\" \u003cfrank@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cempty-subject-001@vendor.com\u003e"
+    ],
+    "Subject": [
+      ""
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}
