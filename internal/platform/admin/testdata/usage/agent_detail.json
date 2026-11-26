@@ -1,0 +1,56 @@
+{
+  "scope": "tenant",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "id": "01a10c9e-1111-7e77-be6a-3cdc8d0b9101",
+  "name": "QA Tester",
+  "bookedName": null,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "totals": {
+    "cost": "20.4400000000",
+    "activities": 206,
+    "costPerActivity": "0.0992233009",
+    "shareOfSpend": 1.647616437472795,
+    "costByBucket": {
+      "uncachedInput": "10.2000000000",
+      "output": "9.0400000000",
+      "cacheRead": "0.7000000000",
+      "cacheWrite": "0.5000000000"
+    },
+    "tokens": {
+      "uncachedInput": 1523000,
+      "output": 120400,
+      "cacheRead": 88000,
+      "cacheWrite": 4100
+    },
+    "calls": 1840,
+    "unpricedCalls": 0
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "0.7400000000",
+      "tokens": {
+        "uncachedInput": 10800,
+        "output": 2790,
+        "cacheRead": 4860,
+        "cacheWrite": 405
+      },
+      "activities": 9
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "1.0200000000",
+      "tokens": {
+        "uncachedInput": 14400,
+        "output": 3720,
+        "cacheRead": 6480,
+        "cacheWrite": 540
+      },
+      "activities": 12
+    }
+  ]
+}

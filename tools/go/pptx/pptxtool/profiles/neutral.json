@@ -1,0 +1,118 @@
+{
+  "name": "Neutral",
+  "version": "1.0",
+  "description": "Brand-neutral default: Office palette and fonts, no logo or decorations",
+  "slide_width": 13.333,
+  "slide_height": 7.5,
+  "colors": {
+    "background1": "FFFFFF",
+    "background2": "F2F2F2",
+    "text1": "000000",
+    "text2": "595959",
+    "accent1": "4472C4",
+    "accent2": "ED7D31",
+    "accent3": "A5A5A5",
+    "accent4": "FFC000",
+    "accent5": "5B9BD5",
+    "accent6": "70AD47"
+  },
+  "heading_font": "Calibri Light",
+  "body_font": "Calibri",
+  "label_font": "Calibri",
+  "assets": {},
+  "footer": {
+    "enabled": true,
+    "show_slide_number": true,
+    "show_footer_text": true,
+    "show_date": false,
+    "font_size": 9,
+    "color_on_light": "595959",
+    "color_on_dark": "FFFFFF",
+    "slide_number_position": {
+      "x": 0.54,
+      "y": 6.92,
+      "width": 0.36,
+      "height": 0.36
+    },
+    "footer_text_position": {
+      "x": 0.92,
+      "y": 6.98,
+      "width": 1.65,
+      "height": 0.24
+    },
+    "slide_number_style": "plain"
+  },
+  "layout_map": {
+    "title": "title",
+    "section": "section",
+    "text": "content_light",
+    "bullet_list": "content_light",
+    "two_column": "content_light",
+    "three_column": "content_light",
+    "comparison": "content_light",
+    "image_left": "content_light",
+    "image_right": "content_light",
+    "image_center": "content_light",
+    "image_full": "full_bleed",
+    "table": "content_light",
+    "chart": "content_light",
+    "quote": "content_dark",
+    "big_number": "content_dark",
+    "timeline": "content_light",
+    "icon_grid": "content_light",
+    "closing": "closing",
+    "blank": "content_light"
+  },
+  "categories": {
+    "title": {
+      "background": "1F3864",
+      "title_color": "FFFFFF",
+      "body_color": "D9E2F3",
+      "accent_bar_color": "4472C4",
+      "kicker_color": "8FAADC",
+      "decorations": []
+    },
+    "section": {
+      "background": "1F3864",
+      "title_color": "FFFFFF",
+      "body_color": "D9E2F3",
+      "accent_bar_color": null,
+      "kicker_color": "8FAADC",
+      "decorations": []
+    },
+    "content_light": {
+      "background": "FFFFFF",
+      "title_color": "1F3864",
+      "body_color": "262626",
+      "accent_bar_color": "4472C4",
+      "decorations": []
+    },
+    "content_dark": {
+      "background": "1F3864",
+      "title_color": "FFFFFF",
+      "body_color": "D9E2F3",
+      "accent_bar_color": "4472C4",
+      "kicker_color": "8FAADC",
+      "decorations": []
+    },
+    "full_bleed": {
+      "background": "FFFFFF",
+      "title_color": "FFFFFF",
+      "body_color": "FFFFFF",
+      "accent_bar_color": null,
+      "decorations": []
+    },
+    "closing": {
+      "background": "1F3864",
+      "title_color": "FFFFFF",
+      "body_color": "D9E2F3",
+      "accent_bar_color": null,
+      "decorations": []
+    }
+  },
+  "card_style": {
+    "shadow": false,
+    "corner_radius_in": 0,
+    "border": true
+  }
+}

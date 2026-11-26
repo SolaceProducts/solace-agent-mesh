@@ -1,0 +1,30 @@
+# Files the bot that maintains the SDK (sam-automation-app[bot]) may never change: the guardrails it is held to, the
+# map of what CI tests and the workflows that test it. ci/check_frozen.py fails any pull request the bot authored or
+# committed to that changes one. People change them in pull requests of their own (CODEOWNERS asks for a review).
+#
+# The behaviour the suite expects of each framework is among them: the conformance differences and every end-to-end
+# test. A framework release that changes it is kept to the old behaviour by a translation layer, or held, and the
+# change is decided by whoever releases next (docs/contributing/framework-releases.md); it is never accepted by editing
+# an expectation. The bot adds tests in modules of its own or in an adapter's own test file.
+#
+# One glob per line, relative to the repository root. `**` matches across directories.
+
+python/sam-link-sdk/ci/**
+python/sam-link-sdk/compat/frameworks.json
+python/sam-link-sdk/tests/fixtures/public_api.json
+python/sam-link-sdk/tests/conftest.py
+python/sam-link-sdk/tests/contract/**
+python/sam-link-sdk/tests/e2e/**
+python/sam-link-sdk/tests/test_adapter_conformance.py
+python/sam-link-sdk/tests/test_public_api.py
+python/sam-link-sdk/tests/test_comments.py
+python/sam-link-sdk/tests/test_docs.py
+python/sam-link-sdk/tests/test_layering.py
+python/sam-link-sdk/tests/test_adapter_surface.py
+python/sam-link-sdk/tests/test_e2e_hygiene.py
+python/sam-link-sdk/tests/test_compat_record.py
+python/sam-link-sdk/tests/test_check_skips.py
+python/sam-link-sdk/tests/test_check_frozen.py
+.github/workflows/python-link-sdk-*.yml
+.github/actions/link-sdk-compat-cell/**
+.github/CODEOWNERS

@@ -1,0 +1,78 @@
+# Example OTEL Exporters Configuration
+#
+# This file demonstrates how to configure OTLP exporters for metrics and logs
+# in Solace Agent Mesh Enterprise.
+#
+# Add this configuration to your connector YAML
+
+management_server:
+  observability:
+    enabled: true  # Enables Prometheus /metrics endpoint
+    metric_prefix: "sam_enterprise"  # Optional prefix for all metrics
+
+  # OTLP exporters configuration (sibling to observability, not child)
+  # Exporters are independent - logs work even when observability.enabled=false
+  exporters:
+      # Example 1: OTEL Collector (both metrics and logs via HTTP)
+      - type: otlp
+        endpoint: http://localhost:4318
+        protocol: http
+        compression: gzip
+        metrics: true
+        logs: true
+        log_level: WARNING  # Only export WARNING, ERROR, CRITICAL logs
+        timeout: 10
+
+      # Example 2: Datadog direct ingestion (metrics only)
+      - type: otlp
+        endpoint: https://api.datadoghq.com
+        protocol: http
+        headers:
+          DD-API-KEY: ${DD_API_KEY}  # Use environment variable
+        metrics: true
+        logs: false  # Don't send logs to this endpoint
+        compression: gzip
+
+      # Example 3: NewRelic via gRPC (logs only)
+      - type: otlp
+        endpoint: https://otlp.nr-data.net:4317
+        protocol: grpc
+        headers:
+          api-key: ${NR_LICENSE_KEY}
+        metrics: false
+        logs: true
+        log_level: ERROR  # Only export ERROR and CRITICAL logs
+        compression: gzip
+
+      # Example 4: Custom OTLP endpoint with TLS
+      - type: otlp
+        endpoint: https://custom-collector.company.com:4318
+        protocol: http
+        headers:
+          Authorization: Bearer ${OTEL_TOKEN}
+        metrics: true
+        logs: true
+        log_level: INFO  # Export INFO, WARNING, ERROR, CRITICAL
+        compression: gzip
+        insecure: false  # Verify TLS certificate
+        certificate_file: /path/to/custom-ca.pem  # Optional custom CA
+
+      # Example 5: Development setup (local collector, all logs)
+      - type: otlp
+        endpoint: http://localhost:4318
+        protocol: http
+        metrics: true
+        logs: true
+        log_level: DEBUG  # Export all logs including DEBUG
+        timeout: 5
+
+# Notes:
+# - Each exporter can send metrics, logs, or both
+# - Multiple exporters can be configured to send to different backends
+# - Headers support environment variable substitution: ${VAR_NAME}
+# - Valid log_levels: DEBUG, INFO, WARNING, ERROR, CRITICAL
+# - Valid compressions: none, gzip, deflate
+# - Valid protocols: http, grpc
+#
+# Both metric and log exporters are wire-compatible with Python SAM
+# Enterprise — the same YAML config works for either runtime.

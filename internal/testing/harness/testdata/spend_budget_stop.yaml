@@ -1,0 +1,23 @@
+test_case_id: "spend_budget_stop_001"
+description: "The mesh budget is spent, so TestAgent stops before its first LLM call and the gateway sees the budget error."
+tags: ["spend", "budget"]
+skip_intermediate_events: true
+
+gateway_input:
+  target_agent_name: "TestAgent"
+  user_identity: "spend_user@example.com"
+  prompt:
+    parts:
+      - text: "Summarize the report."
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "This answer must never be produced."
+      usage: {prompt_tokens: 100, completion_tokens: 10, total_tokens: 110}
+
+expected_gateway_output:
+  - type: "error"
+    error_message_contains: "usage budget is used up until"

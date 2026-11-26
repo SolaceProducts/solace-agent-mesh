@@ -1,0 +1,22 @@
+[
+  {
+    "taskId": "01a1ac8c-59fe-787f-b03c-5f8dd1f1fb2f",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "NW Analyst made the one-page PDF. It has a bar chart of open purchase order value by cost centre and a two-sentence summary.\n\n"
+      },
+      {
+        "kind": "file",
+        "name": "open_po_value_by_cost_centre_report.pdf"
+      },
+      {
+        "kind": "text",
+        "text": "\n\n**Summary in the PDF:** There are 186 open POs worth 2,172,240.01 in total. R\u0026D (433,985.59 across 46 POs) and Operations (423,555.15 across 33 POs) together make up 39.5% of that. Marketing is lowest at 266,077.50 across 22 POs.\n\n| Cost centre | Open POs | Open value |\n|---|---|---|\n| R\u0026D | 46 | 433,985.59 |\n| Operations | 33 | 423,555.15 |\n| Logistics | 29 | 363,994.44 |\n| Facilities | 32 | 359,681.15 |\n| IT | 24 | 324,946.18 |\n| Marketing | 22 | 266,077.50 |\n\n- **Open definition:** \"Open\" means the purchase order status is `open` in the ERP.\n- **Currency:** The ERP gives no currency, so the figures have no currency symbol.\n- **Extras on the page:** Besides the chart and summary, the PDF has a title line and a short source footnote.\n- **Page count:** NW Analyst checked that the PDF has 1 page."
+      }
+    ]
+  }
+]

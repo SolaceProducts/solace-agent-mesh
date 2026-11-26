@@ -1,0 +1,12 @@
+version: 1
+tools:
+  xlsx_read:
+    runtime: go
+    executable: xlsx
+    tool_dir: xlsx
+    timeout_seconds: 60
+  xlsx_write:
+    runtime: go
+    executable: xlsx
+    tool_dir: xlsx
+    timeout_seconds: 120

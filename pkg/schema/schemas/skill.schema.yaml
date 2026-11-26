@@ -1,0 +1,98 @@
+# SAM Skill Configuration — JSON Schema (YAML syntax)
+# Top-level: flat YAML (NOT apps[].app_config structure)
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: SAM Skill Config
+description: Configuration schema for a SAM skill — a knowledge bundle with instructions and optional reference documents.
+
+type: object
+required: [name, description, instruction_content]
+properties:
+
+  # --- Identity ---
+  name:
+    type: string
+    pattern: "^[a-z0-9][a-z0-9-]*$"
+    minLength: 2
+    maxLength: 60
+    description: "Skill identifier. Lowercase alphanumeric + hyphens. Used as directory name and in load_skill calls."
+
+  description:
+    type: string
+    minLength: 10
+    maxLength: 500
+    description: "What this skill provides. Shown to agents and users for discovery."
+
+  tags:
+    type: array
+    items:
+      type: string
+    maxItems: 20
+    description: "Categorization tags for discovery and filtering."
+
+  examples:
+    type: array
+    items:
+      type: string
+    maxItems: 10
+    description: "Example user queries this skill handles. Used by gateway for routing."
+
+  required_scopes:
+    type: array
+    items:
+      type: string
+    description: "Deprecated, ignored: skill loading is not scope-gated."
+
+  required_builtins:
+    type: array
+    items:
+      type: string
+    description: "Built-in tool names this skill needs registered when loaded."
+
+  # --- Content ---
+  instruction_content:
+    type: string
+    minLength: 50
+    maxLength: 50000
+    description: "The skill's instruction body (Markdown). Injected into the agent's context when load_skill is called."
+
+  # --- References ---
+  references:
+    type: array
+    items:
+      type: object
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: "Filename in the references/ directory (e.g., api_reference.md)."
+        content:
+          type: string
+          minLength: 1
+          description: "Inline reference content. Mutually exclusive with artifact."
+        artifact:
+          type: string
+          minLength: 1
+          description: "Artifact name containing the reference content. Mutually exclusive with content."
+      additionalProperties: false
+    description: "Reference documents. Each entry has a name and either inline content or an artifact reference."
+
+  # --- Assets ---
+  assets:
+    type: array
+    items:
+      type: object
+      required: [name, artifact]
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: "Filename in the assets/ directory (e.g., quarterly_report.samt)."
+        artifact:
+          type: string
+          minLength: 1
+          description: "Session artifact whose bytes are packaged as assets/<name>. Artifact-only — assets may be binary."
+      additionalProperties: false
+    description: "Binary or opaque files packaged under assets/ (e.g., packaged .samt report templates). Each entry pulls a session artifact into the bundle; there is no inline content variant."
+
+additionalProperties: false

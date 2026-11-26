@@ -1,0 +1,6 @@
+version: 1
+tools:
+  document_db_query:
+    runtime: go
+    executable: ./document-db
+    timeout_seconds: 120

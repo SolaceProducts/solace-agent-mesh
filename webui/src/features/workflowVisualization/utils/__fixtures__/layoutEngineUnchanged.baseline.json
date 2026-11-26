@@ -1,0 +1,2098 @@
+{
+    "chain with parallel branches and a join": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 246,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "a",
+                "type": "agent",
+                "data": {
+                    "label": "a"
+                },
+                "x": 156,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "b",
+                "type": "agent",
+                "data": {
+                    "label": "b"
+                },
+                "x": 0,
+                "y": 256,
+                "width": 280,
+                "height": 56,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "c",
+                "type": "agent",
+                "data": {
+                    "label": "c"
+                },
+                "x": 312,
+                "y": 256,
+                "width": 280,
+                "height": 56,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "d",
+                "type": "agent",
+                "data": {
+                    "label": "d"
+                },
+                "x": 156,
+                "y": 392,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "e",
+                "type": "agent",
+                "data": {
+                    "label": "e"
+                },
+                "x": 156,
+                "y": 528,
+                "width": 280,
+                "height": 56,
+                "level": 3,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 246,
+                "y": 664,
+                "width": 100,
+                "height": 40,
+                "level": 4,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-a",
+                "source": "__start__",
+                "target": "a",
+                "sourceX": 296,
+                "sourceY": 40,
+                "targetX": 296,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "a-b",
+                "source": "a",
+                "target": "b",
+                "sourceX": 296,
+                "sourceY": 176,
+                "targetX": 140,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "a-c",
+                "source": "a",
+                "target": "c",
+                "sourceX": 296,
+                "sourceY": 176,
+                "targetX": 452,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "b-d",
+                "source": "b",
+                "target": "d",
+                "sourceX": 140,
+                "sourceY": 312,
+                "targetX": 296,
+                "targetY": 392,
+                "isStraight": false
+            },
+            {
+                "id": "c-d",
+                "source": "c",
+                "target": "d",
+                "sourceX": 452,
+                "sourceY": 312,
+                "targetX": 296,
+                "targetY": 392,
+                "isStraight": false
+            },
+            {
+                "id": "d-e",
+                "source": "d",
+                "target": "e",
+                "sourceX": 296,
+                "sourceY": 448,
+                "targetX": 296,
+                "targetY": 528,
+                "isStraight": false
+            },
+            {
+                "id": "e-__end__",
+                "source": "e",
+                "target": "__end__",
+                "sourceX": 296,
+                "sourceY": 584,
+                "targetX": 296,
+                "targetY": 664,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 616,
+        "totalHeight": 728
+    },
+    "top-level switch with a join": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 402,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "a",
+                "type": "agent",
+                "data": {
+                    "label": "a"
+                },
+                "x": 312,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "router",
+                "type": "switch",
+                "data": {
+                    "label": "router"
+                },
+                "branches": [
+                    {
+                        "label": "1",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "2",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "default",
+                        "isDefault": true,
+                        "nodes": []
+                    }
+                ],
+                "x": 312,
+                "y": 256,
+                "width": 280,
+                "height": 152,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "one",
+                "type": "agent",
+                "data": {
+                    "label": "one"
+                },
+                "x": 0,
+                "y": 508,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "two",
+                "type": "agent",
+                "data": {
+                    "label": "two"
+                },
+                "x": 312,
+                "y": 508,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "other",
+                "type": "agent",
+                "data": {
+                    "label": "other"
+                },
+                "x": 624,
+                "y": 508,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "done",
+                "type": "agent",
+                "data": {
+                    "label": "done"
+                },
+                "x": 312,
+                "y": 644,
+                "width": 280,
+                "height": 56,
+                "level": 3,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 402,
+                "y": 780,
+                "width": 100,
+                "height": 40,
+                "level": 4,
+                "children": []
+            },
+            {
+                "id": "__condition_router_one__",
+                "type": "condition",
+                "data": {
+                    "label": "a.output.k == 1",
+                    "conditionLabel": "a.output.k == 1",
+                    "switchNodeId": "router",
+                    "targetNodeId": "one",
+                    "isDefaultCase": false,
+                    "caseNumber": 1
+                },
+                "x": 79.5,
+                "y": 450,
+                "width": 121,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_two__",
+                "type": "condition",
+                "data": {
+                    "label": "a.output.k == 2",
+                    "conditionLabel": "a.output.k == 2",
+                    "switchNodeId": "router",
+                    "targetNodeId": "two",
+                    "isDefaultCase": false,
+                    "caseNumber": 2
+                },
+                "x": 391.5,
+                "y": 450,
+                "width": 121,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_other__",
+                "type": "condition",
+                "data": {
+                    "label": "default",
+                    "conditionLabel": "default",
+                    "switchNodeId": "router",
+                    "targetNodeId": "other",
+                    "isDefaultCase": true,
+                    "caseNumber": 3
+                },
+                "x": 731.5,
+                "y": 450,
+                "width": 65,
+                "height": 28,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-a",
+                "source": "__start__",
+                "target": "a",
+                "sourceX": 452,
+                "sourceY": 40,
+                "targetX": 452,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "a-router",
+                "source": "a",
+                "target": "router",
+                "sourceX": 452,
+                "sourceY": 176,
+                "targetX": 452,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "router-__condition_router_one__",
+                "source": "router",
+                "target": "__condition_router_one__",
+                "sourceX": 452,
+                "sourceY": 408,
+                "targetX": 140,
+                "targetY": 450,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_one__-one",
+                "source": "__condition_router_one__",
+                "target": "one",
+                "sourceX": 140,
+                "sourceY": 478,
+                "targetX": 140,
+                "targetY": 508,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_two__",
+                "source": "router",
+                "target": "__condition_router_two__",
+                "sourceX": 452,
+                "sourceY": 408,
+                "targetX": 452,
+                "targetY": 450,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_two__-two",
+                "source": "__condition_router_two__",
+                "target": "two",
+                "sourceX": 452,
+                "sourceY": 478,
+                "targetX": 452,
+                "targetY": 508,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_other__",
+                "source": "router",
+                "target": "__condition_router_other__",
+                "sourceX": 452,
+                "sourceY": 408,
+                "targetX": 764,
+                "targetY": 450,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_other__-other",
+                "source": "__condition_router_other__",
+                "target": "other",
+                "sourceX": 764,
+                "sourceY": 478,
+                "targetX": 764,
+                "targetY": 508,
+                "isStraight": true
+            },
+            {
+                "id": "one-done",
+                "source": "one",
+                "target": "done",
+                "sourceX": 140,
+                "sourceY": 564,
+                "targetX": 452,
+                "targetY": 644,
+                "isStraight": false
+            },
+            {
+                "id": "two-done",
+                "source": "two",
+                "target": "done",
+                "sourceX": 452,
+                "sourceY": 564,
+                "targetX": 452,
+                "targetY": 644,
+                "isStraight": false
+            },
+            {
+                "id": "other-done",
+                "source": "other",
+                "target": "done",
+                "sourceX": 764,
+                "sourceY": 564,
+                "targetX": 452,
+                "targetY": 644,
+                "isStraight": false
+            },
+            {
+                "id": "done-__end__",
+                "source": "done",
+                "target": "__end__",
+                "sourceX": 452,
+                "sourceY": 700,
+                "targetX": 452,
+                "targetY": 780,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 928,
+        "totalHeight": 844
+    },
+    "top-level switch whose targets are declared out of case order": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 558,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "a",
+                "type": "agent",
+                "data": {
+                    "label": "a"
+                },
+                "x": 468,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "router",
+                "type": "switch",
+                "data": {
+                    "label": "router"
+                },
+                "branches": [
+                    {
+                        "label": "1",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "2",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "3",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "default",
+                        "isDefault": true,
+                        "nodes": []
+                    }
+                ],
+                "x": 468,
+                "y": 256,
+                "width": 280,
+                "height": 186,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "other",
+                "type": "agent",
+                "data": {
+                    "label": "other"
+                },
+                "x": 936,
+                "y": 542,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "three",
+                "type": "agent",
+                "data": {
+                    "label": "three"
+                },
+                "x": 624,
+                "y": 542,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "two",
+                "type": "agent",
+                "data": {
+                    "label": "two"
+                },
+                "x": 312,
+                "y": 542,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "one",
+                "type": "agent",
+                "data": {
+                    "label": "one"
+                },
+                "x": 0,
+                "y": 542,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 558,
+                "y": 678,
+                "width": 100,
+                "height": 40,
+                "level": 3,
+                "children": []
+            },
+            {
+                "id": "__condition_router_one__",
+                "type": "condition",
+                "data": {
+                    "label": "a.output.k == 1",
+                    "conditionLabel": "a.output.k == 1",
+                    "switchNodeId": "router",
+                    "targetNodeId": "one",
+                    "isDefaultCase": false,
+                    "caseNumber": 1
+                },
+                "x": 79.5,
+                "y": 484,
+                "width": 121,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_two__",
+                "type": "condition",
+                "data": {
+                    "label": "a.output.k == 2",
+                    "conditionLabel": "a.output.k == 2",
+                    "switchNodeId": "router",
+                    "targetNodeId": "two",
+                    "isDefaultCase": false,
+                    "caseNumber": 2
+                },
+                "x": 391.5,
+                "y": 484,
+                "width": 121,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_three__",
+                "type": "condition",
+                "data": {
+                    "label": "a.output.k == 3",
+                    "conditionLabel": "a.output.k == 3",
+                    "switchNodeId": "router",
+                    "targetNodeId": "three",
+                    "isDefaultCase": false,
+                    "caseNumber": 3
+                },
+                "x": 703.5,
+                "y": 484,
+                "width": 121,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_other__",
+                "type": "condition",
+                "data": {
+                    "label": "default",
+                    "conditionLabel": "default",
+                    "switchNodeId": "router",
+                    "targetNodeId": "other",
+                    "isDefaultCase": true,
+                    "caseNumber": 4
+                },
+                "x": 1043.5,
+                "y": 484,
+                "width": 65,
+                "height": 28,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-a",
+                "source": "__start__",
+                "target": "a",
+                "sourceX": 608,
+                "sourceY": 40,
+                "targetX": 608,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "a-router",
+                "source": "a",
+                "target": "router",
+                "sourceX": 608,
+                "sourceY": 176,
+                "targetX": 608,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "router-__condition_router_one__",
+                "source": "router",
+                "target": "__condition_router_one__",
+                "sourceX": 608,
+                "sourceY": 442,
+                "targetX": 140,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_one__-one",
+                "source": "__condition_router_one__",
+                "target": "one",
+                "sourceX": 140,
+                "sourceY": 512,
+                "targetX": 140,
+                "targetY": 542,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_two__",
+                "source": "router",
+                "target": "__condition_router_two__",
+                "sourceX": 608,
+                "sourceY": 442,
+                "targetX": 452,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_two__-two",
+                "source": "__condition_router_two__",
+                "target": "two",
+                "sourceX": 452,
+                "sourceY": 512,
+                "targetX": 452,
+                "targetY": 542,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_three__",
+                "source": "router",
+                "target": "__condition_router_three__",
+                "sourceX": 608,
+                "sourceY": 442,
+                "targetX": 764,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_three__-three",
+                "source": "__condition_router_three__",
+                "target": "three",
+                "sourceX": 764,
+                "sourceY": 512,
+                "targetX": 764,
+                "targetY": 542,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_other__",
+                "source": "router",
+                "target": "__condition_router_other__",
+                "sourceX": 608,
+                "sourceY": 442,
+                "targetX": 1076,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_other__-other",
+                "source": "__condition_router_other__",
+                "target": "other",
+                "sourceX": 1076,
+                "sourceY": 512,
+                "targetX": 1076,
+                "targetY": 542,
+                "isStraight": true
+            },
+            {
+                "id": "other-__end__",
+                "source": "other",
+                "target": "__end__",
+                "sourceX": 1076,
+                "sourceY": 598,
+                "targetX": 608,
+                "targetY": 678,
+                "isStraight": false
+            },
+            {
+                "id": "three-__end__",
+                "source": "three",
+                "target": "__end__",
+                "sourceX": 764,
+                "sourceY": 598,
+                "targetX": 608,
+                "targetY": 678,
+                "isStraight": false
+            },
+            {
+                "id": "two-__end__",
+                "source": "two",
+                "target": "__end__",
+                "sourceX": 452,
+                "sourceY": 598,
+                "targetX": 608,
+                "targetY": 678,
+                "isStraight": false
+            },
+            {
+                "id": "one-__end__",
+                "source": "one",
+                "target": "__end__",
+                "sourceX": 140,
+                "sourceY": 598,
+                "targetX": 608,
+                "targetY": 678,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 1240,
+        "totalHeight": 742
+    },
+    "top-level decision that hands off on low confidence": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 558,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "a",
+                "type": "agent",
+                "data": {
+                    "label": "a"
+                },
+                "x": 468,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "pick",
+                "type": "decision",
+                "data": {
+                    "label": "pick",
+                    "routeOn": "category"
+                },
+                "x": 468,
+                "y": 256,
+                "width": 280,
+                "height": 84,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "human",
+                "type": "agent",
+                "data": {
+                    "label": "human"
+                },
+                "x": 936,
+                "y": 440,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "general_desk",
+                "type": "agent",
+                "data": {
+                    "label": "general_desk"
+                },
+                "x": 624,
+                "y": 440,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "tech_desk",
+                "type": "agent",
+                "data": {
+                    "label": "tech_desk"
+                },
+                "x": 312,
+                "y": 440,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "billing_desk",
+                "type": "agent",
+                "data": {
+                    "label": "billing_desk"
+                },
+                "x": 0,
+                "y": 440,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 558,
+                "y": 576,
+                "width": 100,
+                "height": 40,
+                "level": 3,
+                "children": []
+            },
+            {
+                "id": "__condition_pick_billing_desk__",
+                "type": "condition",
+                "data": {
+                    "label": "billing",
+                    "conditionLabel": "billing",
+                    "switchNodeId": "pick",
+                    "targetNodeId": "billing_desk",
+                    "isDefaultCase": false,
+                    "branchKind": "route"
+                },
+                "x": 107.5,
+                "y": 382,
+                "width": 65,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_pick_tech_desk__",
+                "type": "condition",
+                "data": {
+                    "label": "technical",
+                    "conditionLabel": "technical",
+                    "switchNodeId": "pick",
+                    "targetNodeId": "tech_desk",
+                    "isDefaultCase": false,
+                    "branchKind": "route"
+                },
+                "x": 412.5,
+                "y": 382,
+                "width": 79,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_pick_general_desk__",
+                "type": "condition",
+                "data": {
+                    "label": "default",
+                    "conditionLabel": "default",
+                    "switchNodeId": "pick",
+                    "targetNodeId": "general_desk",
+                    "isDefaultCase": false,
+                    "branchKind": "default"
+                },
+                "x": 731.5,
+                "y": 382,
+                "width": 65,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_pick_human__",
+                "type": "condition",
+                "data": {
+                    "label": "escalate < 80% confidence",
+                    "conditionLabel": "escalate < 80% confidence",
+                    "switchNodeId": "pick",
+                    "targetNodeId": "human",
+                    "isDefaultCase": false,
+                    "branchKind": "escalate"
+                },
+                "x": 980.5,
+                "y": 382,
+                "width": 191,
+                "height": 28,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-a",
+                "source": "__start__",
+                "target": "a",
+                "sourceX": 608,
+                "sourceY": 40,
+                "targetX": 608,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "a-pick",
+                "source": "a",
+                "target": "pick",
+                "sourceX": 608,
+                "sourceY": 176,
+                "targetX": 608,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "pick-__condition_pick_billing_desk__",
+                "source": "pick",
+                "target": "__condition_pick_billing_desk__",
+                "sourceX": 608,
+                "sourceY": 340,
+                "targetX": 140,
+                "targetY": 382,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_pick_billing_desk__-billing_desk",
+                "source": "__condition_pick_billing_desk__",
+                "target": "billing_desk",
+                "sourceX": 140,
+                "sourceY": 410,
+                "targetX": 140,
+                "targetY": 440,
+                "isStraight": true
+            },
+            {
+                "id": "pick-__condition_pick_tech_desk__",
+                "source": "pick",
+                "target": "__condition_pick_tech_desk__",
+                "sourceX": 608,
+                "sourceY": 340,
+                "targetX": 452,
+                "targetY": 382,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_pick_tech_desk__-tech_desk",
+                "source": "__condition_pick_tech_desk__",
+                "target": "tech_desk",
+                "sourceX": 452,
+                "sourceY": 410,
+                "targetX": 452,
+                "targetY": 440,
+                "isStraight": true
+            },
+            {
+                "id": "pick-__condition_pick_general_desk__",
+                "source": "pick",
+                "target": "__condition_pick_general_desk__",
+                "sourceX": 608,
+                "sourceY": 340,
+                "targetX": 764,
+                "targetY": 382,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_pick_general_desk__-general_desk",
+                "source": "__condition_pick_general_desk__",
+                "target": "general_desk",
+                "sourceX": 764,
+                "sourceY": 410,
+                "targetX": 764,
+                "targetY": 440,
+                "isStraight": true
+            },
+            {
+                "id": "pick-__condition_pick_human__",
+                "source": "pick",
+                "target": "__condition_pick_human__",
+                "sourceX": 608,
+                "sourceY": 340,
+                "targetX": 1076,
+                "targetY": 382,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_pick_human__-human",
+                "source": "__condition_pick_human__",
+                "target": "human",
+                "sourceX": 1076,
+                "sourceY": 410,
+                "targetX": 1076,
+                "targetY": 440,
+                "isStraight": true
+            },
+            {
+                "id": "human-__end__",
+                "source": "human",
+                "target": "__end__",
+                "sourceX": 1076,
+                "sourceY": 496,
+                "targetX": 608,
+                "targetY": 576,
+                "isStraight": false
+            },
+            {
+                "id": "general_desk-__end__",
+                "source": "general_desk",
+                "target": "__end__",
+                "sourceX": 764,
+                "sourceY": 496,
+                "targetX": 608,
+                "targetY": 576,
+                "isStraight": false
+            },
+            {
+                "id": "tech_desk-__end__",
+                "source": "tech_desk",
+                "target": "__end__",
+                "sourceX": 452,
+                "sourceY": 496,
+                "targetX": 608,
+                "targetY": 576,
+                "isStraight": false
+            },
+            {
+                "id": "billing_desk-__end__",
+                "source": "billing_desk",
+                "target": "__end__",
+                "sourceX": 140,
+                "sourceY": 496,
+                "targetX": 608,
+                "targetY": 576,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 1240,
+        "totalHeight": 640
+    },
+    "map over an agent with a dependent": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 114,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "start",
+                "type": "agent",
+                "data": {
+                    "label": "start"
+                },
+                "x": 24,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "fanout",
+                "type": "map",
+                "data": {
+                    "label": "fanout",
+                    "items": "$.items",
+                    "childNodeId": "worker"
+                },
+                "x": 0,
+                "y": 256,
+                "width": 328,
+                "height": 148,
+                "level": 1,
+                "isCollapsed": false,
+                "children": [
+                    {
+                        "id": "worker",
+                        "type": "agent",
+                        "data": {
+                            "label": "worker"
+                        },
+                        "x": 24,
+                        "y": 68,
+                        "width": 280,
+                        "height": 56,
+                        "isCollapsed": false,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "after",
+                "type": "agent",
+                "data": {
+                    "label": "after"
+                },
+                "x": 24,
+                "y": 484,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 114,
+                "y": 620,
+                "width": 100,
+                "height": 40,
+                "level": 3,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-start",
+                "source": "__start__",
+                "target": "start",
+                "sourceX": 164,
+                "sourceY": 40,
+                "targetX": 164,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "start-fanout",
+                "source": "start",
+                "target": "fanout",
+                "sourceX": 164,
+                "sourceY": 176,
+                "targetX": 164,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "fanout-after",
+                "source": "fanout",
+                "target": "after",
+                "sourceX": 164,
+                "sourceY": 404,
+                "targetX": 164,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "after-__end__",
+                "source": "after",
+                "target": "__end__",
+                "sourceX": 164,
+                "sourceY": 540,
+                "targetX": 164,
+                "targetY": 620,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 352,
+        "totalHeight": 684
+    },
+    "loop over an agent, collapsed": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 90,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "start",
+                "type": "agent",
+                "data": {
+                    "label": "start"
+                },
+                "x": 0,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "retry",
+                "type": "loop",
+                "data": {
+                    "label": "retry",
+                    "childNodeId": "worker"
+                },
+                "x": 0,
+                "y": 256,
+                "width": 280,
+                "height": 44,
+                "level": 1,
+                "isCollapsed": true,
+                "children": []
+            },
+            {
+                "id": "after",
+                "type": "agent",
+                "data": {
+                    "label": "after"
+                },
+                "x": 0,
+                "y": 380,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 90,
+                "y": 516,
+                "width": 100,
+                "height": 40,
+                "level": 3,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-start",
+                "source": "__start__",
+                "target": "start",
+                "sourceX": 140,
+                "sourceY": 40,
+                "targetX": 140,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "start-retry",
+                "source": "start",
+                "target": "retry",
+                "sourceX": 140,
+                "sourceY": 176,
+                "targetX": 140,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "retry-after",
+                "source": "retry",
+                "target": "after",
+                "sourceX": 140,
+                "sourceY": 300,
+                "targetX": 140,
+                "targetY": 380,
+                "isStraight": false
+            },
+            {
+                "id": "after-__end__",
+                "source": "after",
+                "target": "__end__",
+                "sourceX": 140,
+                "sourceY": 436,
+                "targetX": 140,
+                "targetY": 516,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 304,
+        "totalHeight": 580
+    },
+    "map nested in a loop, with dependents of the outer loop": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 246,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "start",
+                "type": "agent",
+                "data": {
+                    "label": "start"
+                },
+                "x": 156,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "outer",
+                "type": "loop",
+                "data": {
+                    "label": "outer",
+                    "childNodeId": "inner"
+                },
+                "x": 108,
+                "y": 256,
+                "width": 376,
+                "height": 268,
+                "level": 1,
+                "isCollapsed": false,
+                "children": [
+                    {
+                        "id": "inner",
+                        "type": "map",
+                        "data": {
+                            "label": "inner",
+                            "items": "$.items",
+                            "childNodeId": "worker"
+                        },
+                        "x": 24,
+                        "y": 68,
+                        "width": 328,
+                        "height": 148,
+                        "isCollapsed": false,
+                        "children": [
+                            {
+                                "id": "worker",
+                                "type": "agent",
+                                "data": {
+                                    "label": "worker"
+                                },
+                                "x": 24,
+                                "y": 68,
+                                "width": 280,
+                                "height": 56,
+                                "isCollapsed": false,
+                                "children": []
+                            }
+                        ]
+                    }
+                ]
+            },
+            {
+                "id": "left",
+                "type": "agent",
+                "data": {
+                    "label": "left"
+                },
+                "x": 0,
+                "y": 604,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "right",
+                "type": "agent",
+                "data": {
+                    "label": "right"
+                },
+                "x": 312,
+                "y": 604,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 246,
+                "y": 740,
+                "width": 100,
+                "height": 40,
+                "level": 3,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-start",
+                "source": "__start__",
+                "target": "start",
+                "sourceX": 296,
+                "sourceY": 40,
+                "targetX": 296,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "start-outer",
+                "source": "start",
+                "target": "outer",
+                "sourceX": 296,
+                "sourceY": 176,
+                "targetX": 296,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "outer-left",
+                "source": "outer",
+                "target": "left",
+                "sourceX": 296,
+                "sourceY": 524,
+                "targetX": 140,
+                "targetY": 604,
+                "isStraight": false
+            },
+            {
+                "id": "outer-right",
+                "source": "outer",
+                "target": "right",
+                "sourceX": 296,
+                "sourceY": 524,
+                "targetX": 452,
+                "targetY": 604,
+                "isStraight": false
+            },
+            {
+                "id": "left-__end__",
+                "source": "left",
+                "target": "__end__",
+                "sourceX": 140,
+                "sourceY": 660,
+                "targetX": 296,
+                "targetY": 740,
+                "isStraight": false
+            },
+            {
+                "id": "right-__end__",
+                "source": "right",
+                "target": "__end__",
+                "sourceX": 452,
+                "sourceY": 660,
+                "targetX": 296,
+                "targetY": 740,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 616,
+        "totalHeight": 804
+    },
+    "top-level switch after a map": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 246,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "start",
+                "type": "agent",
+                "data": {
+                    "label": "start"
+                },
+                "x": 156,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "fanout",
+                "type": "map",
+                "data": {
+                    "label": "fanout",
+                    "items": "$.items",
+                    "childNodeId": "worker"
+                },
+                "x": 132,
+                "y": 256,
+                "width": 328,
+                "height": 148,
+                "level": 1,
+                "isCollapsed": false,
+                "children": [
+                    {
+                        "id": "worker",
+                        "type": "agent",
+                        "data": {
+                            "label": "worker"
+                        },
+                        "x": 24,
+                        "y": 68,
+                        "width": 280,
+                        "height": 56,
+                        "isCollapsed": false,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "router",
+                "type": "switch",
+                "data": {
+                    "label": "router"
+                },
+                "branches": [
+                    {
+                        "label": "1",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "default",
+                        "isDefault": true,
+                        "nodes": []
+                    }
+                ],
+                "x": 156,
+                "y": 484,
+                "width": 280,
+                "height": 118,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "good",
+                "type": "agent",
+                "data": {
+                    "label": "good"
+                },
+                "x": 0,
+                "y": 702,
+                "width": 280,
+                "height": 56,
+                "level": 3,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "bad",
+                "type": "agent",
+                "data": {
+                    "label": "bad"
+                },
+                "x": 312,
+                "y": 702,
+                "width": 280,
+                "height": 56,
+                "level": 3,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 246,
+                "y": 838,
+                "width": 100,
+                "height": 40,
+                "level": 4,
+                "children": []
+            },
+            {
+                "id": "__condition_router_good__",
+                "type": "condition",
+                "data": {
+                    "label": "fanout.output.ok == true",
+                    "conditionLabel": "fanout.output.ok == true",
+                    "switchNodeId": "router",
+                    "targetNodeId": "good",
+                    "isDefaultCase": false,
+                    "caseNumber": 1
+                },
+                "x": 48,
+                "y": 644,
+                "width": 184,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_bad__",
+                "type": "condition",
+                "data": {
+                    "label": "default",
+                    "conditionLabel": "default",
+                    "switchNodeId": "router",
+                    "targetNodeId": "bad",
+                    "isDefaultCase": true,
+                    "caseNumber": 2
+                },
+                "x": 419.5,
+                "y": 644,
+                "width": 65,
+                "height": 28,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-start",
+                "source": "__start__",
+                "target": "start",
+                "sourceX": 296,
+                "sourceY": 40,
+                "targetX": 296,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "start-fanout",
+                "source": "start",
+                "target": "fanout",
+                "sourceX": 296,
+                "sourceY": 176,
+                "targetX": 296,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "fanout-router",
+                "source": "fanout",
+                "target": "router",
+                "sourceX": 296,
+                "sourceY": 404,
+                "targetX": 296,
+                "targetY": 484,
+                "isStraight": false
+            },
+            {
+                "id": "router-__condition_router_good__",
+                "source": "router",
+                "target": "__condition_router_good__",
+                "sourceX": 296,
+                "sourceY": 602,
+                "targetX": 140,
+                "targetY": 644,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_good__-good",
+                "source": "__condition_router_good__",
+                "target": "good",
+                "sourceX": 140,
+                "sourceY": 672,
+                "targetX": 140,
+                "targetY": 702,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_bad__",
+                "source": "router",
+                "target": "__condition_router_bad__",
+                "sourceX": 296,
+                "sourceY": 602,
+                "targetX": 452,
+                "targetY": 644,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_bad__-bad",
+                "source": "__condition_router_bad__",
+                "target": "bad",
+                "sourceX": 452,
+                "sourceY": 672,
+                "targetX": 452,
+                "targetY": 702,
+                "isStraight": true
+            },
+            {
+                "id": "good-__end__",
+                "source": "good",
+                "target": "__end__",
+                "sourceX": 140,
+                "sourceY": 758,
+                "targetX": 296,
+                "targetY": 838,
+                "isStraight": false
+            },
+            {
+                "id": "bad-__end__",
+                "source": "bad",
+                "target": "__end__",
+                "sourceX": 452,
+                "sourceY": 758,
+                "targetX": 296,
+                "targetY": 838,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 616,
+        "totalHeight": 902
+    },
+    "top-level switch routing to a loop": {
+        "nodes": [
+            {
+                "id": "__start__",
+                "type": "start",
+                "data": {
+                    "label": "Start"
+                },
+                "x": 270,
+                "y": 0,
+                "width": 100,
+                "height": 40,
+                "level": -1,
+                "children": []
+            },
+            {
+                "id": "start",
+                "type": "agent",
+                "data": {
+                    "label": "start"
+                },
+                "x": 180,
+                "y": 120,
+                "width": 280,
+                "height": 56,
+                "level": 0,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "router",
+                "type": "switch",
+                "data": {
+                    "label": "router"
+                },
+                "branches": [
+                    {
+                        "label": "1",
+                        "isDefault": false,
+                        "nodes": []
+                    },
+                    {
+                        "label": "default",
+                        "isDefault": true,
+                        "nodes": []
+                    }
+                ],
+                "x": 180,
+                "y": 256,
+                "width": 280,
+                "height": 118,
+                "level": 1,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "retry",
+                "type": "loop",
+                "data": {
+                    "label": "retry",
+                    "childNodeId": "worker"
+                },
+                "x": 0,
+                "y": 474,
+                "width": 328,
+                "height": 176,
+                "level": 2,
+                "isCollapsed": false,
+                "children": [
+                    {
+                        "id": "worker",
+                        "type": "agent",
+                        "data": {
+                            "label": "worker"
+                        },
+                        "x": 24,
+                        "y": 68,
+                        "width": 280,
+                        "height": 56,
+                        "isCollapsed": false,
+                        "children": []
+                    }
+                ]
+            },
+            {
+                "id": "skip",
+                "type": "agent",
+                "data": {
+                    "label": "skip"
+                },
+                "x": 360,
+                "y": 534,
+                "width": 280,
+                "height": 56,
+                "level": 2,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "done",
+                "type": "agent",
+                "data": {
+                    "label": "done"
+                },
+                "x": 180,
+                "y": 730,
+                "width": 280,
+                "height": 56,
+                "level": 3,
+                "isCollapsed": false,
+                "children": []
+            },
+            {
+                "id": "__end__",
+                "type": "end",
+                "data": {
+                    "label": "End"
+                },
+                "x": 270,
+                "y": 866,
+                "width": 100,
+                "height": 40,
+                "level": 4,
+                "children": []
+            },
+            {
+                "id": "__condition_router_retry__",
+                "type": "condition",
+                "data": {
+                    "label": "start.output.k == 1",
+                    "conditionLabel": "start.output.k == 1",
+                    "switchNodeId": "router",
+                    "targetNodeId": "retry",
+                    "isDefaultCase": false,
+                    "caseNumber": 1
+                },
+                "x": 89.5,
+                "y": 416,
+                "width": 149,
+                "height": 28,
+                "children": []
+            },
+            {
+                "id": "__condition_router_skip__",
+                "type": "condition",
+                "data": {
+                    "label": "default",
+                    "conditionLabel": "default",
+                    "switchNodeId": "router",
+                    "targetNodeId": "skip",
+                    "isDefaultCase": true,
+                    "caseNumber": 2
+                },
+                "x": 467.5,
+                "y": 476,
+                "width": 65,
+                "height": 28,
+                "children": []
+            }
+        ],
+        "edges": [
+            {
+                "id": "__start__-start",
+                "source": "__start__",
+                "target": "start",
+                "sourceX": 320,
+                "sourceY": 40,
+                "targetX": 320,
+                "targetY": 120,
+                "isStraight": false
+            },
+            {
+                "id": "start-router",
+                "source": "start",
+                "target": "router",
+                "sourceX": 320,
+                "sourceY": 176,
+                "targetX": 320,
+                "targetY": 256,
+                "isStraight": false
+            },
+            {
+                "id": "router-__condition_router_retry__",
+                "source": "router",
+                "target": "__condition_router_retry__",
+                "sourceX": 320,
+                "sourceY": 374,
+                "targetX": 164,
+                "targetY": 416,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_retry__-retry",
+                "source": "__condition_router_retry__",
+                "target": "retry",
+                "sourceX": 164,
+                "sourceY": 444,
+                "targetX": 164,
+                "targetY": 474,
+                "isStraight": true
+            },
+            {
+                "id": "router-__condition_router_skip__",
+                "source": "router",
+                "target": "__condition_router_skip__",
+                "sourceX": 320,
+                "sourceY": 374,
+                "targetX": 500,
+                "targetY": 476,
+                "isStraight": false
+            },
+            {
+                "id": "__condition_router_skip__-skip",
+                "source": "__condition_router_skip__",
+                "target": "skip",
+                "sourceX": 500,
+                "sourceY": 504,
+                "targetX": 500,
+                "targetY": 534,
+                "isStraight": true
+            },
+            {
+                "id": "retry-done",
+                "source": "retry",
+                "target": "done",
+                "sourceX": 164,
+                "sourceY": 650,
+                "targetX": 320,
+                "targetY": 730,
+                "isStraight": false
+            },
+            {
+                "id": "skip-done",
+                "source": "skip",
+                "target": "done",
+                "sourceX": 500,
+                "sourceY": 590,
+                "targetX": 320,
+                "targetY": 730,
+                "isStraight": false
+            },
+            {
+                "id": "done-__end__",
+                "source": "done",
+                "target": "__end__",
+                "sourceX": 320,
+                "sourceY": 786,
+                "targetX": 320,
+                "targetY": 866,
+                "isStraight": false
+            }
+        ],
+        "totalWidth": 664,
+        "totalHeight": 930
+    }
+}

@@ -1,0 +1,30 @@
+test_case_id: "spend_budget_gateway_refusal_001"
+description: "The mesh budget is spent, so the event-mesh gateway refuses the event and test_agent never runs."
+tags: ["spend", "budget", "event_mesh"]
+
+event_mesh_config:
+  event_handlers:
+    - name: orders
+      subscriptions:
+        - topic: "orders/>"
+      input_expression: "input.payload:text"
+      target_agent_name: test_agent
+      on_success: result_out
+  output_handlers:
+    - name: result_out
+      topic_expression: "static:results/order"
+      payload_expression: "input.payload:text"
+      payload_format: text
+
+event_mesh_input:
+  topic: orders/new
+  payload:
+    text: "Summarize the report."
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "This answer must never be produced."
+      usage: {prompt_tokens: 100, completion_tokens: 10, total_tokens: 110}

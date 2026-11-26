@@ -1,0 +1,14 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "Asking NW Analyst.\n\nThe analyst saved peer.csv."
+      }
+    ]
+  }
+]

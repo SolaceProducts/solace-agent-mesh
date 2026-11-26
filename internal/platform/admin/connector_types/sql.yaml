@@ -1,0 +1,368 @@
+type: sql
+subtypes:
+  - subtype: postgres
+    name: "PostgreSQL"
+    description: "Connect to PostgreSQL database"
+    connection_template: "postgresql://$USERNAME:$PASSWORD@$HOSTNAME:$PORT/$DATABASE"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions (e.g., read-only, limited to specific schemas)."
+    usage_guidance: |
+      Use the PostgreSQL connector when the user wants to query or interact with
+      a PostgreSQL database. The connector provides a SQL tool that the agent can
+      use to run read and write queries. The user needs to provide the host, port,
+      database name, username, and password. For the builder, use
+      <<__SAM_REQUIRED__>> for password and any other values not mentioned in the
+      conversation.
+    field_schema:
+      - name: database
+        type: string
+        label: "Database Name"
+        required: true
+        order: 1
+        hint: "Name of the PostgreSQL database to connect to"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_$]+$"
+      - name: hostname
+        type: string
+        label: "Database Host"
+        required: true
+        order: 2
+        hint: "Database hostname or IP address"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 5432
+        placeholder: "5432"
+        hint: "If no value is provided, the default port number (5432) will be used."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `sql_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`sql_query`). `{}` removes them."
+
+  - subtype: mysql
+    name: "MySQL"
+    description: "Connect to MySQL database"
+    connection_template: "mysql://$USERNAME:$PASSWORD@$HOSTNAME:$PORT/$DATABASE"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions (e.g., read-only, limited to specific schemas)."
+    usage_guidance: |
+      Use the MySQL connector when the user wants to query or interact with
+      a MySQL database. Same field requirements as PostgreSQL but with default
+      port 3306.
+    field_schema:
+      - name: database
+        type: string
+        label: "Database Name"
+        required: true
+        order: 1
+        hint: "Name of the MySQL database to connect to"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_$]+$"
+      - name: hostname
+        type: string
+        label: "Database Host"
+        required: true
+        order: 2
+        hint: "Database hostname or IP address"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 3306
+        placeholder: "3306"
+        hint: "If no value is provided, the default port number (3306) will be used."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `sql_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`sql_query`). `{}` removes them."
+
+  - subtype: mariadb
+    name: "MariaDB"
+    description: "Connect to MariaDB database"
+    connection_template: "mysql://$USERNAME:$PASSWORD@$HOSTNAME:$PORT/$DATABASE"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions (e.g., read-only, limited to specific schemas)."
+    usage_guidance: |
+      Use the MariaDB connector when the user wants to query or interact with
+      a MariaDB database. Same field requirements as MySQL (default port 3306).
+    field_schema:
+      - name: database
+        type: string
+        label: "Database Name"
+        required: true
+        order: 1
+        hint: "Name of the MariaDB database to connect to"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_$]+$"
+      - name: hostname
+        type: string
+        label: "Database Host"
+        required: true
+        order: 2
+        hint: "Database hostname or IP address"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 3306
+        placeholder: "3306"
+        hint: "If no value is provided, the default port number (3306) will be used."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `sql_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`sql_query`). `{}` removes them."
+
+  - subtype: mssql
+    name: "Microsoft SQL Server"
+    description: "Connect to Microsoft SQL Server database"
+    connection_template: "sqlserver://$USERNAME:$PASSWORD@$HOSTNAME:$PORT?database=$DATABASE"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions (e.g., read-only, limited to specific schemas)."
+    usage_guidance: |
+      Use the MSSQL connector when the user wants to query or interact with
+      a Microsoft SQL Server database. The connector provides a SQL tool that
+      the agent can use to run read and write queries. The user needs to
+      provide the host, port, database name, username, and password. Default
+      port is 1433. Encryption is enabled by default. Use
+      <<__SAM_REQUIRED__>> for password and any other values not mentioned in
+      the conversation.
+    field_schema:
+      - name: database
+        type: string
+        label: "Database Name"
+        required: true
+        order: 1
+        hint: "Name of the SQL Server database to connect to"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_$]+$"
+      - name: hostname
+        type: string
+        label: "Database Host"
+        required: true
+        order: 2
+        hint: "Database hostname or IP address"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 1433
+        placeholder: "1433"
+        hint: "If no value is provided, the default port number (1433) will be used."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: encrypt
+        type: select
+        label: "Encryption (TLS)"
+        required: false
+        order: 7
+        default: "yes"
+        hint: "TLS encryption for data in transit."
+        options:
+          - label: "Enabled"
+            value: "yes"
+            description: "Connector is using a secured channel using TLS"
+          - label: "Disabled"
+            value: "no"
+            description: "Connector is using a plaintext connection"
+          - label: "Strict"
+            value: "strict"
+            description: "Requires encryption and always validates the server certificate (ignores Trust Server Certificate setting)"
+      - name: trust_server_certificate
+        type: select
+        label: "Trust Server Certificate"
+        required: false
+        order: 8
+        default: "no"
+        hint: "Whether to validate the server's TLS certificate."
+        options:
+          - label: "Disabled (recommended)"
+            value: "no"
+            description: "Validates certificate expiry, trust chain, and server name match"
+          - label: "Enabled"
+            value: "yes"
+            description: "Skips all certificate validation (use only for dev/test with self-signed certs)"
+        visible_when:
+          encrypt: "yes"
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `sql_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`sql_query`). `{}` removes them."
+
+  - subtype: oracle
+    name: "Oracle"
+    description: "Connect to Oracle database"
+    connection_template: "oracle://$USERNAME:$PASSWORD@$HOSTNAME:$PORT/$SERVICE_NAME"
+    warning: "All agents using this connector will have the same database access. Agent Mesh cannot restrict what queries agents execute—access control must be configured at the database level. For security, use credentials with minimal necessary permissions (e.g., read-only, limited to specific schemas)."
+    usage_guidance: |
+      Use the Oracle connector when the user wants to query or interact with
+      an Oracle database. The connector uses thin mode (no Oracle Client
+      libraries required). The user needs to provide the host, port, service
+      name, username, and password. Default port is 1521. Note: Oracle uses
+      a service name, not a database name. Use <<__SAM_REQUIRED__>> for
+      password and any other values not mentioned in the conversation.
+    field_schema:
+      - name: service_name
+        type: string
+        label: "Service Name"
+        required: true
+        order: 1
+        hint: "Oracle service name (not database name)"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^[a-zA-Z0-9_$.]+$"
+      - name: hostname
+        type: string
+        label: "Database Host"
+        required: true
+        order: 2
+        hint: "Database hostname or IP address"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: port
+        type: number
+        label: "Port"
+        required: false
+        order: 3
+        default: 1521
+        placeholder: "1521"
+        hint: "If no value is provided, the default port number (1521) will be used."
+        validation:
+          min: 1
+          max: 65535
+      - name: username
+        type: string
+        label: "Username"
+        required: true
+        order: 4
+        validation:
+          min_length: 1
+          max_length: 255
+      - name: password
+        type: password
+        label: "Password"
+        required: true
+        secret: true
+        order: 5
+        hint: "Leave placeholder to keep existing value. After saving, this value will no longer be displayed."
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `sql_query`."
+        hint: "Approval gates for this connector's tools, keyed by role (`sql_query`). `{}` removes them."

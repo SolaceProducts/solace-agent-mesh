@@ -1,0 +1,242 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+import React, { useEffect, useMemo, useRef, useState } from "react";
+import { Filter, Plus, Sparkles, X } from "lucide-react";
+
+import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from "@/ui/resizable";
+import type { PromptGroup } from "@/types/prompts";
+
+import { EmptyState } from "@/common";
+import { Button, SearchInput } from "@/ui";
+
+import { CreatePromptCard } from "./CreatePromptCard";
+import { PromptCard } from "./PromptCard";
+import { PromptDetailSidePanel } from "./PromptDetailSidePanel";
+
+interface PromptCardsProps {
+    prompts: PromptGroup[];
+    onManualCreate: () => void;
+    onAIAssisted: () => void;
+    onEdit: (prompt: PromptGroup) => void;
+    onDelete: (id: string, name: string) => void;
+    onViewVersions?: (prompt: PromptGroup) => void;
+    onUseInChat?: (prompt: PromptGroup) => void;
+    onTogglePin?: (id: string, currentStatus: boolean) => void;
+    onExport?: (prompt: PromptGroup) => void;
+    onShare?: (prompt: PromptGroup) => void;
+    newlyCreatedPromptId?: string | null;
+}
+
+export const PromptCards: React.FC<PromptCardsProps> = ({ prompts, onManualCreate, onAIAssisted, onEdit, onDelete, onViewVersions, onUseInChat, onTogglePin, onExport, onShare, newlyCreatedPromptId }) => {
+    const [selectedPrompt, setSelectedPrompt] = useState<PromptGroup | null>(null);
+    const [searchQuery, setSearchQuery] = useState<string>("");
+    const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+    const [showCategoryDropdown, setShowCategoryDropdown] = useState(false);
+    const promptRefs = useRef<Map<string, HTMLDivElement>>(new Map());
+
+    const handlePromptClick = (prompt: PromptGroup) => {
+        setSelectedPrompt(prev => (prev?.id === prompt.id ? null : prompt));
+    };
+
+    const handleCloseSidePanel = () => {
+        setSelectedPrompt(null);
+    };
+
+    const categories = useMemo(() => {
+        const cats = new Set<string>();
+        prompts.forEach(prompt => {
+            if (prompt.category) {
+                cats.add(prompt.category);
+            }
+        });
+        return Array.from(cats).sort();
+    }, [prompts]);
+
+    const filteredPrompts = useMemo(() => {
+        const filtered = prompts.filter(prompt => {
+            const description = prompt.productionPrompt?.description || prompt.description;
+            const command = prompt.productionPrompt?.command || prompt.command;
+            const matchesSearch = prompt.name?.toLowerCase().includes(searchQuery.toLowerCase()) || description?.toLowerCase().includes(searchQuery.toLowerCase()) || command?.toLowerCase().includes(searchQuery.toLowerCase());
+
+            const matchesCategory = selectedCategories.length === 0 || (prompt.category && selectedCategories.includes(prompt.category));
+
+            return matchesSearch && matchesCategory;
+        });
+
+        return filtered.sort((a, b) => {
+            if (a.isPinned !== b.isPinned) {
+                return a.isPinned ? -1 : 1;
+            }
+            const nameA = (a.name ?? "").toLowerCase();
+            const nameB = (b.name ?? "").toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+    }, [prompts, searchQuery, selectedCategories]);
+
+    const toggleCategory = (category: string) => {
+        setSelectedCategories(prev => (prev.includes(category) ? prev.filter(c => c !== category) : [...prev, category]));
+    };
+
+    const clearCategories = () => {
+        setSelectedCategories([]);
+    };
+
+    const clearAllFilters = () => {
+        setSearchQuery("");
+        setSelectedCategories([]);
+    };
+
+    const hasActiveFilters = searchQuery.length > 0 || selectedCategories.length > 0;
+
+    const isLibraryEmpty = prompts.length === 0;
+
+    useEffect(() => {
+        if (newlyCreatedPromptId && prompts.length > 0) {
+            const newPrompt = prompts.find(p => p.id === newlyCreatedPromptId);
+            if (newPrompt) {
+                setSelectedPrompt(newPrompt);
+
+                setTimeout(() => {
+                    const element = promptRefs.current.get(newlyCreatedPromptId);
+                    if (element) {
+                        element.scrollIntoView({ behavior: "smooth", block: "center" });
+                    }
+                }, 100);
+            }
+        }
+    }, [newlyCreatedPromptId, prompts]);
+
+    const createButtons = useMemo(
+        () => [
+            {
+                icon: <Sparkles />,
+                text: "Build with AI",
+                variant: "default" as const,
+                onClick: onAIAssisted,
+            },
+            {
+                icon: <Plus />,
+                text: "Create Manually",
+                variant: "outline" as const,
+                onClick: onManualCreate,
+            },
+        ],
+        [onAIAssisted, onManualCreate]
+    );
+
+    let promptListContent: React.ReactNode;
+    if (filteredPrompts.length === 0 && searchQuery) {
+        promptListContent = <EmptyState title="No Prompts Match Your Filter" subtitle="Try adjusting your filter terms." variant="notFound" buttons={[{ text: "Clear Filter", variant: "default", onClick: () => setSearchQuery("") }]} />;
+    } else if (isLibraryEmpty) {
+        promptListContent = <EmptyState title="No Prompts Found" subtitle="Create prompts to support reusable text structures for chat interactions." variant="noImage" buttons={createButtons} />;
+    } else {
+        promptListContent = (
+            <div className="flex-1 overflow-y-auto sm:pr-6">
+                <div className="grid grid-cols-[repeat(auto-fill,minmax(min(320px,100%),1fr))] gap-6">
+                    <CreatePromptCard onManualCreate={onManualCreate} onAIAssisted={onAIAssisted} />
+                    {filteredPrompts.map(prompt => (
+                        <div
+                            key={prompt.id}
+                            ref={el => {
+                                if (el) {
+                                    promptRefs.current.set(prompt.id, el);
+                                } else {
+                                    promptRefs.current.delete(prompt.id);
+                                }
+                            }}
+                        >
+                            <PromptCard
+                                prompt={prompt}
+                                isSelected={selectedPrompt?.id === prompt.id}
+                                onPromptClick={() => handlePromptClick(prompt)}
+                                onEdit={onEdit}
+                                onDelete={onDelete}
+                                onViewVersions={onViewVersions}
+                                onUseInChat={onUseInChat}
+                                onTogglePin={onTogglePin}
+                                onExport={onExport}
+                                onShare={onShare}
+                            />
+                        </div>
+                    ))}
+                </div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="absolute inset-0 h-full w-full">
+            <ResizablePanelGroup id="promptCardsPanelGroup" orientation="horizontal" className="h-full">
+                <ResizablePanel defaultSize={`${selectedPrompt ? 70 : 100}%`} minSize="50%" maxSize="100%" id="promptCardsMainPanel">
+                    <div className="flex h-full flex-col px-4 py-4 sm:pt-6 sm:pr-0 sm:pb-6 sm:pl-6">
+                        {!isLibraryEmpty && (
+                            <div className="mb-4 flex flex-wrap items-center gap-2">
+                                <SearchInput value={searchQuery} onChange={setSearchQuery} testid="promptSearchInput" />
+
+                                {categories.length > 0 && (
+                                    <div className="relative">
+                                        <Button onClick={() => setShowCategoryDropdown(!showCategoryDropdown)} variant="outline" testid="promptTags">
+                                            <Filter size={16} />
+                                            Tags
+                                            {selectedCategories.length > 0 && <span className="rounded-full bg-(--primary-wMain) px-2 py-0.5 text-xs text-(--primary-text-w10)">{selectedCategories.length}</span>}
+                                        </Button>
+
+                                        {showCategoryDropdown && (
+                                            <>
+                                                <div className="fixed inset-0 z-10" onClick={() => setShowCategoryDropdown(false)} />
+
+                                                <div className="absolute top-full right-0 z-20 mt-1 max-h-[300px] min-w-[200px] overflow-y-auto rounded-md border bg-(--background-w10) shadow-lg sm:right-auto sm:left-0">
+                                                    {selectedCategories.length > 0 && (
+                                                        <div className="border-b">
+                                                            <button
+                                                                data-testid="clearFiltersButton"
+                                                                onClick={clearCategories}
+                                                                className="flex min-h-[24px] w-full cursor-pointer items-center gap-1 px-3 py-2 text-left text-xs text-(--secondary-text-wMain) transition-colors hover:bg-(--secondary-w10) hover:text-(--primary-text-wMain)"
+                                                            >
+                                                                <X size={14} />
+                                                                {selectedCategories.length === 1 ? "Clear Filter" : "Clear Filters"}
+                                                            </button>
+                                                        </div>
+                                                    )}
+                                                    <div className="p-1">
+                                                        {categories.map(category => (
+                                                            <label key={category} className="flex cursor-pointer items-center gap-2 rounded px-2 py-1.5 hover:bg-(--secondary-w10)">
+                                                                <input data-testid={`category-checkbox-${category}`} type="checkbox" checked={selectedCategories.includes(category)} onChange={() => toggleCategory(category)} className="rounded" />
+                                                                <span className="text-sm">{category}</span>
+                                                            </label>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </>
+                                        )}
+                                    </div>
+                                )}
+
+                                {hasActiveFilters && (
+                                    <Button variant="ghost" onClick={clearAllFilters} data-testid="clearAllFiltersButton">
+                                        <X size={16} />
+                                        Clear All
+                                    </Button>
+                                )}
+                            </div>
+                        )}
+
+                        {promptListContent}
+                    </div>
+                </ResizablePanel>
+
+                {selectedPrompt && (
+                    <>
+                        <ResizableHandle />
+                        <ResizablePanel defaultSize="30%" minSize="20%" maxSize="50%" id="promptDetailSidePanel">
+                            <PromptDetailSidePanel prompt={selectedPrompt} onClose={handleCloseSidePanel} onEdit={onEdit} onDelete={onDelete} onViewVersions={onViewVersions} onUseInChat={onUseInChat} onTogglePin={onTogglePin} onExport={onExport} />
+                        </ResizablePanel>
+                    </>
+                )}
+            </ResizablePanelGroup>
+        </div>
+    );
+};

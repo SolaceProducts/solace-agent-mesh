@@ -1,0 +1,337 @@
+{
+ "about": "Where each framework the SDK supports publishes its code, releases, changelog and docs. The compatibility matrix and the bot that maintains the SDK read it to fetch release notes, source and upstream issues for a release no Dependabot pull request has proposed yet. Checked against PyPI project_urls and GitHub on 2026-11-26.",
+ "frameworks": {
+  "langchain": {
+   "name": "LangChain",
+   "packages": [
+    "langchain-core"
+   ],
+   "repo": "langchain-ai/langchain",
+   "source_path": "libs/core",
+   "release_tag": "langchain-core==",
+   "changelog": null,
+   "docs": "https://docs.langchain.com/oss/python/langchain/overview",
+   "adapter": "sam_link_sdk.langchain"
+  },
+  "openai": {
+   "name": "LangChain OpenAI",
+   "packages": [
+    "langchain-core",
+    "langchain-openai"
+   ],
+   "repo": "langchain-ai/langchain",
+   "source_path": "libs/partners/openai",
+   "release_tag": "langchain-openai==",
+   "changelog": null,
+   "docs": "https://docs.langchain.com/oss/python/integrations/providers/openai",
+   "adapter": "sam_link_sdk.langchain"
+  },
+  "langgraph": {
+   "name": "LangGraph",
+   "packages": [
+    "langgraph",
+    "langchain-core"
+   ],
+   "repo": "langchain-ai/langgraph",
+   "source_path": "libs/langgraph",
+   "release_tag": "",
+   "changelog": null,
+   "docs": "https://docs.langchain.com/oss/python/langgraph/overview",
+   "adapter": "sam_link_sdk.langchain"
+  },
+  "openai-agents": {
+   "name": "OpenAI Agents SDK",
+   "packages": [
+    "openai-agents"
+   ],
+   "repo": "openai/openai-agents-python",
+   "source_path": "src/agents",
+   "release_tag": "v",
+   "changelog": "CHANGELOG.md",
+   "docs": "https://openai.github.io/openai-agents-python/",
+   "adapter": "sam_link_sdk.openai_agents"
+  },
+  "adk": {
+   "name": "Google ADK",
+   "packages": [
+    "google-adk",
+    "litellm"
+   ],
+   "repo": "google/adk-python",
+   "source_path": "src/google/adk",
+   "release_tag": "v",
+   "changelog": "CHANGELOG.md",
+   "docs": "https://google.github.io/adk-docs/",
+   "adapter": "sam_link_sdk.adk"
+  },
+  "crewai": {
+   "name": "CrewAI",
+   "packages": [
+    "crewai"
+   ],
+   "repo": "crewAIInc/crewAI",
+   "source_path": "lib/crewai",
+   "release_tag": "",
+   "changelog": null,
+   "docs": "https://docs.crewai.com",
+   "adapter": "sam_link_sdk.crewai"
+  },
+  "strands": {
+   "name": "Strands Agents",
+   "packages": [
+    "strands-agents"
+   ],
+   "repo": "strands-agents/harness-sdk",
+   "source_path": "strands-py",
+   "release_tag": "python/v",
+   "changelog": null,
+   "docs": "https://strandsagents.com",
+   "adapter": "sam_link_sdk.strands"
+  },
+  "agent-framework": {
+   "name": "Microsoft Agent Framework",
+   "packages": [
+    "agent-framework-core",
+    "agent-framework-openai"
+   ],
+   "repo": "microsoft/agent-framework",
+   "source_path": "python",
+   "release_tag": "python-",
+   "changelog": null,
+   "docs": "https://learn.microsoft.com/agent-framework/",
+   "adapter": "sam_link_sdk.agent_framework"
+  },
+  "otel": {
+   "name": "OpenTelemetry SDK",
+   "packages": [
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-otlp-proto-http"
+   ],
+   "repo": "open-telemetry/opentelemetry-python",
+   "source_path": "opentelemetry-sdk",
+   "release_tag": "v",
+   "changelog": "CHANGELOG.md",
+   "docs": "https://opentelemetry-python.readthedocs.io/",
+   "adapter": "sam_link_sdk.otel_steps"
+  },
+  "foundry": {
+   "name": "Azure AI Foundry hosted agents",
+   "packages": [
+    "azure-ai-agentserver-invocations"
+   ],
+   "repo": "Azure/azure-sdk-for-python",
+   "source_path": "sdk/agentserver/azure-ai-agentserver-invocations",
+   "release_tag": "azure-ai-agentserver-invocations_",
+   "changelog": "sdk/agentserver/azure-ai-agentserver-invocations/CHANGELOG.md",
+   "docs": "https://learn.microsoft.com/azure/ai-foundry/",
+   "adapter": "sam_link_sdk.foundry"
+  },
+  "agentcore": {
+   "name": "Amazon Bedrock AgentCore",
+   "packages": [
+    "bedrock-agentcore",
+    "boto3"
+   ],
+   "repo": "aws/bedrock-agentcore-sdk-python",
+   "source_path": "src/bedrock_agentcore",
+   "release_tag": "v",
+   "changelog": "CHANGELOG.md",
+   "docs": "https://docs.aws.amazon.com/bedrock-agentcore/",
+   "adapter": "sam_link_sdk.agentcore"
+  },
+  "hermes": {
+   "name": "Hermes Agent",
+   "packages": [],
+   "repo": "NousResearch/hermes-agent",
+   "source_path": "",
+   "release_tag": null,
+   "changelog": null,
+   "docs": "https://github.com/NousResearch/hermes-agent",
+   "adapter": "sam_link_sdk.hermes"
+  }
+ },
+ "cells_about": "One cell per framework the compatibility workflow installs alone, at its lowest supported and its newest release: the extras it installs, the import names they provide, the unit test modules it runs (a module importing another framework at its top cannot be collected without it) and the framework whose end-to-end tests it runs (SAM_E2E_FRAMEWORK). Hermes is not on PyPI: its cell installs a checkout (compat/pins.json at the floor, the head of its main branch as the newest) and records the commit as the version of hermes-agent.",
+ "cells": {
+  "langchain": {
+   "extras": [
+    "openai"
+   ],
+   "imports": [
+    "langchain_core",
+    "langchain_openai",
+    "openai"
+   ],
+   "e2e": "langchain",
+   "unit": [
+    "tests/test_callbacks.py",
+    "tests/test_peers.py",
+    "tests/test_memory.py",
+    "tests/test_tool_scopes.py",
+    "tests/test_kill_switch.py",
+    "tests/test_hil.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "langgraph": {
+   "extras": [
+    "langgraph",
+    "openai"
+   ],
+   "imports": [
+    "langchain_core",
+    "langchain_openai",
+    "langgraph",
+    "openai"
+   ],
+   "e2e": "langgraph",
+   "unit": [
+    "tests/test_langgraph.py",
+    "tests/test_kill_switch_frameworks.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "openai-agents": {
+   "extras": [
+    "openai-agents"
+   ],
+   "imports": [
+    "agents",
+    "openai"
+   ],
+   "e2e": "openai_agents",
+   "unit": [
+    "tests/test_openai_agents.py",
+    "tests/test_framework_helpers.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "adk": {
+   "extras": [
+    "adk"
+   ],
+   "imports": [
+    "google.adk",
+    "google.genai",
+    "litellm"
+   ],
+   "e2e": "adk",
+   "unit": [
+    "tests/test_adk.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "crewai": {
+   "extras": [
+    "crewai"
+   ],
+   "imports": [
+    "crewai",
+    "litellm",
+    "openai"
+   ],
+   "e2e": "crewai",
+   "unit": [
+    "tests/test_crewai.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "strands": {
+   "extras": [
+    "strands"
+   ],
+   "imports": [
+    "strands",
+    "openai"
+   ],
+   "e2e": "strands",
+   "unit": [
+    "tests/test_strands.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "agent-framework": {
+   "extras": [
+    "agent-framework"
+   ],
+   "imports": [
+    "agent_framework",
+    "openai"
+   ],
+   "e2e": "agent_framework",
+   "unit": [
+    "tests/test_agent_framework.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "otel": {
+   "extras": [
+    "otel",
+    "strands"
+   ],
+   "imports": [
+    "opentelemetry",
+    "strands",
+    "openai"
+   ],
+   "e2e": "otel",
+   "unit": [
+    "tests/test_otel_steps.py",
+    "tests/test_metrics.py",
+    "tests/test_otlp_export.py",
+    "tests/test_framework_drift.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  },
+  "foundry": {
+   "extras": [
+    "foundry"
+   ],
+   "imports": [
+    "azure.ai.agentserver",
+    "starlette"
+   ],
+   "e2e": null,
+   "unit": [
+    "tests/test_serverless_templates.py",
+    "tests/test_framework_drift.py"
+   ]
+  },
+  "agentcore": {
+   "extras": [
+    "agentcore"
+   ],
+   "imports": [
+    "bedrock_agentcore",
+    "boto3"
+   ],
+   "e2e": null,
+   "unit": [
+    "tests/test_agentcore.py",
+    "tests/test_serverless_templates.py",
+    "tests/test_framework_drift.py"
+   ]
+  },
+  "hermes": {
+   "extras": [],
+   "record": [
+    "hermes-agent"
+   ],
+   "imports": [
+    "run_agent",
+    "hermes_cli"
+   ],
+   "e2e": "hermes",
+   "unit": [
+    "tests/test_hermes.py",
+    "tests/test_adapter_conformance.py"
+   ]
+  }
+ }
+}

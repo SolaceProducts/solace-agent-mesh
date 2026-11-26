@@ -1,0 +1,129 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+import type { PaginatedResponse } from "@/api/common";
+
+import { getApiBearerToken } from "@/utils/api";
+
+import type { ArtifactInfo } from "@/types/chat";
+import type { BatchDeleteRequest, BatchDeleteResponse, BatchShareRequest, BatchShareResponse, CreateProjectRequest, Project, ProjectSharesResponse, UpdateProjectData } from "@/types/projects";
+import type { Session } from "@/types/session";
+
+import { api, getErrorFromResponse } from "../client";
+
+export const getProjects = async () => {
+    return api.webui.get<PaginatedResponse<Project>>("/api/v1/projects?expand=artifactCount");
+};
+
+export const createProject = async (data: CreateProjectRequest) => {
+    const formData = new FormData();
+    formData.append("name", data.name);
+
+    if (data.description) {
+        formData.append("description", data.description);
+    }
+
+    return api.webui.post<Project>("/api/v1/projects", formData);
+};
+
+export const addFilesToProject = async (projectId: string, files: File[], fileMetadata?: Record<string, string>): Promise<{ sseLocation: string | null }> => {
+    const formData = new FormData();
+
+    files.forEach(file => {
+        formData.append("files", file);
+    });
+
+    if (fileMetadata && Object.keys(fileMetadata).length > 0) {
+        formData.append("fileMetadata", JSON.stringify(fileMetadata));
+    }
+
+    const response = await api.webui.post(`/api/v1/projects/${projectId}/artifacts`, formData, { fullResponse: true });
+
+    if (!response.ok) {
+        throw new Error(await getErrorFromResponse(response));
+    }
+
+    const result = await response.json();
+    return { ...result, sseLocation: response.headers.get("sse-location") };
+};
+
+export const removeFileFromProject = async (projectId: string, filename: string): Promise<{ sseLocation: string | null }> => {
+    const response = await api.webui.delete(`/api/v1/projects/${projectId}/artifacts/${encodeURIComponent(filename)}`, { fullResponse: true });
+
+    if (!response.ok) {
+        throw new Error(await getErrorFromResponse(response));
+    }
+
+    return { sseLocation: response.headers.get("sse-location") };
+};
+
+export const updateFileMetadata = async (projectId: string, filename: string, description: string) => {
+    return api.webui.patch(`/api/v1/projects/${projectId}/artifacts/${encodeURIComponent(filename)}`, { description });
+};
+
+export const updateProject = async (projectId: string, data: UpdateProjectData) => {
+    return api.webui.put<Project>(`/api/v1/projects/${projectId}`, data);
+};
+
+export const deleteProject = async (projectId: string) => {
+    await api.webui.delete(`/api/v1/projects/${projectId}`);
+};
+
+export const getProjectArtifacts = async (projectId: string) => {
+    return (await api.webui.get<PaginatedResponse<ArtifactInfo>>(`/api/v1/projects/${projectId}/artifacts`)).data;
+};
+
+export const getProjectSessions = async (projectId: string) => {
+    return (await api.webui.get<PaginatedResponse<Session>>(`/api/v1/sessions?projectId=${projectId}&pageNumber=1&pageSize=100`)).data;
+};
+
+export const exportProject = async (projectId: string) => {
+    const response = await api.webui.get(`/api/v1/projects/${projectId}/export`, { fullResponse: true });
+    return await response.blob();
+};
+
+export const importProject = async (file: File, options: { preserveName: boolean; customName?: string }) => {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("options", JSON.stringify(options));
+
+    const response = await api.webui.post("/api/v1/projects/import", formData, { fullResponse: true });
+
+    if (!response.ok) {
+        throw new Error(await getErrorFromResponse(response));
+    }
+
+    const result = await response.json();
+    return { ...result, sseLocation: response.headers.get("sse-location") };
+};
+
+export const getProjectShares = async (projectId: string) => {
+    return api.webui.get<ProjectSharesResponse>(`/api/v1/projects/${projectId}/shares`);
+};
+
+export const createProjectShares = async (projectId: string, data: BatchShareRequest) => {
+    return api.webui.post<BatchShareResponse>(`/api/v1/projects/${projectId}/shares`, data);
+};
+
+export const togglePinProject = async (projectId: string) => {
+    return api.webui.patch<Project>(`/api/v1/projects/${projectId}/pin`, {});
+};
+
+export const deleteProjectShares = async (projectId: string, data: BatchDeleteRequest) => {
+    const response = await fetch(api.webui.getFullUrl(`/api/v1/projects/${projectId}/shares`), {
+        method: "DELETE",
+        headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getApiBearerToken()}`,
+        },
+        body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+        throw new Error(await getErrorFromResponse(response));
+    }
+
+    return (await response.json()) as BatchDeleteResponse;
+};

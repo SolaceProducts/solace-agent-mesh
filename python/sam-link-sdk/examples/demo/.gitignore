@@ -1,0 +1,3 @@
+# Agent link tokens issued by stack/link_tokens.sh: each is an agent's credential.
+stack/tokens/
+*.link-token

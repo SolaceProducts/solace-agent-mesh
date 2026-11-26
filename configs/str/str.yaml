@@ -1,0 +1,142 @@
+trust_manager:
+  enabled: ${TRUST_MANAGER_ENABLED, false}
+  card_publish_interval_seconds: ${TRUST_CARD_PUBLISH_INTERVAL, 10}
+  startup_wait_timeout_seconds: ${TRUST_STARTUP_WAIT_TIMEOUT, 10}
+  fail_on_timeout: false
+
+agent_identity:
+  key_mode: auto
+
+# Runtime metrics surface. Off by default (SAM_OBSERVABILITY_ENABLED unset →
+# enabled: false → no Prometheus /metrics mount, no OTLP exporter). When
+# SAM_OBSERVABILITY_ENABLED=true the STR management server (:8090) serves
+# /metrics and the OTLP exporter pushes to SAM_OTLP_ENDPOINT when
+# SAM_OTLP_METRICS=true. Shape mirrors configs/examples/otel_exporters_config.yaml.
+management_server:
+  observability:
+    enabled: ${SAM_OBSERVABILITY_ENABLED, false}
+    metric_prefix: ${SAM_METRIC_PREFIX, sam}
+    path: /metrics
+  exporters:
+    - type: otlp
+      endpoint: ${SAM_OTLP_ENDPOINT, http://localhost:4318}
+      protocol: ${SAM_OTLP_PROTOCOL, http}
+      compression: gzip
+      metrics: ${SAM_OTLP_METRICS, false}
+      logs: false
+
+apps:
+  - name: str_builtin_tools
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, false}
+      broker_url: ${SOLACE_BROKER_URL, ws://localhost:8008}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+      temporary_queue: ${USE_TEMPORARY_QUEUES, true}
+    app_config:
+      namespace: ${NAMESPACE, solace-agent-mesh}
+      worker_id: builtin-tools-worker
+      # Execution class (isolated_tool_execution flag). A toolset names its
+      # class at the top of its manifest (execution_class, default "shared"),
+      # and all of its tools run on the STR that serves it. An STR with an
+      # execution_class serves exactly that class, on its own queue
+      # (<class>-tools-worker); one without is the default STR and serves only
+      # the shared class, with the flag on or off.
+      execution_class: ${STR_EXECUTION_CLASS, ""}
+      skills_dir: ${SAM_SKILLS_DIR, /opt/sam/skills}
+      toolsets_dir: ${SAM_TOOLS_DIR, /opt/sam/tools}
+      sandbox:
+        mode: ${STR_SANDBOX_MODE, direct}
+        # Staging dir for per-invocation work + artifact preload. On K8s nodes
+        # /tmp is often tmpfs (RAM-backed) — point this at an emptyDir-backed
+        # path when tools stage large artifacts, so staging doesn't eat the
+        # memory budget the in-flight limiter is trying to protect.
+        work_base_dir: ${STR_WORK_BASE_DIR, /tmp/sam-str-work}
+        # Above soft_percent of the container memory limit, new tool calls
+        # wait for memory. Above hard_percent, the tool calls that use the most
+        # memory are stopped with TOOL_MEMORY_EXCEEDED, so the kernel does not
+        # kill the whole STR.
+        memory_guard:
+          soft_percent: ${STR_MEMORY_SOFT_PERCENT, 85}
+          hard_percent: ${STR_MEMORY_HARD_PERCENT, 95}
+          disabled: ${STR_MEMORY_GUARD_DISABLED, false}
+        # Job template of an STR in kubernetes-job mode (STR_SANDBOX_MODE). In
+        # that mode every call this STR serves runs as its own Kubernetes Job
+        # built from this block, and nothing runs as a subprocess of the pod.
+        # Experimental: native executables from uploaded packages only, no
+        # input or output artifacts and no in-tool LLM calls.
+        job_template:
+          # Empty means this pod's own namespace.
+          namespace: ${STR_JOB_NAMESPACE, ""}
+          # Image the Job pod runs. Empty means this pod's own image.
+          image: ${STR_JOB_IMAGE, ""}
+          # Base URL Job pods fetch tool files from, e.g. http://<str-service>:8090.
+          package_url: ${STR_JOB_PACKAGE_URL, ""}
+          image_pull_secret: ${STR_JOB_IMAGE_PULL_SECRET, ""}
+          runtime_class: ${STR_JOB_RUNTIME_CLASS, ""}
+          # key=value[,key=value]
+          node_selector: ${STR_JOB_NODE_SELECTOR, ""}
+          # JSON array of Kubernetes tolerations.
+          tolerations: ${STR_JOB_TOLERATIONS, ""}
+          # Requests and limits of every Job pod. Empty takes 1 / 2Gi / 5Gi.
+          cpu: ${STR_JOB_CPU, ""}
+          memory: ${STR_JOB_MEMORY, ""}
+          ephemeral_storage: ${STR_JOB_EPHEMERAL_STORAGE, ""}
+          # How long a Job pod may take to be scheduled, pull its image and
+          # start. The tool's own timeout counts from when it starts. 0 takes
+          # 120.
+          start_timeout_seconds: ${STR_JOB_START_TIMEOUT_SECONDS, 0}
+        # Ceiling on every tool's execution timeout, whether the manifest, the
+        # tool or the calling agent asked for more. Agents wait as long as this
+        # STR advertises, so raising it lets a slow tool hold its caller longer.
+        max_timeout_seconds: 3600
+        # Admission is fully automatic. The compute budget starts at 2x GOMAXPROCS
+        # (min 2) and then adapts at runtime: it grows while tools are queued and
+        # the cgroup reports no CPU throttling, and backs off when the CPU quota
+        # throttles, between that starting value and the in-flight budget. With
+        # no CPU quota set it holds at the starting value, since throttling can
+        # never be observed then. The in-flight budget is derived from the
+        # container's cgroup memory limit.
+        # There are no operator knobs to size either.
+
+      # Which model in-tool LLM callbacks use. Applies to skill-bundled tools that
+      # call samtoolsdk.ToolContext.CallLLM in their own subprocess — e.g.
+      # sam-test-harness's generate_test_plan / generate_recommendations.
+      #
+      # THIS is the lever: the alias below is resolved through the platform's
+      # model-config bindings on every call, so rotations and model swaps land
+      # without an STR restart. An individual invocation can override it with the
+      # reserved `_model_alias` key in its skill tool_config.
+      #
+      # Leaving this at the default "general" keeps the fallback behaviour below.
+      # Setting it to anything else is an explicit choice, so an unresolvable alias
+      # then fails the tool call rather than quietly serving a different model.
+      tool_model_alias: ${STR_TOOL_MODEL_ALIAS, general}
+
+      # Fallback for the DEFAULT alias only. Used when "general" cannot be resolved
+      # — no bindings registry (standalone STR container, embedded, desktop, dev) or
+      # the alias is unbound. In a platform-connected deployment the reserved
+      # "general" alias always resolves, so editing these values has no effect on
+      # which model tools use — set tool_model_alias instead (operators changed
+      # LLM_SERVICE_* here and the tool kept using the platform's model).
+      #
+      # This block does NOT rescue a non-default tool_model_alias: naming a specific
+      # alias means a different model is not an acceptable substitute, so that case
+      # errors instead of falling back here.
+      #
+      # The block must still be present: without it, and with no bindings
+      # registry, sandbox.go skips IPC-server creation entirely and CallLLM inside
+      # the tool errors with "no IPC connection to STR".
+      model:
+        model: ${LLM_SERVICE_PLANNING_MODEL_NAME, openai/gpt-4o}
+        api_base: ${LLM_SERVICE_ENDPOINT}
+        api_key: ${LLM_SERVICE_API_KEY}
+
+      artifact_service:
+        type: ${OBJECT_STORAGE_TYPE, filesystem}
+        bucket_name: ${ARTIFACT_BUCKET_NAME}
+        endpoint_url: ${S3_ENDPOINT_URL}
+        base_path: ${SAM_DATA_DIR, ./sam-data}
+
+      volume_root: ${SAM_VOLUME_ROOT, /app/data/volumes}

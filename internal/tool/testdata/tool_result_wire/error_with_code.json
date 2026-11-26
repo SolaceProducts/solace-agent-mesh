@@ -1,0 +1,9 @@
+{
+  "_schema": "ToolResult",
+  "_schema_version": "1.0",
+  "data": null,
+  "data_objects": [],
+  "error_code": "FILE_NOT_FOUND",
+  "message": "File not found: data.csv",
+  "status": "error"
+}

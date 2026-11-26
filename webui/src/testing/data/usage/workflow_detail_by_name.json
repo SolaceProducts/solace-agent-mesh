@@ -1,0 +1,67 @@
+{
+  "scope": "tenant",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "id": null,
+  "name": "Nightly Report",
+  "bookedName": "nightly-report",
+  "window": {
+    "startTime": "2026-07-18T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "comparisonWindow": null,
+  "totals": {
+    "cost": "57.4000000000",
+    "activities": 286,
+    "costPerActivity": "0.2006993006",
+    "shareOfSpend": 4.626868077834561,
+    "costByBucket": {
+      "uncachedInput": "30.0000000000",
+      "output": "25.4000000000",
+      "cacheRead": "1.0000000000",
+      "cacheWrite": "1.0000000000"
+    },
+    "tokens": {
+      "uncachedInput": 4400000,
+      "output": 330000,
+      "cacheRead": 120000,
+      "cacheWrite": 9000
+    },
+    "calls": 2002,
+    "unpricedCalls": 0
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "0.6000000000",
+      "tokens": {
+        "uncachedInput": 3600,
+        "output": 930,
+        "cacheRead": 1620,
+        "cacheWrite": 135
+      },
+      "activities": 3
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "0.7000000000",
+      "tokens": {
+        "uncachedInput": 3600,
+        "output": 930,
+        "cacheRead": 1620,
+        "cacheWrite": 135
+      },
+      "activities": 3
+    }
+  ],
+  "nodes": [
+    {
+      "nodeId": "summarize",
+      "name": "summarize",
+      "kind": null,
+      "cost": "57.4000000000",
+      "shareOfWorkflow": 100,
+      "changePercent": null
+    }
+  ]
+}

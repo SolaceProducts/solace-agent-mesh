@@ -1,0 +1,6 @@
+version: 1
+tools:
+  html_to_pdf:
+    runtime: go
+    executable: ./html_to_pdf
+    timeout_seconds: 180

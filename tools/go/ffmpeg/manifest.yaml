@@ -1,0 +1,6 @@
+version: 1
+tools:
+  ffmpeg_tools:
+    runtime: go
+    executable: ./ffmpeg
+    timeout_seconds: 360

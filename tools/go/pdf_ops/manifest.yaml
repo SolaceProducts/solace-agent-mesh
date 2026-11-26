@@ -1,0 +1,6 @@
+version: 1
+tools:
+  pdf_ops:
+    runtime: go
+    executable: ./pdf_ops
+    timeout_seconds: 120

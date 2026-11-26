@@ -1,0 +1,69 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sam-tool-sdk"
+version = "0.1.5"
+description = "Standalone SDK for developing Solace Agent Mesh Python tools"
+readme = "README.md"
+license = "Apache-2.0"
+requires-python = ">=3.10"
+authors = [
+    { name = "Solace Corporation" },
+]
+keywords = ["solace", "agent-mesh", "sam", "tool", "sdk", "llm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: Apache Software License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = []
+
+[project.urls]
+Homepage = "https://github.com/SolaceProducts/solace-agent-mesh"
+Repository = "https://github.com/SolaceProducts/solace-agent-mesh"
+Community = "https://community.solace.com/c/solace-agent-mesh"
+
+[project.optional-dependencies]
+# pydantic is optional: the SDK core (ToolResult/DataObject, the tool runner,
+# artifact handling) is pure-stdlib. pydantic is only consulted lazily, when a
+# tool author declares a pydantic BaseModel as a tool parameter
+# (dynamic_tool.py resolves it at runtime and degrades gracefully when absent).
+# Keeping it out of the hard dependency set lets the bundled tool run under any
+# CPython 3.10+ the STR ships without needing an ABI-matched pydantic_core wheel.
+pydantic = [
+    "pydantic==2.14.3",
+]
+dev = [
+    "pytest==9.2.0",
+    "pytest-asyncio==1.5.0",
+    "pydantic==2.14.3",
+]
+
+[tool.hatch.build.targets.wheel]
+packages = ["sam_tool_sdk"]
+
+[tool.hatch.build.targets.sdist]
+# Keep the public sdist to what an installer needs. RELEASING.md is the
+# internal maintainer runbook (names the private repo + publish workflow);
+# uv.lock and .gitignore are repo-local dev artifacts.
+exclude = [
+    "RELEASING.md",
+    "uv.lock",
+    ".gitignore",
+]
+
+[tool.uv]
+# uv before 0.9.17 ignores a relative exclude-newer and would lock without the window.
+required-version = ">=0.9.17"
+# A release has to be a week old before uv will resolve to it, so a
+# compromised version is usually pulled before it reaches this lockfile.
+exclude-newer = "7 days"

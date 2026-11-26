@@ -1,0 +1,179 @@
+[project]
+name = "sam-link-sdk"
+version = "0.1.0"
+description = "Solace Agent Mesh Link SDK: lets agents built with other frameworks join a Solace Agent Mesh as first-class agents"
+readme = "README.md"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
+authors = [{ name = "Solace Corporation" }]
+maintainers = [{ name = "Solace Corporation" }]
+requires-python = ">=3.11"
+keywords = ["solace", "agent-mesh", "agents", "a2a", "langchain", "langgraph", "openai-agents", "adk", "crewai",
+            "strands", "agent-framework", "opentelemetry"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Framework :: AsyncIO",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Programming Language :: Python :: 3.14",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+    "Typing :: Typed",
+]
+# The core and the agent link; each framework adapter and runtime wrapper has its own extra.
+dependencies = [
+    "websockets>=13",
+]
+
+[project.urls]
+Homepage = "https://github.com/SolaceProducts/solace-agent-mesh"
+Repository = "https://github.com/SolaceProducts/solace-agent-mesh"
+Community = "https://community.solace.com/c/solace-agent-mesh"
+Documentation = "https://github.com/SolaceProducts/solace-agent-mesh/tree/main/python/sam-link-sdk/docs"
+Changelog = "https://github.com/SolaceProducts/solace-agent-mesh/blob/main/python/sam-link-sdk/CHANGELOG.md"
+
+[project.scripts]
+sam-link-sdk = "sam_link_sdk.cli:main"
+
+[project.optional-dependencies]
+langchain = [
+    "langchain-core>=1.6.9",
+]
+foundry = [
+    "azure-ai-agentserver-invocations>=1.1.0",
+]
+agentcore = [
+    "bedrock-agentcore>=1.25",
+    "boto3>=1.40",
+]
+openai = [
+    "langchain-core>=1.6.9",
+    "langchain-openai>=1.7",
+]
+langgraph = [
+    "langchain-core>=1.6.9",
+    "langgraph>=1.2.14",
+]
+openai-agents = [
+    "openai-agents>=0.20.0",
+]
+adk = [
+    "google-adk>=2.14.1",
+    "litellm>=1.104",
+]
+crewai = [
+    "crewai>=1.15.27",
+]
+strands = [
+    "strands-agents[openai]>=1.61.1",
+]
+agent-framework = [
+    "agent-framework-core>=1.22.0",
+    "agent-framework-openai>=1.17",
+]
+otel = [
+    "opentelemetry-sdk>=1.45.2",
+    "opentelemetry-exporter-otlp-proto-http>=1.45.2",
+]
+
+[dependency-groups]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6",
+    "langchain-core>=1.6.9",
+    "langchain-openai>=1.7",
+    "langgraph>=1.2.14",
+    "openai-agents>=0.20.0",
+    "google-adk>=2.14.1",
+    "litellm>=1.104",
+    "crewai[anthropic]>=1.15.27",
+    "strands-agents[openai]>=1.61.1",
+    "agent-framework-core>=1.22.0",
+    "agent-framework-openai>=1.17",
+    # The serverless runtimes' wrappers, so their tests run instead of skipping.
+    "azure-ai-agentserver-invocations>=1.1.0",
+    "bedrock-agentcore>=1.25",
+    "boto3>=1.40",
+]
+contract = [
+    "websockets>=13",
+]
+lint = [
+    "ruff>=0.14",
+]
+typecheck = [
+    "mypy>=1.13",
+]
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/sam_link_sdk"]
+
+[tool.hatch.build.targets.sdist]
+only-include = ["src/sam_link_sdk", "README.md", "LICENSE", "CHANGELOG.md", "pyproject.toml"]
+
+[tool.uv]
+# A release has to be a week old before uv will resolve to it, so a
+# compromised version is usually pulled before it reaches this lockfile.
+exclude-newer = "7 days"
+
+[tool.ruff]
+target-version = "py311"
+line-length = 120
+
+[tool.ruff.lint]
+# ERA catches commented-out code; tests/test_comments.py holds the code to the repository's no-comments rule.
+select = ["E", "F", "W", "I", "B", "UP", "ERA", "SIM", "RUF"]
+# E501: ruff format wraps code at line-length but leaves a long string or comment whole, which is better than splitting it. The rest are style preferences this codebase
+# does not follow: contextlib.suppress (SIM105), unpacking over concatenation (RUF005), next() over a one-item
+# slice (RUF015), __all__ grouped by meaning rather than sorted (RUF022) and ClassVar on test fakes (RUF012).
+ignore = ["E501", "SIM105", "RUF005", "RUF012", "RUF015", "RUF022"]
+# Codes named in noqa comments for rule sets this config does not select, so RUF100 keeps them.
+external = ["N", "S", "BLE"]
+
+[tool.ruff.lint.flake8-bugbear]
+extend-immutable-calls = ["sam_link_sdk.link.v2.Limits"]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
+testpaths = ["tests"]
+markers = [
+    "contract: runs SDK agents against a real SAM-Go build (SAM_GO_BIN or SAM_GO_DIR); see docs/contributing/testing.md",
+    "e2e: runs the framework examples as their own processes on a real SAM-Go build; see docs/contributing/testing.md",
+    "soak: runs one agent under load on a real SAM-Go for minutes, restarting SAM; see docs/contributing/testing.md",
+]
+addopts = "-m 'not contract and not e2e and not soak'"
+
+[tool.mypy]
+python_version = "3.11"
+files = ["src/sam_link_sdk"]
+check_untyped_defs = true
+warn_unused_ignores = true
+warn_redundant_casts = true
+
+# Frameworks and runtimes that ship no type information, or that the SDK imports only inside the process that hosts it.
+[[tool.mypy.overrides]]
+module = ["boto3", "hermes_cli.plugins", "tools.registry", "tools.approval_context", "tools.terminal_tool", "tools.async_delegation", "agent.message_sanitization"]
+ignore_missing_imports = true
+
+[tool.coverage.run]
+source = ["sam_link_sdk"]
+branch = true
+
+[tool.coverage.report]
+# The unit tests cover 92% of lines and branches. The floor sits a little below so a change that adds code without
+# tests fails CI, while the few branches that differ between Python versions do not.
+fail_under = 90
+skip_covered = true
+show_missing = true

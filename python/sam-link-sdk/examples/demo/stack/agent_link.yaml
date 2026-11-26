@@ -1,0 +1,48 @@
+# The agent link entrypoint for the claims desk: SAM's configuration for the eight demo agents (docs/agent-link.md,
+# "Configure SAM"). Each agent connects here over one WebSocket, at
+# ws://<sam host>:<port>/gw/agent-link/v1/connect, and may call only the peers listed for it.
+#
+# Each agent is known by the SHA-256 digest of its own token, never the token. link_tokens.sh issues the tokens and
+# writes the digests to tokens/digests.env; export them before SAM reads this file:
+#
+#   set -a; . examples/demo/stack/tokens/digests.env; set +a
+#
+# The broker settings are the ones the docs show for a local `sam run --embedded`; change them to your deployment's.
+
+apps:
+  - name: desk_agent_link
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, true}
+      broker_url: ${SOLACE_BROKER_URL, ""}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+    app_config:
+      namespace: ${NAMESPACE, sam}
+      gateway_id: agent-link
+      authorization_service:
+        type: none
+      gateway_adapter:
+        type: agent_link
+        adapter_config:
+          agents:
+            - name: claims-intake
+              token_sha256: ${CLAIMS_INTAKE_TOKEN_SHA256}
+              peers: [policy-desk, fraud-screen, repair-estimator, settlement-review]
+            - name: policy-desk
+              token_sha256: ${POLICY_DESK_TOKEN_SHA256}
+              peers: [regulations]
+            - name: regulations
+              token_sha256: ${REGULATIONS_TOKEN_SHA256}
+            - name: fraud-screen
+              token_sha256: ${FRAUD_SCREEN_TOKEN_SHA256}
+              peers: [records-lookup]
+            - name: records-lookup
+              token_sha256: ${RECORDS_LOOKUP_TOKEN_SHA256}
+            - name: repair-estimator
+              token_sha256: ${REPAIR_ESTIMATOR_TOKEN_SHA256}
+              peers: [parts-pricing]
+            - name: parts-pricing
+              token_sha256: ${PARTS_PRICING_TOKEN_SHA256}
+            - name: settlement-review
+              token_sha256: ${SETTLEMENT_REVIEW_TOKEN_SHA256}

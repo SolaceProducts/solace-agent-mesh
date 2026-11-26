@@ -1,0 +1,251 @@
+!include auth/oidc_providers.yaml
+
+trust_manager:
+  enabled: ${TRUST_MANAGER_ENABLED, false}
+  card_publish_interval_seconds: ${TRUST_CARD_PUBLISH_INTERVAL, 10}
+  card_expiration_days: 7
+  verification_mode: "strict"
+  clock_skew_tolerance_seconds: 300
+  jwt_default_ttl_seconds: 3600
+  jwt_max_ttl_seconds: 86400
+  startup_wait_timeout_seconds: ${TRUST_STARTUP_WAIT_TIMEOUT, 10}
+  fail_on_timeout: false
+
+agent_identity:
+  key_mode: auto
+
+# Runtime metrics surface. Off by default (SAM_OBSERVABILITY_ENABLED unset →
+# enabled: false → no Prometheus /metrics mount, no OTLP exporter), so every
+# tier that does not opt in behaves exactly as before. When SAM_OBSERVABILITY_ENABLED=true
+# the Prometheus surface is mounted on the management server (/metrics) and the
+# single OTLP exporter below pushes metrics to SAM_OTLP_ENDPOINT. The exporter
+# only ships metrics when SAM_OTLP_METRICS=true; logs stay off (task-logging is
+# a separate path). Shape mirrors configs/examples/otel_exporters_config.yaml.
+management_server:
+  observability:
+    enabled: ${SAM_OBSERVABILITY_ENABLED, false}
+    metric_prefix: ${SAM_METRIC_PREFIX, sam}
+    path: /metrics
+  exporters:
+    - type: otlp
+      endpoint: ${SAM_OTLP_ENDPOINT, http://localhost:4318}
+      protocol: ${SAM_OTLP_PROTOCOL, http}
+      compression: gzip
+      metrics: ${SAM_OTLP_METRICS, false}
+      logs: false
+
+apps:
+  - name: a2a_webui_backend_app
+    broker:
+      dev_mode: ${SOLACE_DEV_MODE, false}
+      broker_url: ${SOLACE_BROKER_URL, ws://localhost:8008}
+      broker_username: ${SOLACE_BROKER_USERNAME, default}
+      broker_password: ${SOLACE_BROKER_PASSWORD, default}
+      broker_vpn: ${SOLACE_BROKER_VPN, default}
+      temporary_queue: ${USE_TEMPORARY_QUEUES, true}
+    app_config:
+      namespace: ${NAMESPACE, solace-agent-mesh}
+      session_secret_key: ${SESSION_SECRET_KEY, please_change_me_in_production}
+      # A browser session with no user activity for this long is logged out
+      # (default 4 hours; 0 disables). Only applies when login is enabled.
+      sam_access_token:
+        idle_timeout_seconds: ${SESSION_IDLE_TIMEOUT_SECONDS, 14400}
+
+      model:
+        model: ${LLM_SERVICE_GENERAL_MODEL_NAME, openai/gpt-4o}
+        api_base: ${LLM_SERVICE_ENDPOINT, http://localhost:12345}
+        api_key: ${LLM_SERVICE_API_KEY, dummy}
+
+      gateway_id: ${WEBUI_GATEWAY_ID, webui-gateway}
+      fastapi_host: ${FASTAPI_HOST, 0.0.0.0}
+      fastapi_port: ${FASTAPI_PORT, 8800}
+      fastapi_https_port: ${FASTAPI_HTTPS_PORT}
+      ssl_keyfile: ${SSL_KEYFILE}
+      ssl_certfile: ${SSL_CERTFILE}
+      ssl_keyfile_password: ${SSL_KEYFILE_PASSWORD}
+      cors_allowed_origins:
+        - "${FRONTEND_SERVER_URL}"
+        - "http://localhost:3000"
+        - "http://127.0.0.1:3000"
+      cors_allowed_origin_regex: ${CORS_ALLOWED_ORIGIN_REGEX}
+
+      enable_embed_resolution: ${ENABLE_EMBED_RESOLUTION, true}
+      gateway_artifact_content_limit_bytes: ${GATEWAY_ARTIFACT_LIMIT_BYTES, 10000000}
+
+      system_purpose: >
+        The system is an AI Chatbot with agentic capabilities.
+        It will use the agents available to provide information,
+        reasoning and general assistance for the users in this system.
+        **Always return useful artifacts and files that you create to the user.**
+        Provide a status update before each tool call.
+        Your external name is Agent Mesh.
+
+      response_format: >
+        Responses should be clear, concise, and professionally toned.
+        Format responses to the user in Markdown using appropriate formatting.
+
+      frontend_server_url: ${FRONTEND_SERVER_URL}
+      frontend_welcome_message: ${FRONTEND_WELCOME_MESSAGE, How can I assist you today?}
+      frontend_app_name: ${FRONTEND_APP_NAME, Solace Agent Mesh}
+      frontend_collect_feedback: ${FRONTEND_COLLECT_FEEDBACK, true}
+
+      # Publish each submitted thumbs rating to {namespace}/sam/v1/feedback for
+      # downstream consumers. Off by default: the event carries the user's
+      # free-text comment and user id, so enabling it is a deliberate choice
+      # about what leaves the gateway's database. The topic is fixed and not
+      # configurable; route it into your own taxonomy with a broker bridge.
+      #
+      # This is the YAML/env layer. An admin can override enabled and
+      # include_task_info per instance via publishFeedback and
+      # feedbackTaskInfoLevel on the platform's webuiSettings, which takes
+      # effect without recreating the pod.
+      feedback_publishing:
+        enabled: ${FEEDBACK_PUBLISHING_ENABLED, false}
+        include_task_info: ${FEEDBACK_INCLUDE_TASK_INFO, none}
+        max_payload_size_bytes: ${FEEDBACK_MAX_PAYLOAD_SIZE_BYTES, 9000000}
+      frontend_disclaimer_text: ${FRONTEND_DISCLAIMER_TEXT, ""}
+      frontend_logo_url: ${FRONTEND_LOGO_URL, ""}
+      frontend_small_logo_url: ${FRONTEND_SMALL_LOGO_URL, ""}
+      frontend_auth_login_url: ${EXTERNAL_AUTH_SERVICE_URL}/api/v1/auth/login
+      frontend_use_authorization: ${FRONTEND_USE_AUTHORIZATION, false}
+      frontend_redirect_url: ${FRONTEND_REDIRECT_URL}
+
+      # Split topology: tell the frontend where the separately-hosted platform
+      # service lives so it enables agent/connector management. Empty (default)
+      # = platform mounted behind this gateway, or disabled. The platform must
+      # allow the browser origin in its cors_allowed_origins.
+      platform_service:
+        url: ${PLATFORM_SERVICE_URL, }
+
+      background_tasks:
+        default_timeout_ms: ${BACKGROUND_TASKS_TIMEOUT_MS, 3600000}
+
+      external_auth_callback_uri: ${EXTERNAL_AUTH_CALLBACK, http://localhost:8800/api/v1/auth/callback}
+      external_auth_service_url: ${EXTERNAL_AUTH_SERVICE_URL, http://localhost:8080}
+      external_auth_provider: ${EXTERNAL_AUTH_PROVIDER, azure}
+      external_auth_claim_key: ${EXTERNAL_AUTH_CLAIM_KEY, groups}
+
+      # Synthetic-monitor auth path (Datadog Synthetics smoke tests). Disabled
+      # by default; enable per-env via SYNTHETIC_AUTH_* env vars. When enabled,
+      # every field below is required and the gateway fails to start if any is
+      # missing/empty — see internal/entrypoint/oidcauth/synthetic.go.
+      # Env substitution splices raw text before the YAML parse, so the
+      # list-valued vars must be set as YAML flow lists, not bare CSV:
+      #   SYNTHETIC_AUTH_APPID_ALLOWLIST='["<client-app-guid>"]'
+      #   SYNTHETIC_AUTH_ROLES='["SyntheticMonitor"]'
+      synthetic_auth:
+        enabled: ${SYNTHETIC_AUTH_ENABLED, false}
+        tenant_id: ${SYNTHETIC_AUTH_TENANT_ID, ""}
+        audience: ${SYNTHETIC_AUTH_AUDIENCE, ""}
+        role_name: ${SYNTHETIC_AUTH_ROLE_NAME, Synthetics.Smoke}
+        appid_allowlist: ${SYNTHETIC_AUTH_APPID_ALLOWLIST, []}
+        roles: ${SYNTHETIC_AUTH_ROLES, []}
+        # Read-only + chat-send only. Patterns must stay ^...$-anchored —
+        # the parser rejects unanchored regexes to prevent prefix/suffix
+        # widening. On a denied path the gateway logs the exact method/path;
+        # add a specific entry rather than reverting to wildcards.
+        endpoint_allowlist:
+          - { method: GET,  path: "^/api/v1/.*$" }
+          - { method: POST, path: "^/api/v1/message:(stream|send)$" }
+
+      # Must live inside app_config: the gateway parser receives the per-app
+      # config map (httpsse/adapter.go: auth.CreateProvider(..., core.RawConfig())),
+      # so a top-level block is silently dropped and Type falls back to "deny_all".
+      # Under default_rbac the gateway no longer loads RBAC YAML — it calls the
+      # platform service over the broker at token-mint time and bakes the
+      # returned scopes into the JWT. Per-request validation reads scopes from
+      # the JWT claim, so the hot path makes no platform call.
+      #
+      # role_to_scope_definitions_path / user_to_role_assignments_path /
+      # default_roles / idp_claims_config / user_to_role_provider are configured
+      # on the platform service (see platform.yaml authorization_service:).
+      # Leaving them here is accepted for migration but ignored — a WARN will
+      # fire at startup. They will be removed in a future release.
+      #
+      # Modes:
+      #   none         — login on, RBAC bypass (scopes = ["*"])
+      #   deny_all     — login on, all denies (scopes = [])
+      #   default_rbac — login on, broker call to platform at mint
+      authorization_service:
+        type: ${AUTHORIZATION_TYPE, none}
+
+      artifact_service:
+        type: ${OBJECT_STORAGE_TYPE, filesystem}
+        bucket_name: ${ARTIFACT_BUCKET_NAME}
+        endpoint_url: ${S3_ENDPOINT_URL}
+        base_path: ${SAM_DATA_DIR, ./sam-data}
+
+      volume_service:
+        # `enabled` is optional and defaults to TRUE when omitted (an explicit
+        # volume_service block has always meant "volumes on"). Set it to false
+        # to keep the block but disable volumes per environment. Like
+        # scheduler_service.enabled, an omitted `enabled` defaults true; set it
+        # false to opt out.
+        enabled: true
+        type: filesystem
+        root: ${SAM_VOLUME_ROOT, /app/data/volumes}
+        # The volume list (owners, sizes, sessions) must be in a database every
+        # gateway and AWE pod reaches, and must match the AWE's
+        # volume_database_url. Empty keeps it in a SQLite file under `root`,
+        # which is safe only when every process runs on one host.
+        database_url: ${SAM_VOLUME_DATABASE_URL:-${DATABASE_URL:-}}
+
+      session_service:
+        type: ${WEB_UI_SESSION_SERVICE_TYPE, sql}
+        database_url: ${WEB_UI_GATEWAY_DATABASE_URL, sqlite:///${SAM_DATA_DIR}/sam.db}
+        default_behavior: "PERSISTENT"
+
+      auto_title_generation:
+        enabled: true
+
+      task_logging:
+        enabled: ${TASK_LOGGING_ENABLED, true}
+        log_status_updates: ${TASK_LOGGING_STATUS_UPDATES, true}
+        log_artifact_events: ${TASK_LOGGING_ARTIFACT_EVENTS, false}
+        log_file_parts: ${TASK_LOGGING_FILE_PARTS, true}
+        max_file_part_size_bytes: ${TASK_LOGGING_MAX_FILE_PART_SIZE, 10240}
+        # Cap individual string values (e.g. large result bodies) persisted per
+        # event. Bounds task-logger memory and DB write size under load. 0 disables.
+        max_payload_text_bytes: ${TASK_LOGGING_MAX_PAYLOAD_TEXT_BYTES, 16384}
+        hybrid_buffer:
+          enabled: ${TASK_LOGGING_HYBRID_BUFFER, true}
+          flush_threshold: ${TASK_LOGGING_FLUSH_THRESHOLD, 10}
+
+      scheduler_service:
+        enabled: true
+
+      # --- Speech Configuration (STT/TTS) ---
+      # Dormant unless SAM_FEATURE_VOICE_INTERACTION=true: with the flag off the
+      # gateway ignores this block even when provider keys are set.
+      # Python-shape nested block; unresolved ${VAR} placeholders surface as
+      # "not configured" in /api/v1/speech/config and hide the corresponding
+      # settings-dialog UI. computeSpeechSettings (handle_config.go) picks
+      # the first provider whose credentials are present, in the priority
+      # gemini → azure → polly for TTS and openai → azure for STT.
+      speech:
+        stt:
+          provider: ${STT_PROVIDER, openai}
+          openai:
+            api_key: ${OPENAI_API_KEY}
+            model: whisper-1
+          azure:
+            api_key: ${AZURE_SPEECH_KEY}
+            region: ${AZURE_SPEECH_REGION}
+            language: en-US
+        tts:
+          provider: ${TTS_PROVIDER, gemini}
+          gemini:
+            api_key: ${GEMINI_API_KEY}
+            url: ${GEMINI_TTS_URL, https://generativelanguage.googleapis.com/v1beta}
+            default_voice: Kore
+          azure:
+            api_key: ${AZURE_SPEECH_KEY}
+            region: ${AZURE_SPEECH_REGION}
+            default_voice: "en-US-Andrew:DragonHDLatestNeural"
+          polly:
+            aws_access_key_id: ${AWS_ACCESS_KEY_ID}
+            aws_secret_access_key: ${AWS_SECRET_ACCESS_KEY}
+            region: ${AWS_REGION, us-east-1}
+            default_voice: Joanna
+            engine: neural
+

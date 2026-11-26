@@ -1,0 +1,56 @@
+# ============================================================================
+# Solace Agent Mesh — Logging Configuration
+# ============================================================================
+#
+# Standalone logging config for the Go SAM runtime. Loaded only when the
+# LOGGING_CONFIG_PATH environment variable points at this file:
+#
+#     export LOGGING_CONFIG_PATH=$PWD/configs/logging_config.yaml
+#     sam run configs/
+#
+# Without LOGGING_CONFIG_PATH set, the runtime reads the inline `log:` block
+# from each app YAML (e.g. configs/agents/main_orchestrator.yaml) instead.
+# When LOGGING_CONFIG_PATH is set, this file's `log:` block fully replaces
+# the per-app `log:` block.
+#
+# Substitution: env var references with optional defaults are supported.
+# Unset variables without a default value are a fatal startup error (strict
+# semantics, parity with Python SAM). See the values below for syntax.
+#
+# See examples/logging_config_example.yaml in the SAM-Go repo for additional
+# profiles (dev, production-JSON, audit/compliance).
+# ============================================================================
+
+log:
+  # Output format: "text" (human-readable) or "json" (one JSON object per
+  # line, suited to Datadog / Loki / Elasticsearch). The LOG_FORMAT env var
+  # overrides whatever is set here.
+  format: ${LOG_FORMAT, text}
+
+  # Per-stream log levels: DEBUG, INFO, WARN/WARNING, ERROR, CRITICAL
+  # (case-insensitive). stdout_log_level controls stderr; log_file_level
+  # controls the file (if log_file is set). Both default to INFO, including
+  # when the key is omitted entirely.
+  #
+  # Raise a sink to DEBUG only for as long as you are debugging. DEBUG carries
+  # tool stdout/stderr, model completions and third-party response bodies, so
+  # on the file sink it writes that content to disk under whatever retention
+  # is configured below.
+  stdout_log_level: ${SAM_STDOUT_LOG_LEVEL, INFO}
+  log_file_level:   ${SAM_FILE_LOG_LEVEL, INFO}
+
+  # File destination. Empty disables file logging (stderr only).
+  log_file: ${SAM_LOG_FILE, sam.log}
+
+  # Rotation (lumberjack). max_size_mb is the trigger — set to 0 to disable
+  # rotation (file grows unbounded, with a startup WARN). Units are MiB.
+  max_size_mb:  ${SAM_LOG_MAX_SIZE_MB, 50}
+
+  # Number of rotated backups to retain. 0 = unlimited (audit/compliance).
+  max_backups:  ${SAM_LOG_MAX_BACKUPS, 10}
+
+  # Max age of rotated backups in days. 0 = keep forever.
+  max_age_days: ${SAM_LOG_MAX_AGE_DAYS, 0}
+
+  # Gzip rotated backups.
+  compress:     ${SAM_LOG_COMPRESS, false}

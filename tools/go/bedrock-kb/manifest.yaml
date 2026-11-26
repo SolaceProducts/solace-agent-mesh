@@ -1,0 +1,6 @@
+version: 1
+tools:
+  query_bedrock_kb:
+    runtime: go
+    executable: ./bedrock-kb
+    timeout_seconds: 90

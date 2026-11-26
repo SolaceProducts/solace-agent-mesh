@@ -66,15 +66,10 @@ try {
         Invoke-WebRequest -Uri $Asset.browser_download_url -OutFile $Zip -UseBasicParsing
     }
 
-    if ($ExpectedSha256) {
-        $ActualSha256 = (Get-FileHash -Path $Zip -Algorithm SHA256).Hash.ToLowerInvariant()
-        if ($ActualSha256 -ne $ExpectedSha256) { throw "SHA-256 of $($Asset.name) does not match the release; not installing." }
-        Write-Host "Verified SHA-256 $ActualSha256"
-    }
-    else {
-        Write-Warning 'The release does not publish a SHA-256 digest; checking the size only.'
-        if ((Get-Item $Zip).Length -ne $Asset.size) { throw "Downloaded size of $($Asset.name) does not match the release." }
-    }
+    if (-not $ExpectedSha256) { throw "The release does not publish a SHA-256 digest for $($Asset.name); not installing." }
+    $ActualSha256 = (Get-FileHash -Path $Zip -Algorithm SHA256).Hash.ToLowerInvariant()
+    if ($ActualSha256 -ne $ExpectedSha256) { throw "SHA-256 of $($Asset.name) does not match the release; not installing." }
+    Write-Host "Verified SHA-256 $ActualSha256"
 
     if ($env:SAM_INSTALL_DOWNLOAD_ONLY -eq '1') {
         Move-Item -Path $Zip -Destination (Join-Path (Get-Location) $Asset.name) -Force

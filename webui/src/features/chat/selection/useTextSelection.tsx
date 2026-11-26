@@ -1,0 +1,16 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+import { useContext } from "react";
+
+import { TextSelectionContext } from "./TextSelectionContext";
+
+export const useTextSelection = () => {
+    const context = useContext(TextSelectionContext);
+    if (!context) {
+        throw new Error("useTextSelection must be used within TextSelectionProvider");
+    }
+    return context;
+};

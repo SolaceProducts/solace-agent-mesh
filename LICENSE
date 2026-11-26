@@ -6,9 +6,11 @@ Parameters
 Licensor:             Solace Corporation
 Licensed Work:        Solace Agent Mesh, version 2.409.2 or later, including the
                       contents of this repository except the examples/
-                      directory. The Licensed Work does not include the Agent
-                      Mesh Desktop Application installers and packages
-                      attached to this repository's GitHub releases.
+                      directory and the paths that the NOTICE file lists as
+                      licensed under the Apache License, Version 2.0. The
+                      Licensed Work does not include the Agent Mesh Desktop
+                      Application installers and packages attached to this
+                      repository's GitHub releases.
                       The Licensed Work is (c) Solace Corporation.
 Additional Use Grant: None
 Change Date:          Four years from the date the Licensed Work is published.

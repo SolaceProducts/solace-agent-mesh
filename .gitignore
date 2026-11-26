@@ -1,3 +1,57 @@
 # Local notes and assistant config, not part of the repo
 /_*
 .claude/
+
+# Build output
+/bin/
+/cmd/*/__debug*
+*.exe
+*.test
+go.windows.mod
+go.windows.sum
+
+# Files that make generate writes
+pkg/schema/schemas/connector.schema.yaml
+internal/platform/openapispec/spec/sam-openapi.yaml
+
+# Web interface and desktop frontend builds
+node_modules/
+webui/static/
+webui/dist/
+webui/coverage/
+internal/desktop/frontend/dist/
+internal/desktop/onboard/dist/
+
+# Skill tool binaries that the build writes into the embedded skill tree
+internal/builtinskills/files/*/tools/test_harness/test_harness
+internal/builtinskills/files/*/tools/test_harness/test_harness.exe
+internal/builtinskills/files/sam-excel/tools/xlsx/xlsx
+internal/builtinskills/files/sam-excel/tools/xlsx/xlsx.exe
+internal/builtinskills/files/sam-docx/tools/docx/docx
+internal/builtinskills/files/sam-docx/tools/docx/docx.exe
+internal/builtinskills/files/sam-build-apply/tools/build_apply/build_apply
+internal/builtinskills/files/sam-build-apply/tools/build_apply/build_apply.exe
+
+# Test and local run output
+coverage.out
+coverage_*.out
+stim_output/
+sam-data/
+.sam/
+*.db
+*.db-shm
+*.db-wal
+*.log
+*.key
+*.pem
+
+# Local environment
+.env
+.env.local
+.env.*.local
+.venv/
+__pycache__/
+*.pyc
+.DS_Store
+.idea/
+*.swp

@@ -1,0 +1,17 @@
+# The skips a unit test run may have. ci/check_skips.py fails the run on any other.
+#
+# Each entry is `<test id prefix> | <text the skip reason contains>`, and both must match. A test id is pytest's
+# (`tests/test_x.py::test_name[param]`); a module skipped as a whole is its path alone. Every entry needs a comment
+# above it saying why the skip is fine. Keep entries narrow: a broad one hides the next framework that stops importing.
+
+# Hermes is not on PyPI and is not in uv.lock: its tests need a checkout installed by hand (docs/contributing/testing.md).
+tests/test_hermes.py | could not import 'run_agent'
+
+# The Hermes cancel scenario interrupts the AIAgent, which needs Hermes itself; test_hermes covers it.
+tests/test_adapter_conformance.py::test_adapter_conformance[hermes-cancel] | needs Hermes itself
+
+# The Hermes example imports Hermes, which is installed by hand (see above).
+tests/test_examples.py::test_each_example_imports_and_offers_the_same_tools[claims_triage_hermes] | run_agent is not installed
+
+# This combination cannot exist: a CrewAI tool run natively on the event loop has no approval to wait for.
+tests/test_refusal_budgets.py::test_crewai_a_refusal_never_spends_the_tools_usage_limit_and_the_limit_holds_for_calls_that_run[approval_denied-native_on_loop] | no approval can be waited for on the loop

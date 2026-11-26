@@ -70,8 +70,6 @@ gh_curl() {
   fi
 }
 
-file_size() { wc -c < "$1" | tr -d ' '; }
-
 sha256_of() {
   if command -v sha256sum >/dev/null 2>&1; then sha256sum "$1" | awk '{print $1}'
   elif command -v shasum >/dev/null 2>&1; then shasum -a 256 "$1" | awk '{print $1}'
@@ -85,25 +83,24 @@ load_release() {
     || die "could not read the latest release of $REPO (for a private repository, set GITHUB_TOKEN)"
 }
 
-# Sets ASSET_NAME, ASSET_API_URL, ASSET_URL, ASSET_SHA256 and ASSET_SIZE for the
+# Sets ASSET_NAME, ASSET_API_URL, ASSET_URL and ASSET_SHA256 for the
 # asset of the latest release whose name ends with $1.
 find_asset() {
   load_release
   row="$(printf '%s' "$RELEASE_JSON" | tr ',{}' '\n\n\n' | awk -v suffix="$1" '
     function val(s) { sub(/^[^:]*:[ \t]*"?/, "", s); sub(/"?[ \t]*$/, "", s); return s }
-    /^[ \t]*"url":[ \t]*"[^"]*\/releases\/assets\/[0-9]+"/ { api = val($0); name = ""; digest = ""; size = ""; next }
+    /^[ \t]*"url":[ \t]*"[^"]*\/releases\/assets\/[0-9]+"/ { api = val($0); name = ""; digest = ""; next }
     /^[ \t]*"name":/ { if (name == "") name = val($0); next }
-    /^[ \t]*"size":/ { size = val($0); next }
     /^[ \t]*"digest":/ { digest = val($0); next }
     /^[ \t]*"browser_download_url":/ {
       n = length(suffix)
       if (length(name) > n && substr(name, length(name) - n + 1) == suffix) {
         sub(/^sha256:/, "", digest); if (digest == "null") digest = ""
-        printf "%s|%s|%s|%s|%s\n", name, api, val($0), digest, size; exit
+        printf "%s|%s|%s|%s\n", name, api, val($0), digest; exit
       }
     }')"
   [ -n "$row" ] || die "the latest release of $REPO has no asset ending in $1"
-  IFS="|" read -r ASSET_NAME ASSET_API_URL ASSET_URL ASSET_SHA256 ASSET_SIZE <<EOF
+  IFS="|" read -r ASSET_NAME ASSET_API_URL ASSET_URL ASSET_SHA256 <<EOF
 $row
 EOF
 }
@@ -118,13 +115,10 @@ download_asset() {
     curl -fL --progress-bar -o "$dest" "$ASSET_URL" || die "download failed: $ASSET_URL"
   fi
   actual="$(sha256_of "$dest")"
-  if [ -n "$ASSET_SHA256" ] && [ -n "$actual" ]; then
-    [ "$actual" = "$ASSET_SHA256" ] || die "SHA-256 of $ASSET_NAME does not match the release; not installing"
-    say "Verified SHA-256 $actual"
-  else
-    warn "could not verify the SHA-256 digest; checking the size only"
-    [ "$(file_size "$dest")" = "$ASSET_SIZE" ] || die "downloaded size of $ASSET_NAME does not match the release"
-  fi
+  [ -n "$ASSET_SHA256" ] || die "the release does not publish a SHA-256 digest for $ASSET_NAME; not installing"
+  [ -n "$actual" ] || die "neither sha256sum nor shasum is available to verify $ASSET_NAME; install coreutils (Linux) or perl (macOS) and retry"
+  [ "$actual" = "$ASSET_SHA256" ] || die "SHA-256 of $ASSET_NAME does not match the release; not installing"
+  say "Verified SHA-256 $actual"
 }
 
 detect_linux_arch() {

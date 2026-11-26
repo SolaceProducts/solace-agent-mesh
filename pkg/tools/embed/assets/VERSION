@@ -1,0 +1,23 @@
+chart.umd.min.js
+version: 4.4.0
+source: npm chart.js@4.4.0, dist/chart.umd.js (Chart.js's own minified UMD build)
+tarball: https://registry.npmjs.org/chart.js/-/chart.js-4.4.0.tgz
+tarball integrity: sha512-vQEj6d+z0dcsKLlQvbKIMYFHd3t8W/7L2vfJIbYcfyPcRx92CsHqECpueN8qVGNlKyDcr5wBrYAYKnfu/9Q1hQ==
+file sha256: 321e3a3fa98da4aaa957d10be57cbb514de0989eed8f9d726b5d05902cd01904
+license: MIT (https://github.com/chartjs/Chart.js/blob/master/LICENSE.md)
+
+Vendored (not CDN-loaded) so the activity report renders in air-gapped
+deployments and executes no unpinned third-party payload in the SAM UI origin.
+The file is the npm-published dist/chart.umd.js — do NOT use a CDN .min.js
+alias: jsdelivr re-wraps it with a banner ("Do NOT use SRI with dynamically
+generated files") so those bytes are not stable.
+
+To upgrade:
+1. curl -sSL https://registry.npmjs.org/chart.js/-/chart.js-<ver>.tgz -o chart.tgz
+2. Verify the tarball against the registry's published dist.integrity:
+     curl -sS https://registry.npmjs.org/chart.js | \
+       python3 -c "import sys,json;print(json.load(sys.stdin)['versions']['<ver>']['dist']['integrity'])"
+     echo -n "sha512-"; openssl dgst -sha512 -binary chart.tgz | openssl base64 -A
+   The two must match before trusting the file.
+3. tar xzf chart.tgz && cp package/dist/chart.umd.js chart.umd.min.js
+4. Update version/integrity/sha256 above, then rerun the pkg/tools tests.

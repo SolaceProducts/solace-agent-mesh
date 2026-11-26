@@ -1,0 +1,53 @@
+=== schema: mcp ===
+## type: mcp
+
+**MCP**
+
+Expose Agent Mesh agents as Model Context Protocol tools for Claude Code, MCP Inspector, IDEs, and other MCP-compatible clients
+
+> ⚠ When enableAuth is on, your IdP client must allowlist the per-entrypoint redirect URI <external-base>/gw/<gateway_id>/oauth/callback before clients can sign in
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `enableAuth` | `select` | yes | `true` | one of: true, false | Controls authentication only: turning it off does NOT opt the entrypoint out of RBAC. When on, the entrypoint requires a Bearer token on every tool call and joins the cluster's OAuth flow (per-entrypoint signer, IdP from EXTERNAL_AUTH_PROVIDER, scopes from the cluster RBAC catalog). When off, no token is required and calls run as defaultUserIdentity, or as the entrypoint's service account when that field is empty — and are still authorized against that principal's scopes, which also narrows the tools/list response. No-auth / local-dev only. |
+| `defaultUserIdentity` | `string` |  |  | max len 255 | User identity attributed to all tool calls when enableAuth is off. Optional — leave empty to run those calls as the entrypoint's service account, which is what carries RBAC scopes. Rejected at startup when enableAuth is on (HTTP transport carries identity via the Bearer token, not this field). |
+| `runAs` | `system_user_select` |  |  |  | [advanced] Service account unauthenticated tool calls run as when no default user identity is set. Only applies when OAuth is disabled; OAuth-authenticated calls keep the caller's identity. Leave empty for the built-in default service account, which can invoke any agent or workflow; name a scoped service account to narrow what this entrypoint can reach. |
+| `allowedRedirectUris` | `array<object>` |  | `[]` |  | Allowlist of MCP-client redirect URIs the entrypoint accepts on /oauth/authorize. Loopback hosts (http://127.0.0.1, http://localhost) match any port per RFC 8252; everything else must match exactly. Empty list with enableAuth on is a known security gap — RFC 7591 DCR is unauthenticated, so any caller could register an attacker-controlled redirect URI. The entrypoint emits a startup WARN when empty. |
+| `serverName` | `string` |  | `SAM MCP Entrypoint` | len 1–255 | Name reported to MCP clients in server metadata. Defaults to 'SAM MCP Entrypoint'. |
+| `serverDescription` | `string` |  |  | max len 1024 | Description reported to MCP clients in server metadata. |
+| `includeTools` | `array<object>` |  | `[]` |  | Allowlist of tool-name patterns to expose. Empty = expose all. Patterns are exact match (case-insensitive) or regex when they contain special chars. Filters check against agent name, skill name, AND final tool name. |
+| `excludeTools` | `array<object>` |  | `[]` |  | Denylist of tool-name patterns. Takes precedence over includeTools when both match. |
+| `corsAllowedOrigins` | `array<object>` |  | `[]` |  | Allowlist of browser Origin values accepted from browser-based MCP clients (MCPJam, MCP Inspector). Empty = allow all (server-to-server MCP clients never trigger CORS, so wide-open is harmless for them). Required for browser clients on a different origin than the entrypoint — without a matching origin the browser's preflight OPTIONS is blocked. Typical local-dev values: http://127.0.0.1:3010 (MCPJam), http://localhost:6274 (MCP Inspector). |
+| `enableFileInput` | `radio` |  | `false` | one of: false, true | Lets MCP clients send files with a tool call. |
+| `corsAllowedOriginRegex` | `string` |  |  | max len 1024 | [advanced] Optional regex matched in addition to corsAllowedOrigins, for clients on drifting ports (e.g. MCP Inspector picks a random localhost port each launch). Auto-anchored in ^(?:…)$. Example: ^http://localhost:\d+$ |
+| `taskTimeoutSeconds` | `number` |  | `300` | range 1–3600 | [advanced] How long the entrypoint waits for an agent to complete a tool call before timing out the MCP response. Defaults to 300. |
+| `userIdClaim` | `select` |  | `email` | one of: email, sub, upn, preferred_username | [advanced] OIDC claim canonicalized as the Agent Mesh user_id. All choices fall back to 'sub' when the primary claim is missing or carries a sentinel. Defaults to email. |
+| `transport` | `select` |  | `sse` | one of: sse, http, stdio | [advanced] MCP transport. 'sse' (alias 'http') serves the modern MCP Streamable HTTP transport. 'stdio' disables the HTTP surface (advanced use only). |
+| `stateRedirectionEnabled` | `select` |  | `true` | one of: true, false | When on, this entrypoint routes its OAuth callback through a single dispatcher entrypoint (the WebUI's /api/v1/auth/callback by default) instead of its own /gw/<slug>/oauth/callback, so the IdP only needs one redirect URI allowlisted for every MCP entrypoint. Leave the dispatcher URL below blank to auto-derive it from the cluster WebUI base. Turn off only for a self-managed IdP that allowlists each entrypoint's own callback. |
+| `oauthDispatcherUrl` | `string` |  |  | max len 1024; matches regex | Absolute URL of the dispatcher entrypoint's OAuth callback the IdP redirects to (e.g. https://your-host/api/v1/auth/callback). Leave blank to auto-derive it from the cluster WebUI base — set it only to target a non-WebUI dispatcher. The dispatcher verifies the state JWS and forwards to this entrypoint's /oauth/finish. |
+| `systemPurpose` | `textarea` |  |  | max len 4000 | [advanced] Describes to agents what this entrypoint is for. Stamped onto every task this entrypoint submits and available to agent prompts as system_purpose. |
+| `responseFormat` | `textarea` |  |  | max len 4000 | [advanced] Tells agents how to shape their replies for this entrypoint (length, tone, markdown support). Stamped onto every task this entrypoint submits and available to agent prompts as response_format. |
+
+=== example: mcp ===
+kind: entrypoint
+name: example_mcp
+description: "Example mcp entrypoint. Replace with a real description (10+ chars)."
+spec:
+  type: mcp
+  values:
+    enableAuth: "true"
+    # optional: allowedRedirectUris: null  # value of type array<object>
+    # optional: serverName: "SAM MCP Entrypoint"
+    # optional: serverDescription: "..."
+    # optional: includeTools: null  # value of type array<object>
+    # optional: excludeTools: null  # value of type array<object>
+    # optional: corsAllowedOrigins: null  # value of type array<object>
+    # optional: enableFileInput: "false"
+    # optional: corsAllowedOriginRegex: "..."
+    # optional: taskTimeoutSeconds: 300
+    # optional: userIdClaim: "email"
+    # optional: transport: "sse"
+    # optional: stateRedirectionEnabled: "true"
+    # optional: oauthDispatcherUrl: "..."
+    # optional: systemPurpose: "..."
+    # optional: responseFormat: "..."

@@ -1,0 +1,333 @@
+type: email
+subtypes:
+  - subtype: smtp
+    name: "SMTP Email"
+    description: "Send emails via SMTP server"
+    usage_guidance: |
+      Use the SMTP Email connector when the user wants an agent to send outbound
+      emails. The connector provides a send_email tool that agents can use to
+      compose and send emails with optional HTML bodies and attachments.
+
+      The user must provide the SMTP server host, port, and authentication
+      credentials. TLS should be enabled for security (STARTTLS or implicit TLS).
+
+      Authentication options:
+      - PLAIN/LOGIN: Traditional username/password authentication
+      - OAuth 2.0: Modern authentication for Microsoft 365 and Google Workspace
+        - Microsoft 365: Use Azure AD app registration with SMTP.Send permission
+        - Google: Use Google Cloud OAuth with Gmail API scope
+
+      IMPORTANT: The connector enforces a recipient allowlist — agents can only
+      send to approved domains. The envelope_from address is fixed and cannot be
+      changed by agents.
+
+      For passwords and credentials not provided, use <<__SAM_REQUIRED__>> as
+      the placeholder value.
+    warning: "The send_email tool allows agents to send emails externally. Configure the recipient allowlist carefully to prevent unauthorized outbound communication. All sent emails are logged for audit purposes."
+    field_schema:
+      - name: smtp_host
+        type: string
+        label: "SMTP Server Host"
+        required: true
+        order: 1
+        hint: "SMTP server hostname (e.g., smtp.office365.com for Microsoft, smtp.gmail.com for Google)"
+        validation:
+          min_length: 1
+          max_length: 255
+          pattern: "^((([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])|(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9])\\.)*([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\\-]*[a-zA-Z0-9]))$"
+      - name: smtp_port
+        type: number
+        label: "SMTP Port"
+        required: false
+        order: 2
+        default: 587
+        placeholder: "587"
+        hint: "SMTP port (587 for STARTTLS, 465 for implicit TLS, 25 for plain)"
+        validation:
+          min: 1
+          max: 65535
+      - name: smtp_tls
+        type: select
+        label: "TLS Mode"
+        required: true
+        order: 3
+        default: "starttls"
+        hint: "TLS encryption mode for SMTP connection"
+        options:
+          - label: "STARTTLS (Recommended)"
+            value: "starttls"
+            description: "Upgrade plain connection to TLS (port 587)"
+          - label: "Implicit TLS"
+            value: "tls"
+            description: "Direct TLS connection (port 465)"
+          - label: "None (Not Recommended)"
+            value: "none"
+            description: "Plain text connection - use only for testing"
+      - name: smtp_auth_type
+        type: select
+        label: "Authentication Type"
+        required: true
+        order: 4
+        default: "plain"
+        hint: "SMTP authentication method"
+        options:
+          - label: "PLAIN"
+            value: "plain"
+            description: "Standard PLAIN authentication with username/password"
+          - label: "LOGIN"
+            value: "login"
+            description: "LOGIN authentication (for older servers)"
+          - label: "OAuth 2.0 (Microsoft 365)"
+            value: "oauth_microsoft"
+            description: "OAuth 2.0 authentication for Microsoft 365 / Outlook"
+          - label: "OAuth 2.0 (Google)"
+            value: "oauth_google"
+            description: "OAuth 2.0 authentication for Google Workspace / Gmail"
+          - label: "None"
+            value: "none"
+            description: "No authentication required"
+      # PLAIN auth fields
+      - name: smtp_username
+        type: string
+        label: "SMTP Username"
+        required: true
+        order: 5
+        hint: "Username for SMTP authentication (usually your email address)"
+        visible_when:
+          smtp_auth_type: "plain"
+        validation:
+          min_length: 1
+          max_length: 320
+      - name: smtp_username_login
+        type: string
+        label: "SMTP Username"
+        required: true
+        order: 5
+        hint: "Username for SMTP authentication (usually your email address)"
+        visible_when:
+          smtp_auth_type: "login"
+        validation:
+          min_length: 1
+          max_length: 320
+      - name: smtp_password
+        type: password
+        label: "SMTP Password"
+        required: true
+        secret: true
+        order: 6
+        hint: "Password or App Password for SMTP authentication. Leave placeholder to keep existing value."
+        visible_when:
+          smtp_auth_type: "plain"
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: smtp_password_login
+        type: password
+        label: "SMTP Password"
+        required: true
+        secret: true
+        order: 6
+        hint: "Password or App Password for SMTP authentication. Leave placeholder to keep existing value."
+        visible_when:
+          smtp_auth_type: "login"
+        validation:
+          min_length: 1
+          max_length: 1024
+      # Microsoft OAuth fields
+      - name: oauth_microsoft_tenant_id
+        type: string
+        label: "Azure Tenant ID"
+        required: true
+        order: 5
+        hint: "Your Azure AD tenant ID (directory ID). Found in Azure Portal > Azure Active Directory > Overview."
+        visible_when:
+          smtp_auth_type: "oauth_microsoft"
+        validation:
+          min_length: 36
+          max_length: 36
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          error_msg: "Must be a valid GUID (e.g., 12345678-1234-1234-1234-123456789abc)"
+      - name: oauth_microsoft_client_id
+        type: string
+        label: "Azure Client ID"
+        required: true
+        order: 6
+        hint: "Application (client) ID from your Azure AD app registration."
+        visible_when:
+          smtp_auth_type: "oauth_microsoft"
+        validation:
+          min_length: 36
+          max_length: 36
+          pattern: "^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$"
+          error_msg: "Must be a valid GUID (e.g., 12345678-1234-1234-1234-123456789abc)"
+      - name: oauth_microsoft_client_secret
+        type: password
+        label: "Azure Client Secret"
+        required: true
+        secret: true
+        order: 7
+        hint: "Client secret from your Azure AD app registration. Leave placeholder to keep existing value."
+        visible_when:
+          smtp_auth_type: "oauth_microsoft"
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: oauth_microsoft_email
+        type: string
+        label: "Email Address"
+        required: true
+        order: 8
+        hint: "The email address to send from (must have SMTP.Send permission in Azure AD)."
+        visible_when:
+          smtp_auth_type: "oauth_microsoft"
+        validation:
+          min_length: 5
+          max_length: 320
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      # Google OAuth fields
+      - name: oauth_google_client_id
+        type: string
+        label: "Google Client ID"
+        required: true
+        order: 5
+        hint: "OAuth 2.0 Client ID from Google Cloud Console."
+        visible_when:
+          smtp_auth_type: "oauth_google"
+        validation:
+          min_length: 10
+          max_length: 256
+      - name: oauth_google_client_secret
+        type: password
+        label: "Google Client Secret"
+        required: true
+        secret: true
+        order: 6
+        hint: "OAuth 2.0 Client Secret from Google Cloud Console. Leave placeholder to keep existing value."
+        visible_when:
+          smtp_auth_type: "oauth_google"
+        validation:
+          min_length: 1
+          max_length: 256
+      - name: oauth_google_refresh_token
+        type: password
+        label: "Google Refresh Token"
+        required: true
+        secret: true
+        order: 7
+        hint: "OAuth 2.0 Refresh Token obtained through authorization flow. Leave placeholder to keep existing value."
+        visible_when:
+          smtp_auth_type: "oauth_google"
+        validation:
+          min_length: 1
+          max_length: 1024
+      - name: oauth_google_email
+        type: string
+        label: "Email Address"
+        required: true
+        order: 8
+        hint: "The Gmail address to send from."
+        visible_when:
+          smtp_auth_type: "oauth_google"
+        validation:
+          min_length: 5
+          max_length: 320
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      # Common fields
+      - name: envelope_from
+        type: string
+        label: "Sender Email Address"
+        required: true
+        order: 20
+        hint: "Fixed sender address for all emails. Agents cannot override this. For OAuth, this should match the authenticated email."
+        visible_when:
+          smtp_auth_type: "plain"
+        validation:
+          min_length: 5
+          max_length: 320
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      - name: envelope_from_login
+        type: string
+        label: "Sender Email Address"
+        required: true
+        order: 20
+        hint: "Fixed sender address for all emails. Agents cannot override this."
+        visible_when:
+          smtp_auth_type: "login"
+        validation:
+          min_length: 5
+          max_length: 320
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      - name: envelope_from_none
+        type: string
+        label: "Sender Email Address"
+        required: true
+        order: 20
+        hint: "Fixed sender address for all emails. Agents cannot override this."
+        visible_when:
+          smtp_auth_type: "none"
+        validation:
+          min_length: 5
+          max_length: 320
+          pattern: "^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$"
+      - name: recipient_allowlist
+        type: textarea
+        label: "Recipient Allowlist"
+        required: true
+        order: 30
+        placeholder: "example.com\npartner.example.com"
+        hint: "List of allowed recipient domains, one per line. Agents can only send to these domains."
+        validation:
+          min_length: 1
+          max_length: 4096
+      - name: rate_limit_per_minute
+        type: number
+        label: "Rate Limit (per minute)"
+        required: false
+        order: 40
+        default: 60
+        placeholder: "60"
+        hint: "Maximum emails per minute (0 = unlimited)"
+        validation:
+          min: 0
+          max: 10000
+      - name: rate_limit_per_hour
+        type: number
+        label: "Rate Limit (per hour)"
+        required: false
+        order: 41
+        default: 500
+        placeholder: "500"
+        hint: "Maximum emails per hour (0 = unlimited)"
+        validation:
+          min: 0
+          max: 100000
+      - name: max_attachment_size_mb
+        type: number
+        label: "Max Attachment Size (MB)"
+        required: false
+        order: 50
+        default: 10
+        placeholder: "10"
+        hint: "Maximum size for a single attachment in megabytes"
+        validation:
+          min: 1
+          max: 100
+      - name: max_total_attachment_size_mb
+        type: number
+        label: "Max Total Attachment Size (MB)"
+        required: false
+        order: 51
+        default: 25
+        placeholder: "25"
+        hint: "Maximum total size for all attachments in megabytes"
+        validation:
+          min: 1
+          max: 100
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `send_email`."
+        hint: "Approval gates for this connector's tools, keyed by role (`send_email`). `{}` removes them."

@@ -1,0 +1,6 @@
+version: 1
+tools:
+  create_chart_from_plotly_config:
+    runtime: go
+    executable: ./plotly
+    timeout_seconds: 120

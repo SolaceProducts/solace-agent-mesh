@@ -1,0 +1,2322 @@
+{
+ "sam_link_sdk": {
+  "AgentCard": {
+   "attributes": ["description", "display_name", "name", "on_demand", "skills"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"],
+    ["display_name", "POSITIONAL_OR_KEYWORD", "''"],
+    ["skills", "POSITIONAL_OR_KEYWORD", "<factory>"],
+    ["on_demand", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class",
+   "methods": {
+    "tool_description": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "tool_name": {
+     "property": true
+    }
+   }
+  },
+  "AgentConfig": {
+   "attributes": ["audit_sink", "data_access", "description", "display_name", "exit_on_stop", "framework", "input_schema", "keepalive_seconds", "max_call_depth", "max_concurrent_tasks", "max_inline_file_bytes", "max_llm_calls", "mcp_servers", "metrics", "name", "offline_grace_seconds", "output_schema", "owner", "peers", "required_scopes", "shutdown_grace_seconds", "skills", "spend_model_keys", "state_dir", "stream_thinking", "streaming", "suggestions", "task_timeout_seconds", "team", "tools", "version", "welcome_message"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["display_name", "KEYWORD_ONLY", "''"],
+    ["version", "KEYWORD_ONLY", "'1.0.0'"],
+    ["skills", "KEYWORD_ONLY", "<factory>"],
+    ["tools", "KEYWORD_ONLY", "<factory>"],
+    ["input_schema", "KEYWORD_ONLY", "None"],
+    ["output_schema", "KEYWORD_ONLY", "None"],
+    ["welcome_message", "KEYWORD_ONLY", "''"],
+    ["suggestions", "KEYWORD_ONLY", "<factory>"],
+    ["peers", "KEYWORD_ONLY", "<factory>"],
+    ["owner", "KEYWORD_ONLY", "''"],
+    ["team", "KEYWORD_ONLY", "''"],
+    ["framework", "KEYWORD_ONLY", "''"],
+    ["data_access", "KEYWORD_ONLY", "<factory>"],
+    ["mcp_servers", "KEYWORD_ONLY", "<factory>"],
+    ["streaming", "KEYWORD_ONLY", "True"],
+    ["max_call_depth", "KEYWORD_ONLY", "3"],
+    ["keepalive_seconds", "KEYWORD_ONLY", "120.0"],
+    ["spend_model_keys", "KEYWORD_ONLY", "<factory>"],
+    ["max_concurrent_tasks", "KEYWORD_ONLY", "0"],
+    ["max_inline_file_bytes", "KEYWORD_ONLY", "7000000"],
+    ["required_scopes", "KEYWORD_ONLY", "<factory>"],
+    ["shutdown_grace_seconds", "KEYWORD_ONLY", "20.0"],
+    ["stream_thinking", "KEYWORD_ONLY", "False"],
+    ["max_llm_calls", "KEYWORD_ONLY", "20"],
+    ["task_timeout_seconds", "KEYWORD_ONLY", "600.0"],
+    ["audit_sink", "KEYWORD_ONLY", "None"],
+    ["metrics", "KEYWORD_ONLY", "None"],
+    ["offline_grace_seconds", "KEYWORD_ONLY", "900.0"],
+    ["state_dir", "KEYWORD_ONLY", "''"],
+    ["exit_on_stop", "KEYWORD_ONLY", "False"]
+   ],
+   "kind": "class"
+  },
+  "AgentStopped": {
+   "attributes": ["reason"],
+   "bases": ["builtins.RuntimeError"],
+   "init": [
+    ["reason", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "ApprovalResult": {
+   "attributes": ["approved", "outcome"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["approved", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["outcome", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "ConversationMemory": {
+   "attributes": ["max_conversations", "max_turns", "ttl_seconds"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["max_turns", "KEYWORD_ONLY", "20"],
+    ["max_conversations", "KEYWORD_ONLY", "1000"],
+    ["ttl_seconds", "KEYWORD_ONLY", "3600.0"]
+   ],
+   "kind": "class",
+   "methods": {
+    "forget": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["session_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "history": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["session_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "remember": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["session_id", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["items", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["user_text", "POSITIONAL_OR_KEYWORD", "''"],
+      ["answer_text", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    },
+    "transcript": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["session_id", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "DataAccess": {
+   "attributes": ["access", "classification", "system"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["system", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["classification", "POSITIONAL_OR_KEYWORD", "''"],
+    ["access", "POSITIONAL_OR_KEYWORD", "'read'"]
+   ],
+   "kind": "class"
+  },
+  "File": {
+   "attributes": ["content", "mime_type", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["content", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["mime_type", "KEYWORD_ONLY", "''"]
+   ],
+   "kind": "class"
+  },
+  "FrameworkDrift": {
+   "attributes": ["adapter", "framework", "missing", "tested", "version"],
+   "bases": ["builtins.RuntimeError"],
+   "init": [
+    ["adapter", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["framework", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["version", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tested", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["missing", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "InputFile": {
+   "attributes": ["content", "mime_type", "name", "uri"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["content", "POSITIONAL_OR_KEYWORD", "None"],
+    ["mime_type", "KEYWORD_ONLY", "''"],
+    ["uri", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class"
+  },
+  "LinkTransport": {
+   "attributes": ["config"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["config", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "McpServer": {
+   "attributes": ["name", "url"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["url", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class"
+  },
+  "MeshAgent": {
+   "attributes": ["config"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["config", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["handler", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["transport", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class",
+   "methods": {
+    "allowed": {
+     "property": true
+    },
+    "announce": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "check": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "clear_health_problem": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["id", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "guard": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["fn", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "handle_wake": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["idle_seconds", "POSITIONAL_OR_KEYWORD", "3.0"]
+     ]
+    },
+    "on_stop_change": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["listener", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "retire": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "run_forever": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["exit_when_stuck", "KEYWORD_ONLY", "True"]
+     ]
+    },
+    "set_health_problem": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["id", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["severity", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["detail", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "stop": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "NestedRunRefused": {
+   "bases": ["builtins.RuntimeError"],
+   "kind": "class"
+  },
+  "Option": {
+   "attributes": ["description", "label", "value"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["label", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["value", "POSITIONAL_OR_KEYWORD", "''"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class"
+  },
+  "PeerResult": {
+   "attributes": ["agent", "data", "sam_decision", "state", "text", "truncated"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["state", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["text", "POSITIONAL_OR_KEYWORD", "''"],
+    ["data", "POSITIONAL_OR_KEYWORD", "None"],
+    ["truncated", "POSITIONAL_OR_KEYWORD", "False"],
+    ["sam_decision", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class",
+   "methods": {
+    "ok": {
+     "property": true
+    },
+    "summary": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "PromptTooLarge": {
+   "bases": ["builtins.ValueError"],
+   "kind": "class"
+  },
+  "Question": {
+   "attributes": ["header", "multi_select", "options", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["text", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["options", "POSITIONAL_OR_KEYWORD", "()"],
+    ["header", "POSITIONAL_OR_KEYWORD", "''"],
+    ["multi_select", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class"
+  },
+  "RequestContext": {
+   "attributes": ["conversation_context", "project_id", "response_format", "system_purpose", "user_profile", "user_timezone"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["system_purpose", "POSITIONAL_OR_KEYWORD", "''"],
+    ["response_format", "POSITIONAL_OR_KEYWORD", "''"],
+    ["project_id", "POSITIONAL_OR_KEYWORD", "''"],
+    ["conversation_context", "POSITIONAL_OR_KEYWORD", "''"],
+    ["user_profile", "POSITIONAL_OR_KEYWORD", "''"],
+    ["user_timezone", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class",
+   "methods": {
+    "context_prompt": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "SessionInUse": {
+   "bases": ["builtins.RuntimeError"],
+   "kind": "class"
+  },
+  "Skill": {
+   "attributes": ["description", "id", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "Suggestion": {
+   "attributes": ["auto_send", "label", "prompt"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["label", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["prompt", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["auto_send", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class"
+  },
+  "TaskContext": {
+   "attributes": ["agent_name", "call_depth", "context_id", "files", "invocation", "metadata", "request_context", "run_based", "structured_input", "task_id", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["task_id", "KEYWORD_ONLY", "<required>"],
+    ["context_id", "KEYWORD_ONLY", "<required>"],
+    ["text", "KEYWORD_ONLY", "<required>"],
+    ["agent_name", "KEYWORD_ONLY", "<required>"],
+    ["user_id", "KEYWORD_ONLY", "''"],
+    ["files", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class",
+   "methods": {
+    "ask_user": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["questions", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["message", "KEYWORD_ONLY", "''"],
+      ["timeout_seconds", "KEYWORD_ONLY", "2700"]
+     ]
+    },
+    "attach": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["content", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["mime_type", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    },
+    "available_agents": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "call_agent": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["task_description", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["function_call_id", "KEYWORD_ONLY", "''"]
+     ]
+    },
+    "can_prompt_user": {
+     "property": true
+    },
+    "check_running": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "check_tool": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_event": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["event", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_text": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_thinking": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "end_thinking": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "permitted_tools": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "progress": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["status_text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "record_llm_error": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["error", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["provider", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    },
+    "record_usage": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["model", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["usage", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "request_approval": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool_name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool_args", "POSITIONAL_OR_KEYWORD", "None"],
+      ["message", "KEYWORD_ONLY", "''"],
+      ["timeout_seconds", "KEYWORD_ONLY", "2700"]
+     ]
+    },
+    "session_id": {
+     "property": true
+    },
+    "streaming": {
+     "property": true
+    },
+    "user_id": {
+     "property": true
+    }
+   }
+  },
+  "TaskHalted": {
+   "attributes": ["reason", "task_id"],
+   "bases": ["builtins.RuntimeError"],
+   "init": [
+    ["task_id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["reason", "POSITIONAL_OR_KEYWORD", "'stopped'"]
+   ],
+   "kind": "class"
+  },
+  "TaskResult": {
+   "attributes": ["data", "files", "state", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["text", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["state", "POSITIONAL_OR_KEYWORD", "'completed'"],
+    ["files", "POSITIONAL_OR_KEYWORD", "<factory>"],
+    ["data", "POSITIONAL_OR_KEYWORD", "None"]
+   ],
+   "kind": "class"
+  },
+  "ToolAccessDenied": {
+   "attributes": ["tool"],
+   "bases": ["builtins.PermissionError"],
+   "init": [
+    ["tool", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "ToolInfo": {
+   "attributes": ["description", "name", "required_scopes"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"],
+    ["required_scopes", "POSITIONAL_OR_KEYWORD", "<factory>"]
+   ],
+   "kind": "class"
+  },
+  "Usage": {
+   "attributes": ["cache_write_tokens", "cached_input_tokens", "input_tokens", "output_tokens", "reasoning_tokens", "total_tokens"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["input_tokens", "POSITIONAL_OR_KEYWORD", "0"],
+    ["output_tokens", "POSITIONAL_OR_KEYWORD", "0"],
+    ["cached_input_tokens", "POSITIONAL_OR_KEYWORD", "0"],
+    ["cache_write_tokens", "POSITIONAL_OR_KEYWORD", "0"],
+    ["reasoning_tokens", "POSITIONAL_OR_KEYWORD", "0"],
+    ["total_tokens", "POSITIONAL_OR_KEYWORD", "0"]
+   ],
+   "kind": "class"
+  },
+  "UserAnswer": {
+   "attributes": ["answers", "status"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["status", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["answers", "POSITIONAL_OR_KEYWORD", "()"]
+   ],
+   "kind": "class",
+   "methods": {
+    "answered": {
+     "property": true
+    }
+   }
+  },
+  "bind_task": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "current_task": {
+   "kind": "function",
+   "parameters": []
+  }
+ },
+ "sam_link_sdk.adk": {
+  "SamLinkPlugin": {
+   "bases": ["google.adk.plugins.base_plugin.BasePlugin"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "'sam_link_sdk'"]
+   ],
+   "kind": "class",
+   "methods": {
+    "after_run_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["invocation_context", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "after_tool_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "KEYWORD_ONLY", "<required>"],
+      ["tool_args", "KEYWORD_ONLY", "<required>"],
+      ["tool_context", "KEYWORD_ONLY", "<required>"],
+      ["result", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "before_model_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["callback_context", "KEYWORD_ONLY", "<required>"],
+      ["llm_request", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "before_run_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["invocation_context", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "before_tool_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "KEYWORD_ONLY", "<required>"],
+      ["tool_args", "KEYWORD_ONLY", "<required>"],
+      ["tool_context", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "on_event_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["invocation_context", "KEYWORD_ONLY", "<required>"],
+      ["event", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "on_run_error_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["invocation_context", "KEYWORD_ONLY", "<required>"],
+      ["error", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "on_tool_error_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "KEYWORD_ONLY", "<required>"],
+      ["tool_args", "KEYWORD_ONLY", "<required>"],
+      ["tool_context", "KEYWORD_ONLY", "<required>"],
+      ["error", "KEYWORD_ONLY", "<required>"]
+     ]
+    }
+   }
+  },
+  "StopPlugin": {
+   "bases": ["google.adk.plugins.base_plugin.BasePlugin"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "before_model_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["callback_context", "KEYWORD_ONLY", "<required>"],
+      ["llm_request", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "before_run_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["invocation_context", "KEYWORD_ONLY", "<required>"]
+     ]
+    },
+    "before_tool_callback": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "KEYWORD_ONLY", "<required>"],
+      ["tool_args", "KEYWORD_ONLY", "<required>"],
+      ["tool_context", "KEYWORD_ONLY", "<required>"]
+     ]
+    }
+   }
+  },
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": []
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["runner", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["max_model_calls", "KEYWORD_ONLY", "10"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["run_config", "KEYWORD_ONLY", "None"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": []
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.agent": {
+  "Handler": {
+   "kind": "object",
+   "type": "_CallableGenericAlias"
+  },
+  "MeshAgent": {
+   "attributes": ["config"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["config", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["handler", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["transport", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class",
+   "methods": {
+    "allowed": {
+     "property": true
+    },
+    "announce": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "check": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "clear_health_problem": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["id", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "guard": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["fn", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "handle_wake": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["idle_seconds", "POSITIONAL_OR_KEYWORD", "3.0"]
+     ]
+    },
+    "on_stop_change": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["listener", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "retire": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "run_forever": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["exit_when_stuck", "KEYWORD_ONLY", "True"]
+     ]
+    },
+    "set_health_problem": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["id", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["severity", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["detail", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "stop": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  }
+ },
+ "sam_link_sdk.agent_framework": {
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["middleware", "KEYWORD_ONLY", "()"],
+    ["extra_tools", "KEYWORD_ONLY", "()"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.agentcore": {
+  "WAKE_TIMEOUT_SECONDS": {
+   "kind": "constant",
+   "value": 3000.0
+  },
+  "app": {
+   "kind": "function",
+   "parameters": [
+    ["build_agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["timeout_seconds", "POSITIONAL_OR_KEYWORD", "3000.0"]
+   ]
+  },
+  "load_secrets": {
+   "kind": "function",
+   "parameters": [
+    ["environ", "POSITIONAL_OR_KEYWORD", "None"],
+    ["client", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "serve": {
+   "kind": "function",
+   "parameters": [
+    ["build_agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["argv", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  }
+ },
+ "sam_link_sdk.audit": {
+  "AuditEvent": {
+   "attributes": ["fields", "level", "message", "seq"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["message", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["level", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["seq", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["fields", "POSITIONAL_OR_KEYWORD", "<factory>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "as_dict": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "log_sink": {
+   "kind": "function",
+   "parameters": [
+    ["event", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.config": {
+  "AgentConfig": {
+   "attributes": ["audit_sink", "data_access", "description", "display_name", "exit_on_stop", "framework", "input_schema", "keepalive_seconds", "max_call_depth", "max_concurrent_tasks", "max_inline_file_bytes", "max_llm_calls", "mcp_servers", "metrics", "name", "offline_grace_seconds", "output_schema", "owner", "peers", "required_scopes", "shutdown_grace_seconds", "skills", "spend_model_keys", "state_dir", "stream_thinking", "streaming", "suggestions", "task_timeout_seconds", "team", "tools", "version", "welcome_message"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["display_name", "KEYWORD_ONLY", "''"],
+    ["version", "KEYWORD_ONLY", "'1.0.0'"],
+    ["skills", "KEYWORD_ONLY", "<factory>"],
+    ["tools", "KEYWORD_ONLY", "<factory>"],
+    ["input_schema", "KEYWORD_ONLY", "None"],
+    ["output_schema", "KEYWORD_ONLY", "None"],
+    ["welcome_message", "KEYWORD_ONLY", "''"],
+    ["suggestions", "KEYWORD_ONLY", "<factory>"],
+    ["peers", "KEYWORD_ONLY", "<factory>"],
+    ["owner", "KEYWORD_ONLY", "''"],
+    ["team", "KEYWORD_ONLY", "''"],
+    ["framework", "KEYWORD_ONLY", "''"],
+    ["data_access", "KEYWORD_ONLY", "<factory>"],
+    ["mcp_servers", "KEYWORD_ONLY", "<factory>"],
+    ["streaming", "KEYWORD_ONLY", "True"],
+    ["max_call_depth", "KEYWORD_ONLY", "3"],
+    ["keepalive_seconds", "KEYWORD_ONLY", "120.0"],
+    ["spend_model_keys", "KEYWORD_ONLY", "<factory>"],
+    ["max_concurrent_tasks", "KEYWORD_ONLY", "0"],
+    ["max_inline_file_bytes", "KEYWORD_ONLY", "7000000"],
+    ["required_scopes", "KEYWORD_ONLY", "<factory>"],
+    ["shutdown_grace_seconds", "KEYWORD_ONLY", "20.0"],
+    ["stream_thinking", "KEYWORD_ONLY", "False"],
+    ["max_llm_calls", "KEYWORD_ONLY", "20"],
+    ["task_timeout_seconds", "KEYWORD_ONLY", "600.0"],
+    ["audit_sink", "KEYWORD_ONLY", "None"],
+    ["metrics", "KEYWORD_ONLY", "None"],
+    ["offline_grace_seconds", "KEYWORD_ONLY", "900.0"],
+    ["state_dir", "KEYWORD_ONLY", "''"],
+    ["exit_on_stop", "KEYWORD_ONLY", "False"]
+   ],
+   "kind": "class"
+  },
+  "DataAccess": {
+   "attributes": ["access", "classification", "system"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["system", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["classification", "POSITIONAL_OR_KEYWORD", "''"],
+    ["access", "POSITIONAL_OR_KEYWORD", "'read'"]
+   ],
+   "kind": "class"
+  },
+  "McpServer": {
+   "attributes": ["name", "url"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["url", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class"
+  },
+  "Skill": {
+   "attributes": ["description", "id", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "Suggestion": {
+   "attributes": ["auto_send", "label", "prompt"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["label", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["prompt", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["auto_send", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class"
+  },
+  "ToolInfo": {
+   "attributes": ["description", "name", "required_scopes"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"],
+    ["required_scopes", "POSITIONAL_OR_KEYWORD", "<factory>"]
+   ],
+   "kind": "class"
+  }
+ },
+ "sam_link_sdk.context": {
+  "File": {
+   "attributes": ["content", "mime_type", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["content", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["mime_type", "KEYWORD_ONLY", "''"]
+   ],
+   "kind": "class"
+  },
+  "InputFile": {
+   "attributes": ["content", "mime_type", "name", "uri"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["content", "POSITIONAL_OR_KEYWORD", "None"],
+    ["mime_type", "KEYWORD_ONLY", "''"],
+    ["uri", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class"
+  },
+  "TaskContext": {
+   "attributes": ["agent_name", "call_depth", "context_id", "files", "invocation", "metadata", "request_context", "run_based", "structured_input", "task_id", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["task_id", "KEYWORD_ONLY", "<required>"],
+    ["context_id", "KEYWORD_ONLY", "<required>"],
+    ["text", "KEYWORD_ONLY", "<required>"],
+    ["agent_name", "KEYWORD_ONLY", "<required>"],
+    ["user_id", "KEYWORD_ONLY", "''"],
+    ["files", "KEYWORD_ONLY", "None"]
+   ],
+   "kind": "class",
+   "methods": {
+    "ask_user": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["questions", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["message", "KEYWORD_ONLY", "''"],
+      ["timeout_seconds", "KEYWORD_ONLY", "2700"]
+     ]
+    },
+    "attach": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["content", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["mime_type", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    },
+    "available_agents": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "call_agent": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["task_description", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["function_call_id", "KEYWORD_ONLY", "''"]
+     ]
+    },
+    "can_prompt_user": {
+     "property": true
+    },
+    "check_running": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "check_tool": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_event": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["event", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_text": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "emit_thinking": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "end_thinking": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "permitted_tools": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "progress": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["status_text", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "record_llm_error": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["error", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["provider", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    },
+    "record_usage": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["model", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["usage", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "request_approval": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool_name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool_args", "POSITIONAL_OR_KEYWORD", "None"],
+      ["message", "KEYWORD_ONLY", "''"],
+      ["timeout_seconds", "KEYWORD_ONLY", "2700"]
+     ]
+    },
+    "session_id": {
+     "property": true
+    },
+    "streaming": {
+     "property": true
+    },
+    "user_id": {
+     "property": true
+    }
+   }
+  },
+  "TaskHalted": {
+   "attributes": ["reason", "task_id"],
+   "bases": ["builtins.RuntimeError"],
+   "init": [
+    ["task_id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["reason", "POSITIONAL_OR_KEYWORD", "'stopped'"]
+   ],
+   "kind": "class"
+  },
+  "TaskResult": {
+   "attributes": ["data", "files", "state", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["text", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["state", "POSITIONAL_OR_KEYWORD", "'completed'"],
+    ["files", "POSITIONAL_OR_KEYWORD", "<factory>"],
+    ["data", "POSITIONAL_OR_KEYWORD", "None"]
+   ],
+   "kind": "class"
+  },
+  "bind_task": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "current_task": {
+   "kind": "function",
+   "parameters": []
+  }
+ },
+ "sam_link_sdk.crewai": {
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["build", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["max_model_calls", "KEYWORD_ONLY", "10"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["kickoff_inputs", "KEYWORD_ONLY", "None"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["crew", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.delegation": {
+  "AgentCard": {
+   "attributes": ["description", "display_name", "name", "on_demand", "skills"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"],
+    ["display_name", "POSITIONAL_OR_KEYWORD", "''"],
+    ["skills", "POSITIONAL_OR_KEYWORD", "<factory>"],
+    ["on_demand", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class",
+   "methods": {
+    "tool_description": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "tool_name": {
+     "property": true
+    }
+   }
+  },
+  "PeerResult": {
+   "attributes": ["agent", "data", "sam_decision", "state", "text", "truncated"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["state", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["text", "POSITIONAL_OR_KEYWORD", "''"],
+    ["data", "POSITIONAL_OR_KEYWORD", "None"],
+    ["truncated", "POSITIONAL_OR_KEYWORD", "False"],
+    ["sam_decision", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class",
+   "methods": {
+    "ok": {
+     "property": true
+    },
+    "summary": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  }
+ },
+ "sam_link_sdk.events": {
+  "ModelFailed": {
+   "attributes": ["category", "model", "provider"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["model", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["category", "POSITIONAL_OR_KEYWORD", "'unknown'"],
+    ["provider", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class"
+  },
+  "ModelFinished": {
+   "attributes": ["model", "text", "tool_calls", "usage"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["model", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["text", "POSITIONAL_OR_KEYWORD", "''"],
+    ["tool_calls", "POSITIONAL_OR_KEYWORD", "()"],
+    ["usage", "POSITIONAL_OR_KEYWORD", "None"]
+   ],
+   "kind": "class"
+  },
+  "ModelStarted": {
+   "attributes": ["model"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["model", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "Progress": {
+   "attributes": ["text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["text", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "ToolCall": {
+   "attributes": ["args", "id", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["args", "POSITIONAL_OR_KEYWORD", "<factory>"]
+   ],
+   "kind": "class"
+  },
+  "ToolFinished": {
+   "attributes": ["call_id", "failed", "name", "result"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["call_id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["result", "POSITIONAL_OR_KEYWORD", "None"],
+    ["failed", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class"
+  },
+  "ToolStarted": {
+   "attributes": ["args", "call_id", "name"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["call_id", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["args", "POSITIONAL_OR_KEYWORD", "None"]
+   ],
+   "kind": "class"
+  }
+ },
+ "sam_link_sdk.foundry": {
+  "WAKE_TIMEOUT_SECONDS": {
+   "kind": "constant",
+   "value": 3000.0
+  },
+  "app": {
+   "kind": "function",
+   "parameters": [
+    ["build_agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["timeout_seconds", "POSITIONAL_OR_KEYWORD", "3000.0"]
+   ]
+  },
+  "serve": {
+   "kind": "function",
+   "parameters": [
+    ["build_agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["argv", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  }
+ },
+ "sam_link_sdk.hermes": {
+  "Approval": {
+   "attributes": ["message", "names"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["names", "POSITIONAL_OR_KEYWORD", "None"],
+    ["message", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class",
+   "methods": {
+    "covers": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool_name", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "MeshTool": {
+   "attributes": ["description", "handler", "name", "parameters"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["description", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["parameters", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["handler", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "StopGuard": {
+   "bases": ["builtins.object"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "check": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "uninstall": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "watch": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["hermes_agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "agent_defaults": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["build", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["max_model_calls", "KEYWORD_ONLY", "10"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["approval", "KEYWORD_ONLY", "None"],
+    ["extra_tools", "KEYWORD_ONLY", "()"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "KEYWORD_ONLY", "None"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  }
+ },
+ "sam_link_sdk.langchain": {
+  "SamLinkCallbackHandler": {
+   "attributes": ["ctx", "scopes"],
+   "bases": ["langchain_core.callbacks.base.AsyncCallbackHandler"],
+   "init": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "on_chat_model_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["messages", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_end": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["response", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_error": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["error", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["prompts", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_end": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["output", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_error": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["error", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["input_str", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_id", "KEYWORD_ONLY", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "StopGuard": {
+   "bases": ["langchain_core.callbacks.base.BaseCallbackHandler"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "on_chain_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["inputs", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_chat_model_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["messages", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["prompts", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["serialized", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["input_str", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["model", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "()"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["max_model_calls", "KEYWORD_ONLY", "10"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["system_prompt", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "run_graph": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["graph", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["config", "KEYWORD_ONLY", "None"],
+    ["stream_text", "KEYWORD_ONLY", "True"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.link": {
+  "DEFAULT_MAX_FRAME_BYTES": {
+   "kind": "constant",
+   "value": 8388608
+  },
+  "DescriptionTooLong": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  },
+  "LinkAuthRefused": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  },
+  "LinkConfig": {
+   "attributes": ["agent", "allow_insecure", "connect_timeout_seconds", "heartbeat_seconds", "heartbeat_timeout_seconds", "max_auth_refusals", "max_connects_per_minute", "max_frame_bytes", "peer_call_timeout_seconds", "reconnect_max_seconds", "reconnect_min_seconds", "token", "token_file", "trust_store_path", "url"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["url", "KEYWORD_ONLY", "<required>"],
+    ["agent", "KEYWORD_ONLY", "<required>"],
+    ["token", "KEYWORD_ONLY", "<required>"],
+    ["trust_store_path", "KEYWORD_ONLY", "''"],
+    ["connect_timeout_seconds", "KEYWORD_ONLY", "10.0"],
+    ["heartbeat_seconds", "KEYWORD_ONLY", "20.0"],
+    ["heartbeat_timeout_seconds", "KEYWORD_ONLY", "20.0"],
+    ["max_frame_bytes", "KEYWORD_ONLY", "8388608"],
+    ["reconnect_min_seconds", "KEYWORD_ONLY", "0.5"],
+    ["reconnect_max_seconds", "KEYWORD_ONLY", "30.0"],
+    ["max_connects_per_minute", "KEYWORD_ONLY", "20"],
+    ["peer_call_timeout_seconds", "KEYWORD_ONLY", "7200.0"],
+    ["token_file", "KEYWORD_ONLY", "''"],
+    ["max_auth_refusals", "KEYWORD_ONLY", "10"],
+    ["allow_insecure", "KEYWORD_ONLY", "False"]
+   ],
+   "kind": "class",
+   "methods": {
+    "from_env": {
+     "decorator": "classmethod",
+     "parameters": [
+      ["cls", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "''"]
+     ]
+    }
+   }
+  },
+  "LinkConfigError": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  },
+  "LinkError": {
+   "bases": ["builtins.ConnectionError"],
+   "kind": "class"
+  },
+  "LinkProtocolMismatch": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  },
+  "LinkRateLimited": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  },
+  "LinkTransport": {
+   "attributes": ["config"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["config", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "LinkUnavailable": {
+   "attributes": ["retry_after"],
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "init": [
+    ["message", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["retry_after", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "TooManyToolScopes": {
+   "bases": ["sam_link_sdk.link.config.LinkError"],
+   "kind": "class"
+  }
+ },
+ "sam_link_sdk.metrics": {
+  "Metrics": {
+   "bases": ["typing.Protocol"],
+   "init": [
+    ["args", "VAR_POSITIONAL", "<required>"],
+    ["kwargs", "VAR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "active_executions": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["counts", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "counter": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["value", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "histogram": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["seconds", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "NoMetrics": {
+   "bases": ["builtins.object"],
+   "kind": "class",
+   "methods": {
+    "active_executions": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["counts", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "counter": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["value", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "histogram": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["seconds", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "OtelMetrics": {
+   "bases": ["builtins.object"],
+   "init": [
+    ["meter", "POSITIONAL_OR_KEYWORD", "None"],
+    ["prefix", "POSITIONAL_OR_KEYWORD", "'sam'"]
+   ],
+   "kind": "class",
+   "methods": {
+    "active_executions": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["counts", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "counter": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["value", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "histogram": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["name", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["seconds", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["attributes", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "otlp_meter_provider": {
+   "kind": "function",
+   "parameters": [
+    ["endpoint", "KEYWORD_ONLY", "None"],
+    ["export_interval_seconds", "KEYWORD_ONLY", "60.0"],
+    ["headers", "KEYWORD_ONLY", "None"],
+    ["prefix", "KEYWORD_ONLY", "'sam'"],
+    ["set_global", "KEYWORD_ONLY", "True"]
+   ]
+  }
+ },
+ "sam_link_sdk.openai_agents": {
+  "SamLinkRunHooks": {
+   "attributes": ["agent", "ctx", "scopes"],
+   "bases": ["agents.lifecycle.RunHooksBase"],
+   "init": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["run_config", "POSITIONAL_OR_KEYWORD", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"]
+   ],
+   "kind": "class",
+   "methods": {
+    "on_agent_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_handoff": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["from_agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["to_agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_end": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["response", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["system_prompt", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["input_items", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_end": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["result", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "refusing": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run_config", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "StopHooks": {
+   "bases": ["agents.lifecycle.RunHooksBase"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "on_agent_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_llm_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["system_prompt", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["input_items", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_tool_start": {
+     "async": true,
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["context", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["tool", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["max_model_calls", "KEYWORD_ONLY", "10"],
+    ["stream_text", "KEYWORD_ONLY", "True"],
+    ["run_config", "KEYWORD_ONLY", "None"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["run_config", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.otel_steps": {
+  "SamLinkSpanProcessor": {
+   "bases": ["opentelemetry.sdk.trace.SpanProcessor"],
+   "init": [],
+   "kind": "class",
+   "methods": {
+    "force_flush": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["timeout_millis", "POSITIONAL_OR_KEYWORD", "30000"]
+     ]
+    },
+    "forget": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["run", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_end": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["span", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    },
+    "on_start": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["span", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["parent_context", "POSITIONAL_OR_KEYWORD", "None"]
+     ]
+    },
+    "shutdown": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["run", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": [
+    ["tracer_provider", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  }
+ },
+ "sam_link_sdk.prompting": {
+  "ANSWERED": {
+   "kind": "constant",
+   "value": "answered"
+  },
+  "APPROVED": {
+   "kind": "constant",
+   "value": "approved"
+  },
+  "ApprovalResult": {
+   "attributes": ["approved", "outcome"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["approved", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["outcome", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  },
+  "CANCELLED": {
+   "kind": "constant",
+   "value": "cancelled"
+  },
+  "DEFAULT_TIMEOUT_SECONDS": {
+   "kind": "constant",
+   "value": 2700
+  },
+  "DENIED": {
+   "kind": "constant",
+   "value": "denied"
+  },
+  "Option": {
+   "attributes": ["description", "label", "value"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["label", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["value", "POSITIONAL_OR_KEYWORD", "''"],
+    ["description", "POSITIONAL_OR_KEYWORD", "''"]
+   ],
+   "kind": "class"
+  },
+  "PromptTooLarge": {
+   "bases": ["builtins.ValueError"],
+   "kind": "class"
+  },
+  "Question": {
+   "attributes": ["header", "multi_select", "options", "text"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["text", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["options", "POSITIONAL_OR_KEYWORD", "()"],
+    ["header", "POSITIONAL_OR_KEYWORD", "''"],
+    ["multi_select", "POSITIONAL_OR_KEYWORD", "False"]
+   ],
+   "kind": "class"
+  },
+  "TIMED_OUT": {
+   "kind": "constant",
+   "value": "timed_out"
+  },
+  "UNREADABLE": {
+   "kind": "constant",
+   "value": "unreadable"
+  },
+  "UserAnswer": {
+   "attributes": ["answers", "status"],
+   "bases": ["builtins.object"],
+   "init": [
+    ["status", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["answers", "POSITIONAL_OR_KEYWORD", "()"]
+   ],
+   "kind": "class",
+   "methods": {
+    "answered": {
+     "property": true
+    }
+   }
+  }
+ },
+ "sam_link_sdk.redact": {
+  "is_credential_key": {
+   "kind": "function",
+   "parameters": [
+    ["key", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "redact_string": {
+   "kind": "function",
+   "parameters": [
+    ["s", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "redact_value": {
+   "kind": "function",
+   "parameters": [
+    ["value", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ },
+ "sam_link_sdk.stop": {
+  "AgentStopped": {
+   "attributes": ["reason"],
+   "bases": ["builtins.RuntimeError"],
+   "init": [
+    ["reason", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class"
+  }
+ },
+ "sam_link_sdk.strands": {
+  "SamLinkHooks": {
+   "attributes": ["added", "calls", "ctx", "refusals", "scopes"],
+   "bases": ["strands.hooks.registry.HookProvider"],
+   "init": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "None"]
+   ],
+   "kind": "class",
+   "methods": {
+    "register_hooks": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["registry", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "StopHooks": {
+   "bases": ["strands.hooks.registry.HookProvider"],
+   "init": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ],
+   "kind": "class",
+   "methods": {
+    "register_hooks": {
+     "parameters": [
+      ["self", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["registry", "POSITIONAL_OR_KEYWORD", "<required>"],
+      ["kwargs", "VAR_KEYWORD", "<required>"]
+     ]
+    }
+   }
+  },
+  "ask_user_tool": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "mesh_agent_tools": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["agents", "POSITIONAL_OR_KEYWORD", "None"]
+   ]
+  },
+  "run_agent": {
+   "async": true,
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["build", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["input", "KEYWORD_ONLY", "None"],
+    ["memory", "KEYWORD_ONLY", "None"],
+    ["include_request_context", "KEYWORD_ONLY", "False"],
+    ["stream_text", "KEYWORD_ONLY", "True"]
+   ]
+  },
+  "step_reporter": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "stop_guard": {
+   "kind": "function",
+   "parameters": [
+    ["agent", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "tool_infos": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  },
+  "with_approval": {
+   "kind": "function",
+   "parameters": [
+    ["ctx", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["names", "KEYWORD_ONLY", "None"],
+    ["message", "KEYWORD_ONLY", "''"]
+   ]
+  },
+  "with_scopes": {
+   "kind": "function",
+   "parameters": [
+    ["tools", "POSITIONAL_OR_KEYWORD", "<required>"],
+    ["scopes", "POSITIONAL_OR_KEYWORD", "<required>"]
+   ]
+  }
+ }
+}

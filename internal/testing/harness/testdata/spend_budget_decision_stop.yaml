@@ -1,0 +1,28 @@
+test_case_id: "spend_budget_decision_stop_001"
+description: "The mesh budget is spent, so the workflow's decision node fails before its provider is called."
+tags: ["spend", "budget"]
+skip_intermediate_events: true
+expected_completion_timeout_seconds: 20
+
+gateway_input:
+  target_agent_name: "DecisionRoutingWorkflow"
+  user_identity: "spend_user@example.com"
+  parts:
+    - type: "data"
+      data:
+        input_text: "I was charged twice for my subscription this month"
+
+primed_decision_responses:
+  - response: >
+      {"model": "jev-1.13.0",
+       "answers": {"department": {"type": "choice", "choice": "billing",
+                                  "probabilities": {"billing": 0.93, "technical": 0.07},
+                                  "confidence": 0.86}},
+       "usage": {"input_tokens": 42, "output_tokens": 7}}
+
+expected_gateway_output:
+  - type: "final_response"
+    task_state: "failed"
+    content_parts:
+      - type: "text"
+        text_contains: "usage budget is used up until"

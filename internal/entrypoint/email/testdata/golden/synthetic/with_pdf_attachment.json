@@ -1,0 +1,68 @@
+{
+  "MessageID": "\u003cpdf-attach-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cpdf-attach-001@vendor.com\u003e",
+  "From": {
+    "Address": "iris@vendor.com",
+    "DisplayName": "Iris Quinn"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Purchase order attached",
+  "BodyText": "Hi,\r\n\r\nPlease review the attached purchase order.\r\n\r\n-- Iris",
+  "BodyHTML": "",
+  "Attachments": [
+    {
+      "Filename": "purchase_order.pdf",
+      "DeclaredMIMEType": "application/pdf",
+      "DetectedMIMEType": "application/pdf",
+      "SizeBytes": 211,
+      "Content": {
+        "InlineBytes": "JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBvYmo8PC9UeXBlL1BhZ2VzL0tpZHNbXS9Db3VudCAwPj5lbmRvYmoKeHJlZgowIDMKMDAwMDAwMDAwMCA2NTUzNSBmCjAwMDAwMDAwMDkgMDAwMDAgbgowMDAwMDAwMDU0IDAwMDAwIG4KdHJhaWxlcjw8L1NpemUgMy9Sb290IDEgMCBSPj4Kc3RhcnR4cmVmCjk1CiUlRU9GCg==",
+        "ArtifactURI": ""
+      }
+    }
+  ],
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.92515-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "multipart/mixed; boundary=\"boundary-pdf-attach-001\""
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Iris Quinn\" \u003ciris@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cpdf-attach-001@vendor.com\u003e"
+    ],
+    "Mime-Version": [
+      "1.0"
+    ],
+    "Subject": [
+      "Purchase order attached"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

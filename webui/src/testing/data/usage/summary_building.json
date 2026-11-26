@@ -1,0 +1,61 @@
+{
+  "scope": "tenant",
+  "dataAsOf": null,
+  "historyComplete": false,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "comparisonWindow": null,
+  "currency": "USD",
+  "totals": {
+    "cost": "0.0000000000",
+    "costByBucket": {
+      "uncachedInput": "0.0000000000",
+      "output": "0.0000000000",
+      "cacheRead": "0.0000000000",
+      "cacheWrite": "0.0000000000"
+    },
+    "tokens": {
+      "uncachedInput": 0,
+      "output": 0,
+      "cacheRead": 0,
+      "cacheWrite": 0
+    },
+    "calls": 0,
+    "unpricedCalls": 0,
+    "activities": 0
+  },
+  "costByKind": {
+    "users": "0.0000000000",
+    "agents": "0.0000000000",
+    "workflows": "0.0000000000",
+    "models": "0.0000000000"
+  },
+  "comparison": null,
+  "meshBudget": null,
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "0.0000000000",
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "activities": 0
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "0.0000000000",
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "activities": 0
+    }
+  ]
+}

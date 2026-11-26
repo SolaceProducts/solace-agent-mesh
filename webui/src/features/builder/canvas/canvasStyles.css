@@ -1,0 +1,89 @@
+.builder-canvas .react-flow__node {
+    padding: 0;
+    background: transparent;
+    border: none;
+    box-shadow: none;
+}
+
+.builder-canvas .react-flow__node.selected {
+    box-shadow: none;
+}
+
+.builder-canvas .react-flow__edge-path {
+    pointer-events: stroke;
+}
+
+@keyframes fadeSlideIn {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.builder-canvas .react-flow__node {
+    animation: fadeSlideIn 0.25s ease-out;
+}
+
+/* Pulsing border glow for actively generating cards */
+@keyframes builderCardPulse {
+    0%,
+    100% {
+        box-shadow:
+            0 0 0 0 rgba(var(--brand-rgb, 99, 102, 241), 0.4),
+            0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+    50% {
+        box-shadow:
+            0 0 0 4px rgba(var(--brand-rgb, 99, 102, 241), 0.15),
+            0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    }
+}
+
+.builder-card-generating {
+    animation: builderCardPulse 2s ease-in-out infinite;
+}
+
+/* Checkmark pop-in animation for validated status */
+@keyframes checkPop {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    60% {
+        transform: scale(1.2);
+        opacity: 1;
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
+}
+
+.builder-check-pop {
+    animation: checkPop 0.3s ease-out;
+}
+
+/* Slide-in animation for progress timeline items */
+@keyframes progressSlideIn {
+    from {
+        opacity: 0;
+        transform: translateX(-8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+/* Reserve room on the title row for the absolute top-right test-tube button
+   (rendered by CardShell in test mode) so the component name / connector icons
+   never render under it. Targets only the first child (the header / title row),
+   leaving section dividers and body content full-width. The (0,2,0) specificity
+   beats Tailwind's px-4/pr-4 utility, overriding its right padding. */
+.builder-test-reserve > :first-child {
+    padding-right: 2.75rem;
+}

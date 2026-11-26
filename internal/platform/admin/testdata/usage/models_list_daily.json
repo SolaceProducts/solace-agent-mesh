@@ -1,0 +1,170 @@
+{
+  "data": [
+    {
+      "id": "01a10c9e-4444-7e77-be6a-3cdc8d0b9401",
+      "name": "General",
+      "bookedName": null,
+      "cost": "20.4400000000",
+      "activities": 206,
+      "costPerActivity": "0.0992233009",
+      "shareOfSpend": 1.647616437472795,
+      "costByBucket": {
+        "uncachedInput": "10.2000000000",
+        "output": "9.0400000000",
+        "cacheRead": "0.7000000000",
+        "cacheWrite": "0.5000000000"
+      },
+      "tokens": {
+        "uncachedInput": 1523000,
+        "output": 120400,
+        "cacheRead": 88000,
+        "cacheWrite": 4100
+      },
+      "calls": 1840,
+      "unpricedCalls": 0,
+      "daily": [
+        {
+          "date": "2026-10-01",
+          "cost": "12.0400000000",
+          "tokens": {
+            "uncachedInput": 144000,
+            "output": 37200,
+            "cacheRead": 64800,
+            "cacheWrite": 5400
+          },
+          "activities": 120
+        },
+        {
+          "date": "2026-10-02",
+          "cost": "8.4000000000",
+          "tokens": {
+            "uncachedInput": 103200,
+            "output": 26660,
+            "cacheRead": 46440,
+            "cacheWrite": 3870
+          },
+          "activities": 86
+        }
+      ],
+      "models": [
+        {
+          "name": "claude-sonnet-4-6",
+          "provider": "anthropic",
+          "cost": "12.0400000000",
+          "activities": 120,
+          "costByBucket": {
+            "uncachedInput": "12.0400000000",
+            "output": "0.0000000000",
+            "cacheRead": "0.0000000000",
+            "cacheWrite": "0.0000000000"
+          },
+          "tokens": {
+            "uncachedInput": 120000,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "calls": 480,
+          "unpricedCalls": 0
+        },
+        {
+          "name": "claude-sonnet-4-5",
+          "provider": "anthropic",
+          "cost": "8.3000000000",
+          "activities": 85,
+          "costByBucket": {
+            "uncachedInput": "8.3000000000",
+            "output": "0.0000000000",
+            "cacheRead": "0.0000000000",
+            "cacheWrite": "0.0000000000"
+          },
+          "tokens": {
+            "uncachedInput": 85000,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "calls": 340,
+          "unpricedCalls": 0
+        },
+        {
+          "name": null,
+          "provider": null,
+          "cost": "0.1000000000",
+          "activities": 1,
+          "costByBucket": {
+            "uncachedInput": "0.1000000000",
+            "output": "0.0000000000",
+            "cacheRead": "0.0000000000",
+            "cacheWrite": "0.0000000000"
+          },
+          "tokens": {
+            "uncachedInput": 1000,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "calls": 4,
+          "unpricedCalls": 0
+        }
+      ]
+    },
+    {
+      "id": null,
+      "name": "gpt-4o-mini",
+      "bookedName": "gpt-4o-mini",
+      "cost": "0.0000000000",
+      "activities": 0,
+      "costPerActivity": null,
+      "shareOfSpend": 0,
+      "costByBucket": {
+        "uncachedInput": "0.0000000000",
+        "output": "0.0000000000",
+        "cacheRead": "0.0000000000",
+        "cacheWrite": "0.0000000000"
+      },
+      "tokens": {
+        "uncachedInput": 0,
+        "output": 0,
+        "cacheRead": 0,
+        "cacheWrite": 0
+      },
+      "calls": 0,
+      "unpricedCalls": 0,
+      "daily": [
+        {
+          "date": "2026-10-01",
+          "cost": "0.0000000000",
+          "tokens": {
+            "uncachedInput": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "activities": 0
+        },
+        {
+          "date": "2026-10-02",
+          "cost": "0.0000000000",
+          "tokens": {
+            "uncachedInput": 0,
+            "output": 0,
+            "cacheRead": 0,
+            "cacheWrite": 0
+          },
+          "activities": 0
+        }
+      ],
+      "models": []
+    }
+  ],
+  "meta": {
+    "pagination": {
+      "pageNumber": 1,
+      "count": 2,
+      "pageSize": 25,
+      "nextPage": null,
+      "totalPages": 1
+    }
+  }
+}

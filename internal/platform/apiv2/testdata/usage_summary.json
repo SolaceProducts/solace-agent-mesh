@@ -1,0 +1,65 @@
+{
+  "data": {
+    "comparison": null,
+    "comparisonWindow": null,
+    "costByKind": {
+      "agents": "0.0000000000",
+      "models": "12.3400000000",
+      "users": "12.3400000000",
+      "workflows": "0.0000000000"
+    },
+    "currency": "USD",
+    "daily": [
+      {
+        "activities": 1,
+        "cost": "12.3400000000",
+        "date": "<day>",
+        "tokens": {
+          "cacheRead": 0,
+          "cacheWrite": 0,
+          "output": 0,
+          "uncachedInput": 1
+        }
+      }
+    ],
+    "dataAsOf": null,
+    "historyComplete": false,
+    "meshBudget": {
+      "amount": null,
+      "effectiveAmount": null,
+      "id": "00000000-0000-0000-0000-00000000b001",
+      "name": "Agent Mesh",
+      "periodEnd": "<instant>",
+      "periodSpend": "12.3400000000",
+      "periodStart": "<instant>",
+      "source": "default",
+      "status": "unlimited",
+      "topUp": null,
+      "usagePercent": null,
+      "warningPercentage": null
+    },
+    "scope": "tenant",
+    "totals": {
+      "activities": 1,
+      "calls": 1,
+      "cost": "12.3400000000",
+      "costByBucket": {
+        "cacheRead": "0.0000000000",
+        "cacheWrite": "0.0000000000",
+        "output": "0.0000000000",
+        "uncachedInput": "12.3400000000"
+      },
+      "tokens": {
+        "cacheRead": 0,
+        "cacheWrite": 0,
+        "output": 0,
+        "uncachedInput": 1
+      },
+      "unpricedCalls": 0
+    },
+    "window": {
+      "endTime": "<instant>",
+      "startTime": "<instant>"
+    }
+  }
+}

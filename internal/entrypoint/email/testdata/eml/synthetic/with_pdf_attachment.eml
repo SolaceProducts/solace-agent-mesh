@@ -1,0 +1,29 @@
+From: "Iris Quinn" <iris@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Purchase order attached
+Message-ID: <pdf-attach-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+MIME-Version: 1.0
+Content-Type: multipart/mixed; boundary="boundary-pdf-attach-001"
+
+This is a multi-part message in MIME format.
+--boundary-pdf-attach-001
+Content-Type: text/plain; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+Hi,
+
+Please review the attached purchase order.
+
+-- Iris
+--boundary-pdf-attach-001
+Content-Type: application/pdf; name="purchase_order.pdf"
+Content-Transfer-Encoding: base64
+Content-Disposition: attachment; filename="purchase_order.pdf"
+
+JVBERi0xLjQKMSAwIG9iajw8L1R5cGUvQ2F0YWxvZy9QYWdlcyAyIDAgUj4+ZW5kb2JqCjIgMCBv
+Ymo8PC9UeXBlL1BhZ2VzL0tpZHNbXS9Db3VudCAwPj5lbmRvYmoKeHJlZgowIDMKMDAwMDAwMDAw
+MCA2NTUzNSBmCjAwMDAwMDAwMDkgMDAwMDAgbgowMDAwMDAwMDU0IDAwMDAwIG4KdHJhaWxlcjw8
+L1NpemUgMy9Sb290IDEgMCBSPj4Kc3RhcnR4cmVmCjk1CiUlRU9GCg==
+--boundary-pdf-attach-001--

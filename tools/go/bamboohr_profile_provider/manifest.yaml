@@ -1,0 +1,24 @@
+version: 1
+capabilities:
+  profileProvider: true
+tools:
+  enrich_authenticated_user:
+    runtime: go
+    executable: ./bamboohr_profile_provider
+    timeout_seconds: 30
+  search_users:
+    runtime: go
+    executable: ./bamboohr_profile_provider
+    timeout_seconds: 30
+  get_user_profile:
+    runtime: go
+    executable: ./bamboohr_profile_provider
+    timeout_seconds: 30
+  get_time_off:
+    runtime: go
+    executable: ./bamboohr_profile_provider
+    timeout_seconds: 30
+  get_user_profile_picture:
+    runtime: go
+    executable: ./bamboohr_profile_provider
+    timeout_seconds: 30

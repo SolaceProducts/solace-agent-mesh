@@ -1,0 +1,19 @@
+[
+  {
+    "taskId": "01a1ac8d-b20d-7add-9e8e-c4cf32723c8a",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "artifact",
+        "name": "pallet-damage.md",
+        "status": "completed"
+      },
+      {
+        "kind": "text",
+        "text": "\nI've saved the memo as `pallet-damage.md`. It covers the six steps from receiving to prevention, and it uses general best-practice guidance. It has no company-specific policies, deadlines or contacts, so adjust those to fit your internal rules. I haven't asked any agents for data, so nothing in it comes from the ERP."
+      }
+    ]
+  }
+]

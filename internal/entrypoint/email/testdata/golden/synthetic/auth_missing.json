@@ -1,0 +1,51 @@
+{
+  "MessageID": "\u003cauth-missing-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cauth-missing-001@vendor.com\u003e",
+  "From": {
+    "Address": "carol@vendor.com",
+    "DisplayName": "Carol Evans"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "No auth headers here",
+  "BodyText": "This message has no Authentication-Results header at all.\r\nThe auth policy must reject (or otherwise downgrade) it.\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "none",
+    "DKIM": "none",
+    "DMARC": "none",
+    "AlignedFromDomain": "",
+    "RawHeader": ""
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.925255-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Content-Type": [
+      "text/plain; charset=utf-8"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Carol Evans\" \u003ccarol@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cauth-missing-001@vendor.com\u003e"
+    ],
+    "Subject": [
+      "No auth headers here"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

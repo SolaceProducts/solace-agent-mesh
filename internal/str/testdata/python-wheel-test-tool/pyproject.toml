@@ -1,0 +1,25 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sam-tool-wheel-test"
+version = "0.1.0"
+description = "Minimal test tool for wheel-based Python tool pipeline testing"
+requires-python = ">=3.10"
+dependencies = [
+    "sam-tool-sdk",
+]
+
+[project.scripts]
+wheel_echo = "wheel_test_tool:cli"
+
+[tool.hatch.build.targets.wheel]
+include = ["wheel_test_tool.py"]
+
+[tool.uv]
+# uv before 0.9.17 ignores a relative exclude-newer and would lock without the window.
+required-version = ">=0.9.17"
+# A release has to be a week old before uv will resolve to it, so a
+# compromised version is usually pulled before it reaches this lockfile.
+exclude-newer = "7 days"

@@ -1,0 +1,57 @@
+{
+  "MessageID": "\u003cwindows1252-body-001@example.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cwindows1252-body-001@example.com\u003e",
+  "From": {
+    "Address": "outlook-user@example.com",
+    "DisplayName": "Outlook User"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Outlook smart quote",
+  "BodyText": "It’s a Windows-1252 body — we expect this to round-trip as UTF-8.\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "example.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=example.com; dkim=pass header.d=example.com; dmarc=pass header.from=example.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.925155-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=example.com; dkim=pass header.d=example.com; dmarc=pass header.from=example.com"
+    ],
+    "Content-Transfer-Encoding": [
+      "8bit"
+    ],
+    "Content-Type": [
+      "text/plain; charset=windows-1252"
+    ],
+    "Date": [
+      "Mon, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Outlook User\" \u003coutlook-user@example.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cwindows1252-body-001@example.com\u003e"
+    ],
+    "Subject": [
+      "Outlook smart quote"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

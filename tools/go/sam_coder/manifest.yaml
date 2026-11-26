@@ -1,0 +1,14 @@
+version: 1
+
+# sam_coder runs a bounded coding loop inside one invocation, with no shell
+# and no subprocess. It is in no built-in toolset, so the builder does not
+# offer it to agents; the evidence issue drafter invokes it directly. The
+# workspace comes with the call and is deleted when the call ends. The restrictive
+# profile keeps it off the network; its model calls go through the STR's IPC
+# socket, which is metered against the invocation's budget like llm/call.
+tools:
+  sam_coder:
+    runtime: go
+    executable: ./sam_coder
+    timeout_seconds: 1800
+    sandbox_profile: restrictive

@@ -1,0 +1,9 @@
+From: "Carol Evans" <carol@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: No auth headers here
+Message-ID: <auth-missing-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Content-Type: text/plain; charset=utf-8
+
+This message has no Authentication-Results header at all.
+The auth policy must reject (or otherwise downgrade) it.

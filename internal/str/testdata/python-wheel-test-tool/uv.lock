@@ -1,0 +1,27 @@
+version = 1
+revision = 5
+requires-python = ">=3.10"
+
+[options]
+exclude-newer = "0001-01-01T00:00:00Z" # This has no effect and is included for backwards compatibility when using relative exclude-newer values.
+exclude-newer-span = "P7D"
+
+[[package]]
+name = "sam-tool-sdk"
+version = "0.1.2"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8d/e5/e4b0171881b6c23e0417019b10229e1c72ac51f6ac19d768e0ce2cdd7587/sam_tool_sdk-0.1.2.tar.gz", hash = "sha256:630ff51b9954ba854c9715f4849d83d8923e5bfbf097914bbad433ae6182d19d", size = 57507, upload-time = "2026-06-08T23:42:08.946Z" }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/c6/c3/0dfd2dfbd4aff586be4cb7c7117a3f6cb0cc261af1aa3fd6ed2e4d4732e4/sam_tool_sdk-0.1.2-py3-none-any.whl", hash = "sha256:b6f9f9c3791a0212dd44182ed5e2b5bc24139086c2dfeb5e4d042ffcf37eedb9", size = 52004, upload-time = "2026-06-08T23:42:07.524Z" },
+]
+
+[[package]]
+name = "sam-tool-wheel-test"
+version = "0.1.0"
+source = { editable = "." }
+dependencies = [
+    { name = "sam-tool-sdk" },
+]
+
+[package.metadata]
+requires-dist = [{ name = "sam-tool-sdk" }]

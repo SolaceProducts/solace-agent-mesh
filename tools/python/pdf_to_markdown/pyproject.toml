@@ -1,0 +1,30 @@
+[build-system]
+requires = ["hatchling==1.33.0"]
+build-backend = "hatchling.build"
+
+[project]
+name = "sam-tool-pdf-to-markdown"
+version = "0.1.0"
+description = "PDF → Markdown converter tool for Solace Agent Mesh STR (markitdown-backed)"
+requires-python = ">=3.11.5"
+dependencies = [
+    "sam-tool-sdk",
+    "markitdown[pdf]==0.1.9",
+    # Promotes markitdown[pdf]'s transitive pdfplumber to a direct dependency because the tool
+    # now calls extract_tables() itself. The pin has to satisfy markitdown's own range, since
+    # the two share one copy of the library.
+    "pdfplumber==0.11.10",
+]
+
+[project.scripts]
+convert_pdf_to_markdown = "pdf_to_markdown_tool:cli"
+
+[tool.hatch.build.targets.wheel]
+include = ["pdf_to_markdown_tool.py"]
+
+[tool.uv]
+# uv before 0.9.17 ignores a relative exclude-newer and would lock without the window.
+required-version = ">=0.9.17"
+# A release has to be a week old before uv will resolve to it, so a
+# compromised version is usually pulled before it reaches this lockfile.
+exclude-newer = "7 days"

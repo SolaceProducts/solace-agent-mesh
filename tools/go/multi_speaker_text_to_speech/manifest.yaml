@@ -1,0 +1,6 @@
+version: 1
+tools:
+  multi_speaker_text_to_speech:
+    runtime: go
+    executable: ./multi_speaker_text_to_speech
+    timeout_seconds: 120

@@ -1,0 +1,6 @@
+version: 1
+tools:
+  convert_to_markdown:
+    runtime: go
+    executable: ./convert_to_markdown
+    timeout_seconds: 120

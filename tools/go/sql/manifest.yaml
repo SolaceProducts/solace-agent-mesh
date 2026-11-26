@@ -1,0 +1,6 @@
+version: 1
+tools:
+  execute_sql_query:
+    runtime: go
+    executable: ./sql
+    timeout_seconds: 120

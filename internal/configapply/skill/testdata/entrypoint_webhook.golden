@@ -1,0 +1,50 @@
+=== schema: webhook ===
+## type: webhook
+
+**Webhook**
+
+Accept inbound HTTP requests and dispatch each one to an agent or workflow
+
+> ⚠ The route path becomes part of a publicly reachable URL under /gw/<id>/. Protect every route with a token or HMAC signature.
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `routePath` | `string` | yes |  | len 1–512; matches regex | Path segment appended to /gw/<gateway_id>/. Must start with '/' and be URL-safe. |
+| `method` | `select` |  | `POST` | one of: POST, PUT, PATCH | Method the entrypoint accepts on the route. |
+| `authMode` | `select` | yes | `token` | one of: token, hmac | How the entrypoint validates inbound requests. 'token' compares a shared bearer token; 'hmac' verifies a per-payload signature. |
+| `authToken` | `password (secret)` | yes, when `authMode`=`token` |  | len 8–1024; secret | Shared secret expected on every request. Token location selects where the caller carries it; the default is an Authorization: Bearer header. |
+| `hmacSecret` | `password (secret)` | yes, when `authMode`=`hmac` |  | len 16–1024; secret | Shared secret the sender uses to sign the payload. |
+| `hmacAlgorithm` | `select` |  | `sha256` | one of: sha256, sha512 | (no description) |
+| `hmacHeader` | `string` |  | `X-Hub-Signature-256` | len 1–128 | HTTP header carrying the signature (e.g. X-Hub-Signature-256). |
+| `hmacPrefix` | `string` |  | `sha256=` | max len 32 | Prefix stripped from the signature header value before hex/base64 decode. GitHub-style senders use "sha256="; leave empty if the header carries the raw signature. |
+| `hmacEncoding` | `select` |  | `hex` | one of: hex, base64, base64url, base64raw, base64rawurl | Encoding of the signature value in the header (after any prefix is stripped). Use hex for GitHub/GitLab; base64 for standard HMAC-SHA256 signers; base64url for PayPal-style URL-safe signers. |
+| `authTokenLocation` | `select` |  | `bearer` | one of: bearer, header, query | Where the caller carries the token. Use bearer for senders you control; header or query for senders that cannot set an Authorization header. A token in the query string is recorded by proxies and access logs — prefer a header where the sender allows one. |
+| `authTokenName` | `string` | yes, when `authMode`=`token` and `authTokenLocation`=`header` or `query` |  | len 1–128 | Name of the header or query parameter carrying the token, for example X-Webhook-Token. |
+| `targetType` | `select` | yes | `agent` | one of: agent, workflow | Whether inbound requests are handled by an agent or by a workflow. |
+| `targetAgentName` | `agent_select` | yes, when `targetType`=`agent` |  |  | Agent that handles inbound requests. |
+| `targetWorkflowName` | `workflow_select` | yes, when `targetType`=`workflow` |  |  | Workflow that handles inbound requests. |
+| `inputExpression` | `textarea` | yes |  | min len 1 | sacexpr expression that builds the agent's input from the request. e.g. "template:Order {{user_data.path:id}}: {{json://input.payload:}}". |
+| `runAs` | `system_user_select` |  |  |  | [advanced] Service account this entrypoint's requests run as. Leave empty for the built-in default service account, which can invoke any agent or workflow; name a scoped service account to narrow what this entrypoint can reach. |
+| `maxBodyBytes` | `number` |  | `1048576` | range 1024–52428800 | Reject requests with a body larger than this. Defaults to 1 MiB. |
+| `systemPurpose` | `textarea` |  |  | max len 4000 | [advanced] Describes to agents what this entrypoint is for. Stamped onto every task this entrypoint submits and available to agent prompts as system_purpose. |
+| `responseFormat` | `textarea` |  |  | max len 4000 | [advanced] Tells agents how to shape their replies for this entrypoint (length, tone, markdown support). Stamped onto every task this entrypoint submits and available to agent prompts as response_format. |
+
+=== example: webhook ===
+kind: entrypoint
+name: example_webhook
+description: "Example webhook entrypoint. Replace with a real description (10+ chars)."
+spec:
+  type: webhook
+  values:
+    routePath: "/orders"
+    # optional: method: "POST"
+    authMode: "token"
+    authToken: ${EXAMPLE_WEBHOOK_AUTHTOKEN}  # secret — provide via env var
+    # optional: authTokenLocation: "bearer"
+    targetType: "agent"
+    targetAgentName: "..."
+    inputExpression: "x"
+    # optional: runAs: null  # value of type system_user_select
+    # optional: maxBodyBytes: 1048576
+    # optional: systemPurpose: "..."
+    # optional: responseFormat: "..."

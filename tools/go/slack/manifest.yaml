@@ -1,0 +1,10 @@
+version: 1
+tools:
+  slack:
+    runtime: go
+    executable: ./slack
+    timeout_seconds: 90
+  slack_update:
+    runtime: go
+    executable: ./slack
+    timeout_seconds: 30

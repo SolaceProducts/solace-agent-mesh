@@ -1,0 +1,93 @@
+{
+  "scope": "tenant",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "id": "01a10c9e-2222-7e77-be6a-3cdc8d0b9201",
+  "name": "Parminder Procurement",
+  "user": {
+    "email": "parminder@example.com",
+    "isSystemUser": false
+  },
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "totals": {
+    "cost": "412.3000000000",
+    "activities": 120,
+    "costPerActivity": "3.4358333333",
+    "shareOfSpend": 33.234454851762884,
+    "costByBucket": {
+      "uncachedInput": "203.1000000000",
+      "output": "190.2000000000",
+      "cacheRead": "11.0000000000",
+      "cacheWrite": "8.0000000000"
+    },
+    "tokens": {
+      "uncachedInput": 30310000,
+      "output": 2536000,
+      "cacheRead": 1375000,
+      "cacheWrite": 64000
+    },
+    "calls": 3011,
+    "unpricedCalls": 2
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "30.1000000000",
+      "tokens": {
+        "uncachedInput": 10800,
+        "output": 2790,
+        "cacheRead": 4860,
+        "cacheWrite": 405
+      },
+      "activities": 9
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "27.4000000000",
+      "tokens": {
+        "uncachedInput": 9600,
+        "output": 2480,
+        "cacheRead": 4320,
+        "cacheWrite": 360
+      },
+      "activities": 8
+    }
+  ],
+  "budget": {
+    "id": "01a10c9e-f47a-7e77-be6a-3cdc8d0b976d",
+    "name": "Procurement",
+    "source": "assigned",
+    "amount": "450.0000000000",
+    "warningPercentage": 80,
+    "topUp": null,
+    "effectiveAmount": "450.0000000000",
+    "periodStart": "2026-10-01T00:00:00.000Z",
+    "periodEnd": "2026-11-01T00:00:00.000Z",
+    "periodSpend": "412.3000000000",
+    "usagePercent": 91.62222222222223,
+    "status": "approaching"
+  },
+  "topRoots": [
+    {
+      "kind": "agent",
+      "id": "01a10c9e-1111-7e77-be6a-3cdc8d0b9102",
+      "name": "Customer Support",
+      "bookedName": null,
+      "cost": "193.1600000000",
+      "shareOfUser": 46.84938151831191
+    },
+    {
+      "kind": "workflow",
+      "id": null,
+      "name": "Nightly Report",
+      "bookedName": "nightly-report",
+      "cost": "138.3200000000",
+      "shareOfUser": 33.5483870967742
+    }
+  ],
+  "otherCost": "80.8200000000",
+  "otherShareOfUser": 19.6022313849139
+}

@@ -1,0 +1,65 @@
+test_case_id: "token_parity_compaction_001"
+description: "A context-limit error triggers a compaction call and a retry; every surface records the summarizer's tokens along with the agent's."
+skip_intermediate_events: true
+
+test_runner_config_overrides:
+  agent_config:
+    auto_summarization:
+      enabled: true
+      compaction_percentage: 0.5
+
+gateway_inputs:
+  - target_agent_name: "TestAgent"
+    user_identity: "spend_user@example.com"
+    a2a_parts:
+      - type: "text"
+        text: "Tell me about the history of computing, from the abacus to quantum computers."
+    external_context:
+      a2a_session_id: "session_token_parity_compaction"
+  - target_agent_name: "TestAgent"
+    user_identity: "spend_user@example.com"
+    a2a_parts:
+      - type: "text"
+        text: "Now tell me about cats."
+    external_context:
+      a2a_session_id: "session_token_parity_compaction"
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            content: "Computing runs from the abacus through Babbage, Turing, ENIAC, the transistor and the personal computer to quantum research."
+          finish_reason: "stop"
+      usage: {prompt_tokens: 1000, completion_tokens: 50, total_tokens: 1050, cached_tokens: 600, cache_write_tokens: 200}
+  - error_response:
+      status_code: 400
+      message: "This model's maximum context length is 4096 tokens. However, your messages resulted in too many tokens."
+  - static_response:
+      choices:
+        - message:
+            content: "The user asked about computing history and got an overview."
+          finish_reason: "stop"
+      usage: {prompt_tokens: 3000, completion_tokens: 40, total_tokens: 3040, cached_tokens: 0}
+  - static_response:
+      choices:
+        - message:
+            content: "Cats have been domesticated for thousands of years."
+          finish_reason: "stop"
+      usage: {prompt_tokens: 700, completion_tokens: 30, total_tokens: 730, cached_tokens: 300, cache_write_tokens: 100}
+
+expected_gateway_output:
+  - type: "final_response"
+    request_index: 0
+    status:
+      state: "completed"
+  - type: "final_response"
+    request_index: 1
+    status:
+      state: "completed"
+      message:
+        role: "agent"
+        parts:
+          - type: "text"
+            text_contains:
+              - "Cats have been domesticated"
+              - "automatically summarized"

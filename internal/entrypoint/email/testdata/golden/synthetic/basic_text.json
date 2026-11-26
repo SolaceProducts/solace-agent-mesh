@@ -1,0 +1,54 @@
+{
+  "MessageID": "\u003cbasic-text-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cbasic-text-001@vendor.com\u003e",
+  "From": {
+    "Address": "alice@vendor.com",
+    "DisplayName": "Alice Smith"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Order request",
+  "BodyText": "Please ship 50 widgets to Toronto by Friday.\r\n\r\nThanks,\r\nAlice\r\n",
+  "BodyHTML": "",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.92522-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "text/plain; charset=utf-8"
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Alice Smith\" \u003calice@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cbasic-text-001@vendor.com\u003e"
+    ],
+    "Subject": [
+      "Order request"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

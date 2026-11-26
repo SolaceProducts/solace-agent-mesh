@@ -1,0 +1,57 @@
+{
+  "MessageID": "\u003cmultipart-001@vendor.com\u003e",
+  "InReplyTo": "",
+  "References": null,
+  "ThreadID": "\u003cmultipart-001@vendor.com\u003e",
+  "From": {
+    "Address": "dave@vendor.com",
+    "DisplayName": "Dave Wilson"
+  },
+  "ReplyTo": null,
+  "To": [
+    {
+      "Address": "sam-email-entrypoint@example.org",
+      "DisplayName": ""
+    }
+  ],
+  "CC": null,
+  "Subject": "Multipart text + html",
+  "BodyText": "Hi team,\r\n\r\nPlain-text part of the alternative.\r\n",
+  "BodyHTML": "\u003chtml\u003e\u003cbody\u003e\u003cp\u003eHi team,\u003c/p\u003e\u003cp\u003e\u003cstrong\u003eHTML\u003c/strong\u003e part of the alternative.\u003c/p\u003e\u003c/body\u003e\u003c/html\u003e",
+  "Attachments": null,
+  "AuthResults": {
+    "SPF": "pass",
+    "DKIM": "pass",
+    "DMARC": "pass",
+    "AlignedFromDomain": "vendor.com",
+    "RawHeader": "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+  },
+  "ReceivedAt": "2026-05-01T10:08:58.926458-06:00",
+  "ProviderUID": "",
+  "RawHeaders": {
+    "Authentication-Results": [
+      "protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com"
+    ],
+    "Content-Type": [
+      "multipart/alternative; boundary=\"boundary-mp-text-html-001\""
+    ],
+    "Date": [
+      "Sun, 27 Apr 2026 10:00:00 +0000"
+    ],
+    "From": [
+      "\"Dave Wilson\" \u003cdave@vendor.com\u003e"
+    ],
+    "Message-Id": [
+      "\u003cmultipart-001@vendor.com\u003e"
+    ],
+    "Mime-Version": [
+      "1.0"
+    ],
+    "Subject": [
+      "Multipart text + html"
+    ],
+    "To": [
+      "sam-email-entrypoint@example.org"
+    ]
+  }
+}

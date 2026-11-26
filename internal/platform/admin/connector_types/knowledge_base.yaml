@@ -1,0 +1,131 @@
+type: knowledge_base
+subtypes:
+  - subtype: bedrock
+    name: "Amazon Bedrock"
+    description: "Connect to Amazon Bedrock Knowledge Base for RAG retrieval"
+    warning: "All agents using this connector will have access to the same Knowledge Base. Access control must be configured at the AWS IAM level. For AWS IAM Role authentication, ensure Agent Mesh is deployed on AWS."
+    usage_guidance: |
+      Use the Bedrock Knowledge Base connector when the user wants to give an
+      agent access to a knowledge base for retrieval-augmented generation (RAG).
+      The user needs an existing Amazon Bedrock Knowledge Base with its ID and
+      AWS credentials. The knowledge base ID is a unique identifier from the
+      AWS Bedrock console. The region defaults to us-east-1 if not specified.
+
+      Always use <<__SAM_REQUIRED__>> for the aws_access_key_id and aws_secret_access_key fields
+      since these are AWS credentials that should never appear in artifacts.
+    field_schema:
+      - name: kb_id
+        type: string
+        label: "Knowledge Base ID"
+        required: true
+        order: 1
+        placeholder: "ABC123XYZ"
+        validation:
+          min_length: 1
+          max_length: 100
+      - name: region
+        type: string
+        label: "AWS Region"
+        required: true
+        order: 2
+        default: "us-east-1"
+        placeholder: "us-east-1"
+        validation:
+          min_length: 1
+          max_length: 50
+          pattern: "^[a-z0-9]+(-[a-z0-9]+)*$"
+          error_msg: "AWS Region must be a valid region name (e.g., us-east-1, eu-west-1)"
+      - name: auth_type
+        type: select
+        label: "Authentication Scheme"
+        required: true
+        order: 3
+        default: "access_key"
+        hint: "How the connector authenticates with AWS."
+        options:
+          - label: "AWS IAM Role Chaining"
+            value: "iam"
+            description: "Assume an IAM role via the node's instance credentials (requires Agent Mesh running on AWS)"
+          - label: "AWS Access Key"
+            value: "access_key"
+            description: "Authenticate with a static access key ID and secret key pair"
+      - name: aws_access_key_id
+        type: password
+        label: "AWS Access Key"
+        required: true
+        secret: true
+        order: 4
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 16
+          max_length: 128
+      - name: aws_secret_access_key
+        type: password
+        label: "AWS Secret Key"
+        required: true
+        secret: true
+        order: 5
+        visible_when:
+          auth_type: "access_key"
+        validation:
+          min_length: 30
+          max_length: 255
+      - name: aws_account_id
+        type: string
+        label: "AWS Account ID"
+        required: true
+        order: 6
+        placeholder: "123456789012"
+        hint: "The AWS Account ID where the Bedrock Knowledge Base is located. Required for IAM role assumption."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 1
+          max_length: 20
+          pattern: "^\\d+$"
+      - name: role_name
+        type: string
+        label: "Role Name"
+        required: true
+        order: 7
+        placeholder: "SolaceBedrockKBAccess"
+        hint: "Name of the IAM role with permissions to access the Bedrock Knowledge Base (e.g., 'BedrockKBAccessRole')"
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 1
+          max_length: 64
+      - name: session_name
+        type: string
+        label: "Session Name"
+        required: false
+        order: 8
+        placeholder: "solace-kb-session"
+        hint: "Session name for auditing the assumed role in AWS CloudTrail logs. Defaults to 'solace-kb-session'."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 64
+      - name: external_id
+        type: password
+        label: "External ID"
+        required: false
+        secret: true
+        order: 9
+        placeholder: "solace-sam-abc-123"
+        hint: "Optional security token for cross-account access. Required if configured in the IAM role's trust policy."
+        visible_when:
+          auth_type: "iam"
+        validation:
+          min_length: 2
+          max_length: 1224
+      - name: hil
+        type: hil
+        label: "Tool Approvals"
+        required: false
+        hidden: true
+        order: 900
+        description: "Human approval before this connector's tools run. Keys under tools: are role names: `query_bedrock_kb`."
+        hint: "Approval gates for this connector's tools, keyed by role (`query_bedrock_kb`). `{}` removes them."

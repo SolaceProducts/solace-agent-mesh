@@ -1,0 +1,12 @@
+From: "Alice Smith" <alice@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Order request
+Message-ID: <basic-text-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+Content-Type: text/plain; charset=utf-8
+
+Please ship 50 widgets to Toronto by Friday.
+
+Thanks,
+Alice

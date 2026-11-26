@@ -1,0 +1,29 @@
+=== schema: agent_link ===
+## type: agent_link
+
+**Agent Link**
+
+Let third-party agents built with the Agent Mesh link SDK join the mesh over one WebSocket each instead of the broker
+
+> ⚠ Agents connect to /gw/<id>/v1/connect, each with its own token. Add link agents and choose this entrypoint for them; they are not part of these settings.
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `maxFrameBytes` | `number` |  | `8388608` | range 1024–67108864 | Largest WebSocket message in either direction. A larger message from an agent closes its connection. Defaults to 8 MiB. |
+| `maxInflight` | `number` |  | `16` | range 1–1024 | Tasks delivered to one connection that it has not acknowledged yet. Defaults to 16. |
+| `maxConnectionsPerAgent` | `number` |  | `8` | range 1–256 | Connections one agent may hold open at once. Another one is closed. Defaults to 8. |
+| `maxConnectsPerMinute` | `number` |  | `60` | range 1–6000 | Connections one agent may open per minute. More are refused with HTTP 429. Defaults to 60. |
+| `taskTtlSeconds` | `number` |  | `7200` | range 1–604800 | How long a delivered task may stay unanswered before it times out. Defaults to 7200. |
+
+=== example: agent_link ===
+kind: entrypoint
+name: example_agent_link
+description: "Example agent_link entrypoint. Replace with a real description (10+ chars)."
+spec:
+  type: agent_link
+  values:
+    # optional: maxFrameBytes: 8388608
+    # optional: maxInflight: 16
+    # optional: maxConnectionsPerAgent: 8
+    # optional: maxConnectsPerMinute: 60
+    # optional: taskTtlSeconds: 7200

@@ -1,0 +1,26 @@
+[
+  {
+    "taskId": "t1",
+    "isError": false,
+    "isWarning": false,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "Working on it."
+      }
+    ]
+  },
+  {
+    "taskId": "t1",
+    "isError": true,
+    "isWarning": true,
+    "inputRequest": "",
+    "segments": [
+      {
+        "kind": "text",
+        "text": "The request timed out. Please try again."
+      }
+    ]
+  }
+]

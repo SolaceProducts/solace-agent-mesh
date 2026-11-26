@@ -1,0 +1,9 @@
+From: "Pretend Alice" <alice@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: Trust me bro
+Message-ID: <forged-001@attacker.example>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: mx.attacker.example; spf=pass; dkim=pass; dmarc=pass header.from=vendor.com
+Content-Type: text/plain
+
+Hi, this email is totally legit.

@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+.coverage
+.mypy_cache/
+.ruff_cache/
+.contract-cache/
+.env
+dist/
+build/
+*.egg-info/
+.hermes-home/

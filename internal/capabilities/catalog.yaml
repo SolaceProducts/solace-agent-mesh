@@ -1,0 +1,83 @@
+# SAM capability catalog. This header is the authoritative guide — read it
+# before adding an entry, since a mistake here silently mis-resolves a feature.
+#
+# A capability describes a product feature whose availability varies by platform
+# (runtime.GOOS). Unlike feature flags — operator-controlled on/off toggles —
+# capabilities are resolved automatically from the runtime environment and are
+# read-only from the outside.
+#
+# Schema:
+#   key          (string, required, snake_case, stable identifier)
+#   name         (string, required, human-readable label)
+#   description  (string, optional)
+#   maturity     (string, optional, baseline for all unlisted platforms;
+#                one of: unavailable | stable | beta | early_access | experimental)
+#   platforms    (map, optional, goos → maturity override; goos is a runtime.GOOS
+#                value such as windows, darwin, linux)
+#
+# Decided semantics (the footguns):
+#   - baseline `maturity` is OPTIONAL and defaults to `unavailable` on unlisted
+#     platforms (fail-closed). Omitting it silently hides the feature everywhere
+#     it is not listed — set it deliberately.
+#   - `unavailable` is a FIRST-CLASS value usable as a baseline OR a per-OS
+#     override. Broken on one OS: maturity: experimental + platforms: {darwin:
+#     unavailable}. Deliberately platform-exclusive: set maturity: unavailable
+#     explicitly (rather than omitting the baseline) so the intent is visible.
+#
+# Resolution order for a given platform:
+#   1. SAM_CAPABILITY_<UPPER_KEY>=false  → unavailable  (env override)
+#   2. platforms[goos]                  → that maturity (platform override)
+#   3. maturity (baseline)              → that maturity (baseline)
+#   4. (nothing)                        → unavailable
+#
+# Badge rendering (UI, via findCapabilityBadge):
+#   stable        → no badge
+#   beta          → BETA badge
+#   early_access  → EARLY ACCESS badge
+#   experimental  → EXPERIMENTAL badge
+#   unavailable   → no badge (the consuming surface hides the item itself)
+
+capabilities:
+  - key: event_mesh_gateway
+    name: Event Mesh Gateway
+    description: "Connect agents to a Solace event mesh via configurable event rules. Requires libsolclient.dll and OpenSSL 3 DLLs on Windows."
+    maturity: stable
+    platforms:
+      windows: beta
+
+  - key: whatsapp_gateway
+    name: WhatsApp Entrypoint
+    description: "Let people reach agents from 1:1 WhatsApp chats through the Meta WhatsApp Business Cloud API. Early Access on all platforms."
+    maturity: early_access
+
+  - key: google_chat_gateway
+    name: Google Chat Entrypoint
+    description: "Let people reach agents from Google Chat direct messages, spaces and group chats through a Google Workspace Chat app. Early Access on all platforms."
+    maturity: early_access
+
+  - key: agent_link_gateway
+    name: Agent Link Entrypoint
+    description: "Let third-party agents built with the Agent Mesh link SDK join the mesh over one WebSocket each instead of the broker. Early Access on all platforms; on by default, and off wherever the agent_link_entrypoint flag is turned off."
+    maturity: early_access
+
+  - key: workflow_decision_node
+    name: Workflow Decision Nodes
+    description: "Route workflows on typed answers from a decision model (TypeSafe, OpenAI's Decisions API, or Gemini's Decisions API), configured as a decision model on the Models page or, for a workflow loaded from a config file, inline. Early Access on all platforms; on by default, and off wherever the workflow_decision_node flag is turned off."
+    maturity: early_access
+
+  - key: event_mesh_connector
+    name: Event Mesh Connector
+    description: "Let AI agents publish messages to a Solace event broker through connector tools. GA on all platforms; Beta on Windows, which requires libsolclient.dll and OpenSSL 3 DLLs."
+    maturity: stable
+    platforms:
+      windows: beta
+
+  - key: document_db_mongodb_connector
+    name: MongoDB Connector
+    description: "Let AI agents query and modify a MongoDB collection through connector tools. Beta on all platforms."
+    maturity: beta
+
+  - key: web_search_connector
+    name: Web Search Connector
+    description: "Let AI agents search the web through Tavily or Exa and cite their sources. Early Access on all platforms."
+    maturity: early_access

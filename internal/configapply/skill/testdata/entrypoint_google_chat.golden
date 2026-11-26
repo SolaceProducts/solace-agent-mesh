@@ -1,0 +1,58 @@
+=== schema: google_chat ===
+## type: google_chat
+
+**Google Chat**
+
+Connect your AI agent to Google Chat through a Google Workspace Chat app
+
+> ⚠ Requires a Google Workspace Chat app and a service account for it.
+
+| Field | Type | Required | Default | Validation | Description |
+|---|---|---|---|---|---|
+| `delivery` | `select` |  | `https` | one of: https, pubsub | [advanced] How Google Chat delivers events. HTTPS supports every feature but needs this entrypoint reachable from Google over public HTTPS. Cloud Pub/Sub needs no inbound access, but a Chat app built as a Google Workspace add-on gets no buttons over it. |
+| `endpoint_url` | `string` |  |  |  | The https:// URL Google Chat posts events to, ending in /events. Leave empty to use this entrypoint's own address, shown on its Network tab after you create it; enter that address as the Chat app's HTTP endpoint URL. |
+| `addon_service_account_email` | `string` |  |  | matches regex | For a Chat app built as a Google Workspace add-on: the Service account email shown under the app's Connection settings, service-<project number>@gcp-sa-gsuiteaddons.iam.gserviceaccount.com. Leave empty for a Chat app without add-on features. |
+| `pubsub_subscription` | `string` | yes, when `delivery`=`pubsub` |  | len 1–512; matches regex | [advanced] Full resource name of the subscription the Chat app publishes its events to. |
+| `service_account_key` | `password (secret)` |  |  | secret | JSON key of your own service account, which posts replies and, with Pub/Sub delivery, pulls the subscription. Leave empty to use this deployment's Google identity (Workload Identity on Google Cloud). |
+| `default_agent_name` | `agent_select` |  | `Orchestrator` |  | The agent that handles messages when no specific agent is mentioned. |
+| `use_user_identity_in_channels` | `boolean` |  | `false` |  | When enabled, multi-party space messages keep the sending user's identity instead of the run-as Agent Mesh service account. Direct messages always run as the sender. |
+| `allowed_email_domains` | `string` |  |  |  | Comma-separated Google Workspace domains whose users may message this app. When empty, every domain is allowed; otherwise senders from any other domain are refused before their identity is looked up. |
+| `feedback_enabled` | `boolean` |  | `false` |  | [advanced] Offer thumbs up and down buttons on each answer and record the ratings. |
+| `thread_history_limit` | `number` |  | `0` | range 0–100 | How many earlier messages of a space thread the agent sees when the app is mentioned in it, up to 100. 0 turns this off. A Google Workspace administrator must first approve the app's chat.app.messages.readonly scope. |
+| `artifact_drive_folder_id` | `string` |  |  |  | A shared drive, or a folder in one, where files the agent makes are put and shared with the person who asked for them, because a Chat app cannot attach files to a message. Use a drive just for this: everyone who can open it can open every file in it, and files stay there after the person's access ends. The app's service account needs to add files to it and to delete or trash them. Nothing is put there for a task that runs as an Agent Mesh service account, as a task in a shared space does unless "Use real user identity in spaces" is on; with it on, the link to the file is posted where the whole space can see it. Leave empty to name the files in the reply with a link to the web UI instead. |
+| `artifact_drive_access_days` | `number` |  | `30` | range 1–365 | [advanced] How many days the person who asked for a file can open it in Drive, from 1 to 365. Only used with a Drive folder. |
+| `project_number` | `string` |  |  |  | [advanced] Google Cloud project number of the Chat app. |
+| `run_as` | `system_user_select` |  |  |  | [advanced] Agent Mesh service account that messages in shared spaces run as. Leave empty for the built-in default service account; name a scoped service account to narrow what shared spaces can reach. |
+| `identity_claim_key` | `string` |  | `email` |  | [advanced] The identity provider claim the sender's Google Workspace email is matched against. |
+| `min_edit_interval_ms` | `number` |  | `1100` | min 0 | [advanced] Minimum spacing between writes to one space, which keeps streamed replies inside the Chat API's per-space write quota. |
+| `initial_status_message` | `string` |  | `⏳ Working on it…` |  | [advanced] Status text posted while the agent works on a message. |
+| `auth_audience_type` | `select` |  | `endpoint_url` | one of: project_number, endpoint_url | [advanced] HTTPS delivery only: the Chat app's authentication audience. Endpoint URL (the default, and the only option for an add-on Chat app) verifies each request against endpoint_url; project number verifies it against project_number. |
+| `systemPurpose` | `textarea` |  |  | max len 4000 | [advanced] Describes to agents what this entrypoint is for. Stamped onto every task this entrypoint submits and available to agent prompts as system_purpose. |
+| `responseFormat` | `textarea` |  |  | max len 4000 | [advanced] Tells agents how to shape their replies for this entrypoint (length, tone, markdown support). Stamped onto every task this entrypoint submits and available to agent prompts as response_format. |
+
+=== example: google_chat ===
+kind: entrypoint
+name: example_google_chat
+description: "Example google_chat entrypoint. Replace with a real description (10+ chars)."
+spec:
+  type: google_chat
+  values:
+    # optional: delivery: "https"
+    # optional: endpoint_url: "..."
+    # optional: addon_service_account_email: "..."
+    service_account_key: ${EXAMPLE_GOOGLE_CHAT_SERVICE_ACCOUNT_KEY}  # secret — provide via env var
+    # optional: default_agent_name: "Orchestrator"
+    # optional: use_user_identity_in_channels: false
+    # optional: allowed_email_domains: "example.com, example.org"
+    # optional: feedback_enabled: false
+    # optional: thread_history_limit: 0
+    # optional: artifact_drive_folder_id: "0AB1cD2eF3gH4iJ5kL"
+    # optional: artifact_drive_access_days: 30
+    # optional: project_number: "..."
+    # optional: run_as: null  # value of type system_user_select
+    # optional: identity_claim_key: "email"
+    # optional: min_edit_interval_ms: 1100
+    # optional: initial_status_message: "⏳ Working on it…"
+    # optional: auth_audience_type: "endpoint_url"
+    # optional: systemPurpose: "..."
+    # optional: responseFormat: "..."

@@ -1,0 +1,94 @@
+{
+  "scope": "tenant",
+  "dataAsOf": "2026-10-15T19:19:00.000Z",
+  "historyComplete": true,
+  "id": "01a10c9e-3333-7e77-be6a-3cdc8d0b9301",
+  "name": "Expense Audit",
+  "bookedName": null,
+  "window": {
+    "startTime": "2026-10-01T00:00:00.000Z",
+    "endTime": "2026-10-15T19:20:00.000Z"
+  },
+  "comparisonWindow": {
+    "startTime": "2026-09-01T00:00:00.000Z",
+    "endTime": "2026-09-15T19:20:00.000Z"
+  },
+  "totals": {
+    "cost": "57.4000000000",
+    "activities": 286,
+    "costPerActivity": "0.2006993006",
+    "shareOfSpend": 4.626868077834561,
+    "costByBucket": {
+      "uncachedInput": "30.0000000000",
+      "output": "25.4000000000",
+      "cacheRead": "1.0000000000",
+      "cacheWrite": "1.0000000000"
+    },
+    "tokens": {
+      "uncachedInput": 4400000,
+      "output": 330000,
+      "cacheRead": 120000,
+      "cacheWrite": 9000
+    },
+    "calls": 2002,
+    "unpricedCalls": 0
+  },
+  "daily": [
+    {
+      "date": "2026-10-01",
+      "cost": "1.8000000000",
+      "tokens": {
+        "uncachedInput": 10800,
+        "output": 2790,
+        "cacheRead": 4860,
+        "cacheWrite": 405
+      },
+      "activities": 9
+    },
+    {
+      "date": "2026-10-02",
+      "cost": "2.2000000000",
+      "tokens": {
+        "uncachedInput": 13200,
+        "output": 3410,
+        "cacheRead": 5940,
+        "cacheWrite": 495
+      },
+      "activities": 11
+    }
+  ],
+  "nodes": [
+    {
+      "nodeId": "code_assistant",
+      "name": "Code Assistant",
+      "kind": "agent",
+      "cost": "32.9700000000",
+      "shareOfWorkflow": 57.4390243902439,
+      "changePercent": 6.012861736334405
+    },
+    {
+      "nodeId": "review",
+      "name": "Policy Reviewer",
+      "kind": "agent",
+      "cost": "24.0300000000",
+      "shareOfWorkflow": 41.86411149825784,
+      "changePercent": null
+    },
+    {
+      "nodeId": "notify",
+      "name": "send_email",
+      "kind": "tool",
+      "cost": "0.0000000000",
+      "shareOfWorkflow": 0,
+      "changePercent": null
+    },
+    {
+      "nodeId": "old_step",
+      "name": "old_step",
+      "kind": null,
+      "cost": "0.4000000000",
+      "shareOfWorkflow": 0.6968641114982579,
+      "changePercent": null
+    }
+  ]
+}

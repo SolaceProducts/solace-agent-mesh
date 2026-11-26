@@ -1,0 +1,6 @@
+version: 1
+tools:
+  graph_db_query:
+    runtime: go
+    executable: ./graph-db
+    timeout_seconds: 120

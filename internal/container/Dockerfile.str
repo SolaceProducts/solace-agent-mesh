@@ -1,0 +1,413 @@
+# Standalone STR (Secure Tool Runtime) image.
+#
+# Multi-stage build:
+#   1. Go builder: compiles sam-str + all Go builtin tools
+#   2. Ubuntu runtime: system packages + Go tools + Python tools with venvs
+#
+# Supports both amd64 and arm64 via GitHub Actions matrix runners.
+# Tool authors can rely on the system packages listed here
+# (documented in docs/arch/volumes.md section 6.3).
+
+FROM ghcr.io/astral-sh/uv:0.13.9 AS uv
+
+# ============================================================
+# Stage 1: Build Go binaries
+# ============================================================
+FROM golang:1.27-bookworm AS builder
+ARG STR_VERSION=dev
+ENV VERSION_LDFLAGS="-X github.com/SolaceProducts/solace-agent-mesh/internal/samversion.Version=${STR_VERSION} -X github.com/SolaceProducts/solace-agent-mesh/internal/samversion.STRVersion=${STR_VERSION}"
+WORKDIR /src
+COPY go.mod go.sum ./
+# go.mod has `replace github.com/jmespath/go-jmespath => ./third_party/jmespath`
+# (vendored in PR #677). `go mod download` resolves the replace target and
+# needs the directory present in the build context before it runs.
+COPY third_party/ ./third_party/
+RUN go mod download
+
+# Copy source in layers ordered by change frequency (least → most).
+COPY common/ ./common/
+COPY tools/ ./tools/
+COPY python/ ./python/
+COPY pkg/ ./pkg/
+COPY cmd/ ./cmd/
+COPY internal/ ./internal/
+COPY configs/ ./configs/
+COPY skills/ ./skills/
+
+# STR binary (CGO enabled for Solace C SDK).
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go build -ldflags "${VERSION_LDFLAGS}" -o /bin/sam-str ./cmd/str
+
+# Go builtin tools (static binaries, no CGO needed).
+# All tools follow the pattern /tools/<name>/<name> from ./tools/go/<name>.
+# The manifest is copied in the same loop and the copy is strict: the STR
+# discovers tools by manifest, so a binary without one is silently invisible
+# to every agent (a separate copy list drifted from this one and shipped the
+# plotly binary manifest-less).
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    set -e && \
+    for d in sql bedrock-kb pptx imagemagick ffmpeg document-db search graph-db \
+             mermaid plotly libreoffice pdf_ops pdf_extract_text \
+             render_to_images html_to_pdf convert_to_markdown text_to_speech multi_speaker_text_to_speech \
+             concatenate_audio slack send_email volume_fs sam_coder web_search; do \
+      CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" -o "/tools/${d}/${d}" "./tools/go/${d}"; \
+      cp "/src/tools/go/${d}/manifest.yaml" "/tools/${d}/manifest.yaml"; \
+    done
+
+# skill (the load_skill runtime runner) is deliberately manifest-less: the
+# skill runtime execs it directly, it is not discovered from the tools dir.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" -o /tools/skill/skill ./tools/go/skill
+
+# Event Mesh tool: CGO, no -tags nosolace (it calls broker.NewSolaceBroker; the
+# nosolace stub panics). libsolclient.a links statically, so no runtime .so needed.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    go build -ldflags "${VERSION_LDFLAGS}" -o /tools/event-mesh/event-mesh ./tools/go/event-mesh && \
+    cp /src/tools/go/event-mesh/manifest.yaml /tools/event-mesh/manifest.yaml
+
+# Stage built-in skills at THIS image's arch.
+#
+# Metadata (SKILL.md, tools/manifest.yaml, references/) is the embed tree under
+# internal/builtinskills/files/<skill>/ and is copied wholesale, so a new
+# metadata-only built-in skill needs no Dockerfile change. Bundled tool
+# binaries are compiled natively here (the GH Actions matrix runs this stage
+# under the target arch), so each binary matches the STR that will exec it.
+# The object store ships these skills WITHOUT a binary (builtinskills.BuildZip
+# strips it), so this per-arch image copy is the only source of the executable
+# for the cluster STR — fixing the exec-format-error on mixed-arch envs.
+#
+# Only the binary-bearing skills are listed explicitly because each maps to
+# a distinct tools/go source dir and binary name; metadata-only skills are
+# picked up automatically by the cp above. Any host-arch binary that leaked
+# into the build context (the embed binaries are .gitignore'd) is overwritten
+# by the native build below; stray windows .exe siblings are dropped.
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    set -e && \
+    SRC=/src/internal/builtinskills/files && \
+    DST=/builtin-skills && \
+    mkdir -p "$DST" && \
+    cp -a "$SRC"/. "$DST"/ && \
+    find "$DST" -name '*.exe' -delete && \
+    CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" \
+      -o "$DST/sam-excel/tools/xlsx/xlsx" ./tools/go/xlsx && \
+    CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" \
+      -o "$DST/sam-docx/tools/docx/docx" ./tools/go/docx && \
+    CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" \
+      -o "$DST/sam-test-harness/tools/test_harness/test_harness" ./tools/go/test_harness && \
+    CGO_ENABLED=0 go build -tags nosolace -ldflags "${VERSION_LDFLAGS}" \
+      -o "$DST/sam-build-apply/tools/build_apply/build_apply" ./tools/go/build_apply
+
+# git-lfs: Debian's package is compiled with the distro's frozen Go toolchain
+# (1.19 on bookworm), which security scanners flag for Go stdlib CVEs. The
+# upstream v3.8.0 release additionally pins golang.org/x/net v0.57.0, still
+# vulnerable to the HTTP/2 advisories GO-2026-6603, -6610, -6611, -6612 and
+# -6617, and golang.org/x/text v0.40.0, vulnerable to GO-2026-6629 (precis
+# panic). `go install` can't override a module's own dependencies, so build
+# from a source checkout with x/net and x/text bumped to the versions in our
+# go.mod.
+ARG GIT_LFS_VERSION=v3.8.1
+ARG GIT_LFS_XNET_VERSION=v0.61.0
+ARG GIT_LFS_XTEXT_VERSION=v0.43.0
+RUN --mount=type=cache,target=/root/.cache/go-build \
+    git clone --depth 1 --branch "${GIT_LFS_VERSION}" https://github.com/git-lfs/git-lfs.git /tmp/git-lfs && \
+    cd /tmp/git-lfs && \
+    go get "golang.org/x/net@${GIT_LFS_XNET_VERSION}" "golang.org/x/text@${GIT_LFS_XTEXT_VERSION}" && \
+    CGO_ENABLED=0 go build -o /out/git-lfs . && \
+    rm -rf /tmp/git-lfs
+
+# ============================================================
+# Stage 2: Runtime image
+# ============================================================
+FROM debian:bookworm-20261123-slim
+
+LABEL org.opencontainers.image.licenses="LicenseRef-Solace-Proprietary" \
+      org.opencontainers.image.vendor="Solace Corporation" \
+      org.opencontainers.image.title="solace-agent-mesh-str" \
+      org.opencontainers.image.source="https://github.com/SolaceProducts/solace-agent-mesh" \
+      org.opencontainers.image.documentation="https://solace.com/legal/"
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+# System packages available to tool authors at runtime.
+# This list is documented in docs/arch/volumes.md section 6.3.
+# Uses Debian bookworm-slim for smaller image size while maintaining
+# full glibc compatibility for Python wheels with C extensions.
+# chromium is the largest CVE surface in this image and the source of the
+# vulnerabilities Prisma flags. Debian ships the patched build
+# via bookworm-security, but BuildKit caches the apt layer, so a stale build
+# keeps shipping the old chromium. Pinning the required floor asserts the
+# patched version is present and, because bumping it changes this RUN's text,
+# busts the apt-layer cache and forces a fresh pull the next time a chromium CVE
+# is disclosed — replacing the base-image-date bump used when a newer Debian
+# snapshot is available.
+ARG CHROMIUM_MIN_VERSION=156.0.8078.47-1~deb12u1
+# jq (with libjq1) is a Prisma CVE surface patched the same way:
+# a version floor asserts the fixed build is present and busts the cached apt
+# layer, and a floor (not an exact `jq=<version>` pin) keeps the build working
+# when Debian supersedes the version in bookworm-security.
+ARG JQ_MIN_VERSION=1.6-2.1+deb12u2
+# libgbm1 comes from the mesa source package (a chromium dependency) and is the
+# CVE surface Prisma flags for mesa (CVE-2026-40393). It is
+# floored the same way as chromium and jq: the version floor asserts the patched
+# build is present and, because all mesa binaries share the source version,
+# checking one package validates the whole set. Bumping the floor busts the
+# cached apt layer to force a fresh pull.
+ARG MESA_MIN_VERSION=22.3.6-1+deb12u2
+# curl (with libcurl) is a Prisma CVE surface patched the same
+# way: a version floor asserts the fixed build is present and busts the cached
+# apt layer, and a floor (not an exact `curl=<version>` pin) keeps the build
+# working when Debian supersedes the version in bookworm-security.
+ARG CURL_MIN_VERSION=7.88.1-10+deb12u15
+# python3.11 bundles its own expat (pyexpat), the CVE surface Prisma flags
+# (CVE-2026-4224 — C stack overflow on deeply nested content
+# models). Patched via bookworm-security; the floor asserts the fixed build is
+# installed and busts the cached apt layer when the version is next bumped.
+ARG PYTHON311_MIN_VERSION=3.11.2-6+deb12u8
+# imagemagick is a Prisma CVE surface (CVE-2026-56367 and the CVE-2026-563xx
+# cluster). Patched via bookworm-security; the floor asserts the fixed build is
+# installed and busts the cached apt layer when the version is next bumped.
+ARG IMAGEMAGICK_MIN_VERSION=8:6.9.11.60+dfsg-1.6+deb12u12
+# openssl, pcre2, xz-utils (liblzma5), libde265 (via imagemagick), libssh2
+# (via curl), jbig2dec (via ghostscript), and libass/aom (via ffmpeg) are Prisma
+# CVE surfaces, floored the same way. Each is named explicitly
+# because libpcre2-8-0 and liblzma5 ship in the base image and apt only upgrades
+# an already-installed package when it is named. Naming them also marks them
+# manually installed: when removing imagemagick, ffmpeg or ghostscript, drop
+# their libraries from this list and the floor loop too.
+ARG OPENSSL_MIN_VERSION=3.0.22-1~deb12u1
+ARG PCRE2_MIN_VERSION=10.42-1+deb12u1
+ARG LIBDE265_MIN_VERSION=1.0.11-1+deb12u3
+ARG LIBSSH2_MIN_VERSION=1.10.0-3+deb12u1
+ARG JBIG2DEC_MIN_VERSION=0.19-3+deb12u1
+ARG XZ_MIN_VERSION=5.4.1-1+deb12u2
+ARG LIBASS_MIN_VERSION=1:0.17.1-1+deb12u1
+ARG AOM_MIN_VERSION=3.6.0-1+deb12u3
+ARG LIBSSH_MIN_VERSION=0.10.6-0+deb12u3
+ARG CA_CERTIFICATES_MIN_VERSION=20250419~deb12u2
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    bash \
+    bubblewrap \
+    build-essential \
+    bzip2 \
+    ca-certificates \
+    chromium \
+    cmake \
+    coreutils \
+    curl \
+    diffutils \
+    fd-find \
+    ffmpeg \
+    file \
+    findutils \
+    gawk \
+    ghostscript \
+    git \
+    grep \
+    gzip \
+    imagemagick \
+    iptables \
+    jq \
+    libaom3 \
+    libass9 \
+    libde265-0 \
+    libgnutls30 \
+    libjbig2dec0 \
+    liblzma5 \
+    libpcre2-8-0 \
+    libssh-gcrypt-4 \
+    libssh2-1 \
+    libssl3 \
+    make \
+    openssh-client \
+    patch \
+    poppler-utils \
+    python3 \
+    python3-pip \
+    python3-venv \
+    ripgrep \
+    sed \
+    tar \
+    tree \
+    unzip \
+    wget \
+    xz-utils \
+    zip \
+    && rm -rf /var/lib/apt/lists/* \
+    && installed="$(dpkg-query -W -f='${Version}' chromium)" \
+    && if ! dpkg --compare-versions "$installed" ge "$CHROMIUM_MIN_VERSION"; then \
+         echo "chromium $installed is below required floor $CHROMIUM_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && installed="$(dpkg-query -W -f='${Version}' jq)" \
+    && if ! dpkg --compare-versions "$installed" ge "$JQ_MIN_VERSION"; then \
+         echo "jq $installed is below required floor $JQ_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && installed="$(dpkg-query -W -f='${Version}' libgbm1)" \
+    && if ! dpkg --compare-versions "$installed" ge "$MESA_MIN_VERSION"; then \
+         echo "mesa (libgbm1) $installed is below required floor $MESA_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && installed="$(dpkg-query -W -f='${Version}' curl)" \
+    && if ! dpkg --compare-versions "$installed" ge "$CURL_MIN_VERSION"; then \
+         echo "curl $installed is below required floor $CURL_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && installed="$(dpkg-query -W -f='${Version}' python3.11)" \
+    && if ! dpkg --compare-versions "$installed" ge "$PYTHON311_MIN_VERSION"; then \
+         echo "python3.11 $installed is below required floor $PYTHON311_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && installed="$(dpkg-query -W -f='${Version}' imagemagick)" \
+    && if ! dpkg --compare-versions "$installed" ge "$IMAGEMAGICK_MIN_VERSION"; then \
+         echo "imagemagick $installed is below required floor $IMAGEMAGICK_MIN_VERSION" >&2; exit 1; \
+       fi \
+    && for floor in \
+         "libssl3 $OPENSSL_MIN_VERSION" \
+         "libpcre2-8-0 $PCRE2_MIN_VERSION" \
+         "libde265-0 $LIBDE265_MIN_VERSION" \
+         "libssh-gcrypt-4 $LIBSSH_MIN_VERSION" \
+         "libssh2-1 $LIBSSH2_MIN_VERSION" \
+         "libjbig2dec0 $JBIG2DEC_MIN_VERSION" \
+         "liblzma5 $XZ_MIN_VERSION" \
+         "libass9 $LIBASS_MIN_VERSION" \
+         "libaom3 $AOM_MIN_VERSION" \
+         "ca-certificates $CA_CERTIFICATES_MIN_VERSION"; do \
+         pkg="${floor%% *}"; \
+         min="${floor#* }"; \
+         installed="$(dpkg-query -W -f='${Version}' "$pkg")"; \
+         if ! dpkg --compare-versions "$installed" ge "$min"; then \
+           echo "$pkg $installed is below required floor $min" >&2; exit 1; \
+         fi; \
+       done
+
+# Debian's python3-pip/-setuptools carry CVE-flagged versions (pip 23,
+# setuptools 66) that the distro never rebuilds. Bootstrap current versions
+# into /usr/local with the apt pip, then purge the Debian copies — pip keeps
+# working from /usr/local, and python3-venv (wheel-seeded) is unaffected.
+RUN python3 -m pip install --break-system-packages --upgrade pip "setuptools>=78.1.1" && \
+    apt-get purge -y python3-pip python3-setuptools python3-wheel python3-pkg-resources && \
+    apt-get autoremove -y && \
+    python3 -m pip --version
+
+# Relax the IM6 policy to allow PDF / PS / EPS rendering. Debian's
+# imagemagick package ships /etc/ImageMagick-6/policy.xml with these
+# coders set to rights="none" by default — a 2018 Ghostscript-CVE
+# response that's persisted long past the underlying fix. Without this
+# patch, "convert in.pdf out.png" fails with
+#   "attempt to perform an operation not allowed by the security
+#    policy 'PDF'"
+# inside the STR sandbox. MVG and MSL (which CAN execute arbitrary IM
+# scripts) stay denied; only the document-rendering coders are unlocked.
+# Ghostscript above provides the actual PDF/PS decode delegate.
+RUN sed -i \
+        -e 's|<policy domain="coder" rights="none" pattern="PDF" />|<policy domain="coder" rights="read\|write" pattern="PDF" />|' \
+        -e 's|<policy domain="coder" rights="none" pattern="PS" />|<policy domain="coder" rights="read\|write" pattern="PS" />|' \
+        -e 's|<policy domain="coder" rights="none" pattern="EPS" />|<policy domain="coder" rights="read\|write" pattern="EPS" />|' \
+        -e 's|<policy domain="coder" rights="none" pattern="XPS" />|<policy domain="coder" rights="read\|write" pattern="XPS" />|' \
+        /etc/ImageMagick-6/policy.xml
+
+# LibreOffice for Office/ODF document conversion (DOCX/PPTX/XLSX/ODT/ODP/ODS → PDF).
+# IMPORTANT: LibreOffice is a separate open-source application licensed under MPL-2.0.
+# See https://www.libreoffice.org/download/source-code/ for source code.
+RUN echo "============================================================" && \
+    echo "NOTICE: Installing LibreOffice - a separate open-source application" && \
+    echo "LibreOffice is licensed under Mozilla Public License 2.0 (MPL-2.0)" && \
+    echo "License: https://www.mozilla.org/en-US/MPL/2.0/" && \
+    echo "Source:  https://www.libreoffice.org/download/source-code/" && \
+    echo "============================================================" && \
+    apt-get update && \
+    apt-get install -y --no-install-recommends \
+        libreoffice-writer-nogui \
+        libreoffice-impress-nogui \
+        libreoffice-calc-nogui && \
+    rm -rf /var/lib/apt/lists/*
+
+# uv — fast Python package manager for tool venv setup.
+COPY --from=uv /uv /usr/local/bin/uv
+
+# License attribution must precede any binary COPY.
+COPY LICENSE /usr/share/doc/solace-agent-mesh-str/LICENSE
+COPY licenses/solace-agent-mesh-source-third-party-licenses.txt /usr/share/doc/solace-agent-mesh-str/solace-agent-mesh-source-third-party-licenses.txt
+
+# Go STR binary.
+COPY --from=builder /bin/sam-str /usr/local/bin/sam-str
+RUN chmod +x /usr/local/bin/sam-str
+
+# git-lfs built from upstream source in stage 1 (replaces the Debian package).
+# The Debian package registered the LFS filters in /etc/gitconfig via its
+# postinst; `git lfs install --system` reproduces that.
+COPY --from=builder /out/git-lfs /usr/local/bin/git-lfs
+RUN git lfs install --system --skip-repo
+
+# Go builtin tools (pre-compiled with manifests).
+COPY --from=builder /tools/ /opt/sam/builtin-tools/
+
+# Python tool SDK (needed to build Python tool venvs).
+COPY --from=builder /src/python/sam-tool-sdk /opt/sam/sam-tool-sdk
+
+# Python builtin tools (source + manifests). plotly is now a Go tool
+# (tools/go/plotly) built above; it no longer ships as a Python tool.
+COPY --from=builder /src/tools/python/python_executor /opt/sam/builtin-tools/python_executor
+COPY --from=builder /src/tools/python/pdf_to_markdown /opt/sam/builtin-tools/pdf_to_markdown
+
+ARG TOOL_PYTHON_VERSION=3.11.18
+ENV UV_PYTHON_INSTALL_DIR=/opt/sam/python
+RUN uv python install --no-bin "$TOOL_PYTHON_VERSION"
+
+# Pre-build Python tool venvs so executables are ready at startup.
+# Use `python/` as the venv directory (not `.venv/`) because STR's executable
+# resolver (internal/str/manifest.go: resolveExecutable) looks at the Lambda
+# Layer convention path <tool_dir>/python/bin/<exec> when the manifest's
+# `executable:` field isn't an absolute path. With a venv at `python/` the
+# console script lands at `python/bin/<exec>` and bare manifest entries
+# resolve directly.
+#
+# `uv sync --frozen` installs exactly what uv.lock pins and checks every hash,
+# so each image build ships the same versions. The SDK comes from this
+# checkout rather than the PyPI release the lock records. The venv has no pip,
+# which also keeps Debian's CVE-flagged pip wheels out of it.
+RUN --mount=type=cache,target=/root/.cache/uv \
+    for tool_dir in python_executor pdf_to_markdown; do \
+      cd /opt/sam/builtin-tools/${tool_dir} && \
+      UV_PROJECT_ENVIRONMENT=python UV_PYTHON_DOWNLOADS=never \
+        uv sync --frozen --no-dev --no-editable --managed-python --python "$TOOL_PYTHON_VERSION" \
+          --no-install-package sam-tool-sdk && \
+      uv pip install --python python/bin/python --no-deps /opt/sam/sam-tool-sdk \
+      || exit 1; \
+    done
+
+# Non-root user matching the main image convention. /skill is the fixed bwrap
+# mount point for skill-bundled tools (--ro-bind <skillDir> /skill, see
+# internal/str/sandbox.go); it must pre-exist in the image because bwrap can't
+# mkdir the destination once --ro-bind / / has remounted the root read-only
+# (and the pod sets readOnlyRootFilesystem). Bind-mounting over the existing
+# dir on a read-only fs is fine; only the mkdir needs a writable root. /skill
+# is left root-owned (not in the chown below): it only has to exist as a mount
+# point, and bwrap replaces its contents with the bound skill dir at launch.
+RUN groupadd -g 10002 solaceai && useradd -u 10001 -g solaceai -m solaceai && \
+    mkdir -p /opt/sam/tools /opt/sam/skills /opt/sam/builtin-skills /skill /etc/sam/configs/str && \
+    chown -R solaceai:solaceai /opt/sam /etc/sam
+COPY --from=builder /src/configs/str/str.yaml /etc/sam/configs/str/str.yaml
+
+# Copy skills bundle. The STR uses skills_dir=/opt/sam/skills (see str.yaml)
+# to discover bundled skill tools. AWE-side agents that reference skills
+# by name share the same layout, so both processes see the same content
+# when skills/ is mounted or — in this image — baked in at build time.
+# chmod=0555 → dirs traversable, files readable, nothing writable (skills are
+# static content; runtime-mutable state belongs elsewhere).
+COPY --from=builder --chown=solaceai:solaceai --chmod=0555 /src/skills/ /opt/sam/skills/
+
+# Built-in skills baked at this image's arch (staged in the builder above). The
+# cluster STR scans this dir (SAM_BUILTIN_SKILLS_DIR, default
+# /opt/sam/builtin-skills) and, for sam-* built-ins, prefers these image copies
+# over the metadata-only object-store mirror, so a bundled tool binary always
+# matches the STR's own architecture. chmod=0555 → static read-only content
+# with the tool binary's exec bit intact; the STR never writes here. Left
+# root-owned (no --chown): 0555 is world-readable/executable, so the solaceai
+# user can run the binary without granting any write permission.
+COPY --from=builder --chmod=0555 /builtin-skills/ /opt/sam/builtin-skills/
+
+USER solaceai
+
+# Mount point for host-provided tool volumes.
+VOLUME /volumes
+
+EXPOSE 8090
+
+ENTRYPOINT ["sam-str", "--config", "/etc/sam/configs/str/str.yaml", "--tools-dir", "/opt/sam/builtin-tools"]

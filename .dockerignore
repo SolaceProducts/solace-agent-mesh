@@ -1,0 +1,14 @@
+bin/
+dist/
+.git/
+.claude/
+docs/
+dev-docs/
+test/
+scripts/
+*.db
+*.db-wal
+*.db-shm
+coverage_*.out
+platform-enterprise
+openapi

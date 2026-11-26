@@ -1,0 +1,1177 @@
+# SAM feature flag catalog.
+#
+# Schema:
+#   key            (string, required, snake_case, stable identifier)
+#   name           (string, required, human-readable label)
+#   release_phase  (string, required: experimental | early_access | beta |
+#                   controlled_availability | general_availability | deprecated)
+#   default        (bool, required, baseline on/off)
+#   description    (string, optional, brief explanation)
+#
+# Operators override values via SAM_FEATURE_<UPPER_KEY> env vars. YAML
+# config is NOT a source of override values — that mechanism is gone.
+features:
+  - key: show_thinking_content
+    name: Show Thinking Content
+    release_phase: experimental
+    default: false
+    description: "Display LLM thinking/reasoning tokens in the inline activity timeline"
+
+  - key: auto_title_generation
+    name: Auto Title Generation
+    release_phase: general_availability
+    default: true
+    description: "Automatically generate a descriptive title for new chat sessions using LLM analysis of the first message exchange."
+
+  - key: mentions
+    name: Mentions
+    release_phase: general_availability
+    default: true
+    description: >
+      Allow users to @mention other users in chat messages. Requires a wired
+      platform identity service; the frontend combines this flag with that
+      infrastructure check.
+
+  - key: chat_sharing
+    name: Chat Sharing
+    release_phase: general_availability
+    default: true
+    description: >
+      Allow users to share chat sessions with other members of their
+      organisation. Requires a wired platform identity service and SQL
+      session persistence; the frontend combines this flag with those
+      infrastructure checks.
+
+  - key: builder
+    name: Builder
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the SAM Builder page for creating agents, workflows, and
+      connectors through a guided chat experience. Per-user access is
+      still gated by RBAC: the frontend page requires the builder:_:use
+      scope and the builder CRUD/test APIs require agent_builder:*:* /
+      workflow_builder:*:* (see internal/platform/admin/routes.go).
+      Set SAM_FEATURE_BUILDER=false to hide Builder for a deployment.
+
+  - key: builder_server_apply
+    name: Builder Server-Side Apply
+    release_phase: experimental
+    default: true
+    description: >
+      Persist Quick Build components through
+      POST /api/v1/platform/builder/builds instead of the frontend's per-kind
+      create loop. The endpoint plans a create/update diff, so editing a
+      component saved in an earlier session actually lands; without it the
+      frontend skips any agent or entrypoint name already on the platform and
+      redeploys the old config. Because it updates by name, a save replaces a
+      same-named component edited outside the Builder; unless the user has
+      opted out, the Builder plans first and asks before replacing a component
+      it did not itself create or update (it keeps that record per Builder
+      session in this browser, so another session or browser asks once per
+      component). A build that names its Builder session also records, on the
+      platform, the agents and workflows it creates or updates, and reports
+      the ones a later plan drops; the same flag mounts
+      POST /api/v1/platform/builder/removals, the only Builder route that
+      deletes, which removes an agent or workflow the user confirms and the
+      session created, and needs agent_builder:*:delete or
+      workflow_builder:*:delete, the scopes the Agents page (Builder > Agents)
+      and the Workflows page (Builder > Workflows) need to delete. Every save
+      needs read scope on connectors and skills, and on each kind in the build,
+      plus create or update scope for each kind it creates or changes. Skills
+      save over the frontend path either way, and on either path a skill already
+      on the platform under the same name is updated in place (asked about first
+      unless the Builder wrote it or the user opted out), which needs update
+      scope on skills; a role that cannot read skills can still create a new
+      one. On by default. Before
+      upgrading, set SAM_FEATURE_BUILDER_SERVER_APPLY=false on a deployment that
+      relies on the per-kind path's skip-on-conflict behaviour, or whose Builder
+      roles lack connector:*:read or skill:*:read. Set it on both the platform
+      and the gateway, restart both, and reload the UI: the gateway serves the
+      flag the UI reads and the platform mounts the route, so setting it on only
+      one makes every save 404 or leaves the UI on the other path.
+
+  - key: artifact_attachment
+    name: Artifact Attachment
+    release_phase: general_availability
+    default: true
+    description: >
+      New chat input attachment UX: dropdown for uploading new files or
+      attaching existing artifacts, card-style file/artifact previews with
+      thumbnails, and standalone preview dialogs. When disabled, the chat
+       input shows the legacy paperclip upload button and simple filename
+      badges.
+
+  - key: artifacts_page
+    name: Artifacts Page
+    release_phase: general_availability
+    default: true
+    description: "Enable the standalone Artifacts page in the frontend navigation."
+
+  - key: volumes
+    name: Volumes
+    release_phase: experimental
+    default: false
+    description: >
+      User-managed filesystem workspaces (volumes). Gates the
+      /api/v1/volumes management API and the Volumes page in the frontend
+      navigation. Off by default; operators opt in via SAM_FEATURE_VOLUMES=true.
+      The bundled default gateway config ships a volume_service block, so the
+      surface activates as soon as the flag is enabled. This is a soft gate
+      (same posture as python_code_execution): it governs the discoverable
+      management/UI surface, not the runtime. An agent explicitly configured
+      with volume slots in its YAML still resolves and mounts those volumes at
+      tool-dispatch time regardless of the flag — that path is an explicit
+      operator opt-in, not a default-on surface.
+
+  - key: binary_artifact_preview
+    name: Binary Artifact Preview
+    release_phase: general_availability
+    default: true
+    description: >
+      Operator-level on/off switch for the in-chat Office-document preview
+      (DOCX / PPTX / XLSX). As of DATAGO-144931 the preview renders entirely
+      client-side in the browser via a WASM engine — there is no server-side
+      conversion and no LibreOffice dependency. This flag gates whether the
+      WebUI mounts that renderer.
+
+  - key: prompt_version_history
+    name: Prompt Version History
+    release_phase: experimental
+    default: false
+    description: >
+      Enable version history for prompts in the Prompt Library: each
+      save creates a new immutable version that users can browse and
+      restore.
+
+  - key: project_sharing
+    name: Project Sharing
+    release_phase: general_availability
+    default: true
+    description: >
+      Allow users to share projects with other members of their organisation.
+      Requires a wired platform identity service to resolve org members; the
+      frontend combines this flag with that infrastructure check.
+
+  - key: prompt_sharing
+    name: Prompt Sharing
+    release_phase: general_availability
+    default: true
+    description: >
+      Allow users to share prompts from the Prompt Library with other members
+      of their organisation. Requires a wired platform identity service; the
+      handlers combine this flag with that infrastructure check.
+
+  - key: scheduler
+    name: Scheduler
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the scheduled tasks surface for running agents on a cron-
+      style schedule. Requires SQL session persistence and a configured
+      scheduler_service; the relevant handlers combine this flag with
+      those infrastructure checks at the call site.
+
+  - key: task_logging
+    name: Task Logging
+    release_phase: general_availability
+    default: true
+    description: >
+      Frontend display toggle for the per-task execution log surface.
+      Backend service capture is controlled separately by the
+      task_logging.enabled YAML config; this flag only gates whether the
+      log surface is visible in the UI.
+
+  - key: python_code_execution
+    name: Python Code Execution
+    release_phase: experimental
+    default: false
+    description: >
+      Expose the built-in "Code Execution" toolset (the execute_python_code
+      STR tool) in the Agent Builder catalog. Off by default. This is a soft,
+      builder-visibility gate only: the python_executor tool always ships in
+      the STR image, and hand-authored agent YAML that references
+      execute_python_code (or the builtin_code_execution / code_execution
+      group) still runs at runtime regardless of this flag. Set
+      SAM_FEATURE_PYTHON_CODE_EXECUTION=true to show it in the builder.
+
+  # "Gateway" is the legacy term for Entrypoint (DATAGO-130047). These catalog
+  # keys derive the operator-set env vars SAM_FEATURE_EMAIL_GATEWAY /
+  # SAM_FEATURE_WHATSAPP_GATEWAY, which gate the "email"/"whatsapp" types on the
+  # platform API and CLI schema surfaces only (a config-file
+  # gateway_adapter.type is never gated); renaming a key breaks those deployed
+  # env-var settings and the user-facing "feature not enabled" error text.
+  - key: email_gateway
+    name: Email Entrypoint
+    release_phase: experimental
+    default: false
+    description: >
+      Enable the email gateway type for inbound IMAP polling. Disabled by
+      default while the feature is incomplete. When off, the email schema is
+      hidden from the platform API and the create endpoint rejects
+      type:"email" requests.
+
+  # The UI reads the WhatsApp maturity badge from the whatsapp_gateway entry
+  # in internal/capabilities/catalog.yaml, not from this release_phase;
+  # TestCatalogBaselineMatchesFeatureReleasePhase fails if the two disagree.
+  - key: whatsapp_gateway
+    name: WhatsApp Entrypoint
+    release_phase: early_access
+    default: true
+    description: >
+      Enable the whatsapp gateway type for inbound WhatsApp Business Cloud API
+      webhooks on the platform API and CLI schema surfaces. When off, the type
+      is hidden from the entrypoint picker and sam config schema, and creating,
+      updating, testing, or listing message templates for a whatsapp
+      entrypoint is rejected. A config-file entrypoint
+      (gateway_adapter.type: whatsapp) is not gated.
+
+  # The UI reads the Agent Link maturity badge from the agent_link_gateway
+  # entry in internal/capabilities/catalog.yaml, not from this release_phase.
+  # The two keys differ, so no test compares them: change both together.
+  - key: agent_link_entrypoint
+    name: Agent Link Entrypoint
+    release_phase: early_access
+    default: true
+    description: >
+      Enable the agent_link entrypoint type, through which third-party agents
+      built with the sam_mesh SDK join the mesh over one WebSocket instead of
+      the broker. It is created on the platform API like any entrypoint, with
+      its link agents managed there, or configured in runtime config
+      (gateway_adapter.type: agent_link). When off, the agent_link schema is
+      hidden from the platform API and the create endpoint rejects
+      type:"agent_link" requests. It also gates the runtime: an agent_link
+      application refuses to start, and so does the gateway that hosts it.
+
+  # The UI reads the Google Chat maturity badge from the google_chat_gateway
+  # entry in internal/capabilities/catalog.yaml, not from this release_phase;
+  # TestCatalogBaselineMatchesFeatureReleasePhase fails if the two disagree.
+  - key: google_chat_gateway
+    name: Google Chat Entrypoint
+    release_phase: early_access
+    default: false
+    description: >
+      Enable the google_chat gateway type for Google Workspace Chat apps
+      delivering interaction events over HTTPS (the default) or Cloud
+      Pub/Sub. Disabled by default. When off, the google_chat schema is
+      hidden from the platform API and the create endpoint rejects
+      type:"google_chat" requests. Unlike the WhatsApp and email flags, it
+      also gates the runtime: a gateway refuses to start a google_chat adapter,
+      including one from a config file (gateway_adapter.type: google_chat).
+
+  - key: event_mesh_connector
+    name: Event Mesh Connector
+    release_phase: general_availability
+    default: true
+    description: >
+      Enable the Event Mesh connector type for sending requests to backend
+      microservices via a Solace event broker. Enabled by default; set
+      SAM_FEATURE_EVENT_MESH_CONNECTOR=false to disable.
+      When off, the event_mesh schema is hidden from the platform API, list
+      endpoints filter out existing rows, and the create endpoint rejects
+      type:"event_mesh" requests.
+
+  - key: event_catalog
+    name: Event Catalog
+    release_phase: experimental
+    default: false
+    description: >
+      Serve the event catalog API (/api/v2/platform/eventCatalogEntries): the
+      named business events an administrator curates, each mapped to a topic
+      on an event mesh entrypoint's broker, so the owner of an always-on agent
+      can pick the event that wakes it by name. Nothing subscribes to an entry
+      yet. Set SAM_FEATURE_EVENT_CATALOG=true on the platform to serve it; with
+      it off the API answers 404.
+
+  - key: email_connector
+    name: Email Connector
+    release_phase: experimental
+    default: false
+    description: >
+      Enable the Email connector type for sending messages via SMTP.
+      When off, the email schema is hidden from the platform API and
+      the create endpoint rejects type:"email" requests.
+
+  - key: document_db_connector
+    name: Document DB Connector
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the document_db connector type (MongoDB and DynamoDB subtypes).
+      With SAM_FEATURE_DOCUMENT_DB_CONNECTOR=false the document_db schema is
+      hidden from the platform API, list endpoints filter out existing rows,
+      and the create endpoint rejects type:"document_db" requests.
+
+  - key: graph_db_connector
+    name: Graph DB Connector
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the graph_db connector type (Neo4j and Amazon Neptune subtypes).
+      Enabled by default but still experimental; set
+      SAM_FEATURE_GRAPH_DB_CONNECTOR=false to disable.
+      When off, the graph_db schema is hidden from the platform API, list
+      endpoints filter out existing rows, and the create endpoint rejects
+      type:"graph_db" requests.
+
+  - key: search_connector
+    name: Search Connector
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the search connector type (Elasticsearch and Amazon OpenSearch
+      subtypes). Enabled by default but still experimental; set
+      SAM_FEATURE_SEARCH_CONNECTOR=false to disable. When off, the search
+      schema is hidden from the platform API,
+      list endpoints filter out existing rows, and the create endpoint rejects
+      type:"search" requests.
+
+  # The UI reads the Web Search maturity badge from the web_search_connector
+  # entry in internal/capabilities/catalog.yaml, not from this release_phase;
+  # TestCatalogBaselineMatchesFeatureReleasePhase fails if the two disagree.
+  - key: web_search_connector
+    name: Web Search Connector
+    release_phase: early_access
+    default: true
+    description: >
+      Enable the web_search connector type (Tavily and Exa subtypes), which
+      gives every agent bound to it a cited web search tool (DATAGO-161844).
+      On by default; set SAM_FEATURE_WEB_SEARCH_CONNECTOR=false to disable.
+      When off, the web_search schema is hidden from the platform API, list
+      endpoints filter out existing rows, and the create endpoint rejects
+      type:"web_search" requests. Agents already bound to one keep their tool.
+
+  - key: rbac
+    name: RBAC Management
+    release_phase: general_availability
+    default: true
+    description: >
+      Gate the in-product RBAC management experience under the "Custom Roles
+      and Scopes in the SAM UI" epic (DATAGO-123202): the User Management
+      pages (claim mappings, users, roles) and their supporting read surfaces
+      (assignable scope catalog, known-users directory). On by default; set
+      SAM_FEATURE_RBAC=false to hide the surface. Gating differs by surface:
+      every RBAC *write* needs the superadmin grant, the directory reads need
+      rbac:_:read, and the per-component access lookup also accepts
+      agent_builder:*:read / workflow_builder:*:read — which the shipped
+      sam_manager role holds, so that route exposes known-user identity data
+      beyond RBAC admins.
+      The foundational RBAC substrate is NOT gated by this flag and is
+      always on: the
+      /api/v2/platform/rbac/{roles,grants,claimMappings} CRUD API,
+      configapply reconcile/pull of rbac* kinds, and the gateway/broker
+      authorization enforcement are always live and scope-protected.
+      The login-time user upsert and the identity claim projection it writes
+      are also always on, whatever this flag says. They are what a chat
+      entrypoint resolves a sender against, so gating them would turn off
+      sender authentication as a side effect of a roles-and-grants decision.
+      That means every deployment builds a persistent identity directory
+      (display name, email, groups, last login, projected claims) regardless
+      of this flag; the projection has a per-user revocation endpoint, the
+      directory itself has no purge path today.
+
+  - key: observability_agent
+    name: Observability Agent
+    release_phase: controlled_availability
+    default: false
+    description: >
+      Admin-only observability agent. When
+      enabled, the platform seeds and deploys the built-in agent and the gateway
+      registers the analytics surfaces (HTTP /api/v1/analytics/** + the broker
+      control analytics endpoint). Off by default for a controlled rollout;
+      enable via SAM_FEATURE_OBSERVABILITY_AGENT=true. Access is additionally
+      gated by the analytics:_:read scope.
+
+  - key: feedback_management
+    name: Feedback Management
+    release_phase: general_availability
+    default: true
+    description: >
+      Gates the Signals & Usage > Feedback nav section and its admin/history
+      views (thumbs feedback review UI). The underlying feedback submit/list
+      API (/api/v1/feedback) is unconditionally available and unaffected by
+      this flag — this only controls the review surfaces layered on top
+      of it. On by default; set SAM_FEATURE_FEEDBACK_MANAGEMENT=false to hide
+      the review surfaces. Consumer surfaces: the nav and route gates
+      (AppLayout.tsx, FeedbackGate.tsx) and the role-editor scope pickers
+      (ScopeBundleEditor.tsx, RoleFormDialog.tsx).
+
+  - key: notify_service
+    name: Notification Service
+    release_phase: early_access
+    default: true
+    description: >
+      Broker-driven notification service (per-user inbox, the bell and
+      Notifications page, notification settings, and Slack and Teams delivery),
+      mounted on the gateway proxy under /api/v1/notify. On by default; operators
+      can disable it via SAM_FEATURE_NOTIFY_SERVICE=false. A gateway that hosts the
+      platform stores notifications in the database a `notify:` block names, or
+      the platform's own; a gateway that does not serve the service reports the
+      flag off to its web UI so the bell and page stay hidden. When disabled, the
+      gateway does not mount the notify handler, open the notify DB, or run its
+      broker subscriber.
+
+  - key: evidence_store
+    name: Evidence Store Population
+    release_phase: experimental
+    default: false
+    description: >
+      Populates the platform evidence read model (evidence.* in the platform
+      database) from gateway task history: a bounded initial backfill
+      (evidence.lookback, default 30 days) followed by a 30-second tail, run as
+      a leader job by the one gateway process that leads. Population runs only
+      where the platform is co-hosted with the gateway in one process
+      (sam-gwe --platform-config, or embedded mode), and reads that gateway's
+      history in-process; a standalone platform reports gateway_unconfigured.
+      The schema is created regardless of this flag; when disabled no fold or
+      gateway read runs and existing evidence rows are
+      preserved. Enable via SAM_FEATURE_EVIDENCE_STORE=true. On SQLite the
+      evidence tables live in a companion file next to the platform database
+      (platform.db gets platform.evidence.db).
+
+  - key: evidence_judge
+    name: Evidence Judge Runner
+    release_phase: experimental
+    default: false
+    description: >
+      Runs the evidence cause judge as a pass of evidence population: each tick
+      it triages the traces it has not considered since they last changed and
+      asks an LLM why each trace triage routes to the judge went wrong,
+      recording the verdict in evidence.trace_causes and every outcome in
+      evidence.trace_judgments. It calls the model configured under the
+      evidence-judge alias, or general while that is unset, within
+      evidence.judge's batch and daily budget, and reads only content the
+      evidence.semantic_policy allows. Needs evidence_store. Enable via
+      SAM_FEATURE_EVIDENCE_JUDGE=true.
+
+  - key: evidence_screen_decision
+    name: Evidence Screening by Decision Model
+    release_phase: experimental
+    default: false
+    description: >
+      When evidence.judge.screen.mode is decision, lets the evidence screen
+      ask a third-party model whether each unrated trace with no failure
+      signal should go to the evidence judge, and whether its evidence shows
+      a declined answer, a reported failure, an empty result or a delegate
+      problem, any of which also sends it to the judge. A screen that failed
+      to decide is retried on a later pass. The model is the one configured
+      under the evidence-screen alias (evidence.judge.screen.model_alias):
+      a decision model (TypeSafe Jev, the OpenAI Decisions API or the Gemini
+      Decisions API), asked
+      directly, or a chat model, asked the same questions through the
+      chat-model evaluator; a new decision model can be created only while
+      workflow_decision_node or eval_decision_evaluator is on. Each
+      screened trace's redacted evidence,
+      including what its successful tool calls returned and its delegates'
+      replies, leaves the deployment for whichever provider the alias
+      resolves to, so enable it only after that vendor's data-processing
+      review. WITH IT OFF, mode decision sends nothing and screens nothing,
+      saying so once, and mode sample is unaffected. Needs
+      evidence_judge. Enable via SAM_FEATURE_EVIDENCE_SCREEN_DECISION=true.
+
+  - key: evidence_proposals
+    name: Evidence Configuration Proposals
+    release_phase: experimental
+    default: false
+    description: >
+      Drafts configuration changes for the evidence store's config-owned
+      findings in the leader's proposal scan job, outside the evidence tick:
+      once per evidence.proposals.scan_interval, within its per_tick and
+      daily budget of drafts, it asks an LLM for the fewest concrete changes,
+      usually one and at most three, each to another of the agent's
+      instruction, a skill it loaded, the description other agents read
+      before delegating to it or to a peer it delegated to, offered only
+      when a delegation went wrong, or a new skill for
+      a tool it keeps calling wrong when no skill it has covers that tool, that would make a
+      recurring problem less likely, and stores them in config_proposals and
+      config_proposal_changes as one proposal for a human to approve
+      or reject as a whole. The model may search the calls of a failing tool, in the
+      sample traces and in recent traces where the tool succeeded, must cite
+      the steps its change rests on, and a second call of the same model
+      reviews the change for a reason it is wrong before it is stored, both
+      within three call_timeouts shared between them. It applies nothing. It calls the model configured under the
+      evidence-proposer alias, or general while that is unset, and shows it
+      only content the evidence.semantic_policy allows. With it on, the same
+      model also explains impacted findings of every owner in plain words
+      (what goes wrong, why, and who acts on it): once per
+      evidence.proposals.explain_scan_interval it shows the model up to
+      three sample traces of each finding it explains, within
+      explain_per_scan and explain_max_per_day attempts, and stores the
+      explanation for GET /api/v2/platform/evidence/findings?expand=explanation,
+      which serves it only to a caller holding both evidence:*:read and
+      agent:*:read_trace, since it draws on the traces of the finding's agent
+      and every agent it delegated to.
+      Runs only where evidence_store and evidence_judge are on. Enable via
+      SAM_FEATURE_EVIDENCE_PROPOSALS=true.
+
+  - key: evidence_eval_sets
+    name: Evidence Evaluation Sets
+    release_phase: experimental
+    default: false
+    description: >
+      Drafts, for each config-owned evidence finding, an evaluation set that
+      reproduces it, so a reviewer can check the problem recurs against the
+      agent before trusting a fix. Once per
+      evidence.proposals.eval_set_scan_interval, within eval_set_per_scan and
+      eval_set_max_per_day attempts, it shows the evidence-proposer model (or
+      general while that is unset) up to three sample traces of a finding,
+      as evidence.semantic_policy allows, and creates in the evaluation
+      feature a dataset of three to five synthesized requests, an llm_judge
+      evaluator that fails a run showing the problem, and an experiment that
+      targets the agent. The requests only look something up: when the traces
+      show the agent doing what its configuration tells it to, meeting a stop
+      outside its control (a denied access, a failing service, a call that
+      needed a person's approval), not showing the problem at all, or only a
+      request that changes, creates, deletes or sends something would show
+      it, the model declines and nothing is created.
+      It runs nothing: a person starts the experiment,
+      whose requests then reach the agent's real tools. The drafted text is
+      guarded against copying trace text, identifiers and numbers, but may
+      paraphrase what the traces say, and the evaluation objects are readable
+      by anyone holding evaluation:_:read, so enable it only where those
+      readers may also read agents' traces. GET
+      /api/v2/platform/evidence/findings?expand=evalSet links a finding to its
+      set and whether its latest run reproduced it, for a caller holding
+      evidence:*:read and agent:*:read_trace. Runs only where evidence_store
+      and evidence_judge are on. Enable via SAM_FEATURE_EVIDENCE_EVAL_SETS=true.
+
+  - key: evidence_internal_findings
+    name: Evidence Findings SAM Must Fix
+    release_phase: experimental
+    default: false
+    description: >
+      Shows the evidence findings whose owner is platform or product: failures
+      in SAM's own runtime or product, which a deployment's operator cannot
+      fix. With it off, the findings API leaves them out of its results and
+      totals, so owner=platform and owner=product return none, and
+      GET /api/v2/platform/evidence/findings/{id} answers 404 for one. Their
+      traces still count, and their failure classes still show, in the trace
+      reads. The judge's
+      attributed owner never hides a failure, but a cause the judge places on
+      the product is hidden. Enable via SAM_FEATURE_EVIDENCE_INTERNAL_FINDINGS=true.
+
+  - key: evidence_coder_proposals
+    name: Evidence Coder Proposals
+    release_phase: experimental
+    default: false
+    description: >
+      Drafts evidence proposals with the coding agent instead of the
+      per-finding drafter. In the proposal scan job, the config-owned findings
+      are grouped into issues (a failed tool across agents and error codes, a
+      flag across agents), and the coder runs once per issue over the offered
+      instructions, descriptions and skills. It runs as the sam_coder tool on
+      the STR: the workspace and the issue's sample traces go to it as one
+      bundle with the call, and it starts no subprocess. It needs a
+      PostgreSQL evidence store, and is not wired on SQLite. Each
+      configuration fix must be an exact edit of an offered target; it goes
+      through the proposals guard and review and is stored as one proposal
+      per target, the issue's key linking them; a skill to create is written
+      as its body, the frontmatter being supplied. A scan drafts for one
+      issue whatever per_tick is, and an issue's fixes are bounded only by
+      the proposals' max_per_day left. What configuration cannot fix
+      is declined and recorded in evidence.coder_runs and
+      evidence.coder_problems. Bounded per issue by
+      EVIDENCE_CODER_PROPOSALS_MAX_STEPS and _RUN_TOKENS and per day by
+      _DAILY_TOKENS. Trace content, redacted as evidence.semantic_policy
+      allows, goes to the model under the evidence-coder alias, or general
+      while that is unset. Needs evidence_proposals. Enable via
+      SAM_FEATURE_EVIDENCE_CODER_PROPOSALS=true.
+
+  - key: activity_monitor
+    name: Activity Monitor
+    release_phase: experimental
+    default: true
+    description: >
+      Enable the Activity Monitor — a chat-driven analytics agent that
+      reports per-agent and per-workflow activity with handler-first
+      attribution (topic-derived, invariant across dispatch paths).
+      When enabled, the Activity Monitor is seeded and the gateway wires
+      the /api/v1/activity/** HTTP surface. When disabled, the agent is
+      not seeded and the endpoints are not registered. The
+      handler_name / handler_type task columns (migrations 00032 + 00033)
+      are populated by the task logger whenever task logging is on,
+      independent of this flag — the flag gates the agent and its
+      endpoints, not column population. Sentinel's analytics/* surface is
+      unaffected either way — it reads via topic-JOIN, not via these columns.
+      Access model: the Activity Monitor is invoked via the standard
+      agent-invoke machinery (same gate as Orchestrator — no custom
+      scope required to talk to it). By default users see only their
+      own task activity. The activity:*:read scope elevates the caller
+      to tenant-wide drill-down and per-user content visibility across
+      all users. Note: unlike Sentinel's analytics surface (which
+      splits read from read_content), the Activity Monitor has no
+      content-tier axis — activity:*:read grants both cross-user
+      visibility AND content read in one scope. On by default; operators
+      can disable it via SAM_FEATURE_ACTIVITY_MONITOR=false.
+
+  - key: hil_approver_sets
+    name: HIL Approver Sets
+    release_phase: experimental
+    default: false
+    description: >
+      Let a tool's approval gate name who answers it (hil.approvers: users and
+      chat places) instead of the task's own user. The notification service
+      asks every listed user through their notification settings, posts once in
+      each listed place, accepts the first answer from a listed user, refuses
+      and audits anyone else, and tells the others who answered. Requires
+      notify_service on the agent and on the notification service. Off by
+      default; enable via SAM_FEATURE_HIL_APPROVER_SETS=true on every agent,
+      notification service and chat gateway. When disabled, a gate that names
+      approvers refuses the tool call, and the notification service refuses a
+      request that carries an approver set. Rollout order: upgrade every
+      notification service replica, chat gateway and agent to this release
+      first, then set the flag. A notification service replica that predates
+      this release shares the reply queue and would accept an answer to an
+      approver-set request without checking who answered; such a service
+      also drops the request an agent with the flag on sends, rather than
+      asking fewer approvers. An approver-set wait is held in the agent
+      process and does not survive a pod restart, even with
+      durable_task_resume on: the old card stays live until it expires, a
+      click on it is not applied, and a re-run pages the approvers again.
+      With the flag on, the notification service's reply queue is created with
+      a redelivery limit of 3, so a reply that fails four deliveries in a row is
+      dropped; an existing queue keeps its old options until it is patched
+      through SEMP or recreated.
+
+  - key: workflow_hil_pause_resume
+    name: Workflow HIL Pause/Resume
+    release_phase: controlled_availability
+    default: false
+    description: >
+      Allow workflow tool nodes that return a pending (HIL) result to pause the
+      workflow instead of failing it: the node's input request is routed through
+      the notification service (requires notify_service), the paused execution is
+      persisted to a durable store, and the workflow resumes — on any pod — when
+      the user answers or the request times out. Off by default; enable via
+      SAM_FEATURE_WORKFLOW_HIL_PAUSE_RESUME=true. When disabled, a pending tool
+      result fails the node exactly as before.
+
+  - key: workflow_durable_waits
+    name: Workflow Durable Waits
+    release_phase: experimental
+    default: false
+    description: >
+      Allow workflow `timer` nodes, which wait for a duration, and `wait`
+      nodes, which wait for a named signal. A run whose open steps all wait
+      (on a timer, a signal or a person) parks in the workflow's store, so it
+      outlives the AWE that started it. A timer's due time is stored with the
+      parked run; every AWE sweeps the workflows it hosts for due runs every
+      30 seconds and wakes up to 2,048 runs per workflow per sweep, so a timer
+      whose AWE stopped fires up to about 35 seconds late. A run parked on a
+      node that a redeploy removed fails when its wake or signal arrives. The
+      broker must allow the AWE to publish and subscribe on
+      `<namespace>/sam/v1/workflow/wake/>`. A signal is a user_input_response message published to
+      the workflow's notify response topic under the request id
+      `signal:<taskId>:<signal>`; the broker ACL on that topic decides who can
+      send one.
+      A signal sent before the run reaches its wait node is dropped, and a
+      wait node in an evaluation run fails. Requires
+      workflow_hil_pause_resume, workflow_checkpoint_resume and the
+      workflow's session_service database; a workflow with timer or wait
+      nodes fails to start without them. Turn the flag on only once every AWE
+      runs a release that has it, and drain or cancel runs parked on timer or
+      wait nodes before turning it off or rolling back. Off by default; enable
+      via SAM_FEATURE_WORKFLOW_DURABLE_WAITS=true.
+
+  - key: durable_task_resume
+    release_phase: experimental
+    default: false
+    name: Durable Task Resume
+    description: >
+      Persist a paused agent task to the session store so any AWE replica can
+      resume it. With this off, a task waiting on a remote tool call, a
+      question to the user or a tool approval blocks inside its turn: its
+      request message stays unacked, so the broker redelivers it when the pod
+      is lost (up to max_message_redelivery times) and the task starts over,
+      repeating the LLM turns and tool calls already paid for. Only peer,
+      workflow-peer and tool-login pauses, and a tool's own request for a
+      person's approval, live in the pausing process's memory with the message
+      already acked, so losing that pod loses those tasks with no redelivery. With this on, all of these pause into a checkpoint
+      and any replica can resume the task from it: peer and remote-tool
+      responses already fan out to every replica of an agent, so a survivor
+      receives the response, and the checkpoint gives it the state to act on.
+      The exceptions still block: a remote tool that has an auth handler does
+      not pause, a tool approval pauses only in the agent's own tool dispatch
+      (a workflow tool node blocks), and a task whose checkpoint write fails at
+      the pause cannot be resumed after a pod loss; for a remote tool call, a
+      question or a tool approval its request stays unacknowledged until the task
+      ends, so the broker redelivers it if the process is lost, and for other
+      waits it is not redelivered. Only the task's first pause holds its request:
+      a pause after a resume or an adoption has no request left to hold, so a
+      failed write there loses the task if the process is lost. An
+      approved call runs on the replica that resumes the task. A remote tool
+      call that pauses is audited and measured when it finishes (including
+      a reply that reaches the replica after it handed the task off), is
+      cancelled or is abandoned, not when it is published, and normally once:
+      when the store cannot record a reply the call is reported and the
+      reaper may report it again. Requires a
+      configured session store that outlives the process; an in-memory store
+      turns this off with a warning. Every agent then subscribes to its notify response topic,
+      even with the notification service off, so the broker must allow that.
+      A user's answer is recorded for the task wherever it lands, after
+      checking that the sender may answer. An answer on the agent's request
+      queue that cannot be recorded, when the session store could be read, is
+      not acknowledged, so the broker redelivers it (up to
+      max_message_redelivery times). A notification-service answer is also
+      queued on the request queue: that copy is acknowledged once recorded and
+      redelivered when it cannot be, while the copy on the agent's direct
+      subscription is acknowledged on receipt and not redelivered. When the holder cannot write
+      an answer either it resumes with the answer in memory only. While a task
+      waits, gated tool arguments,
+      questions, answers and remote tool results are stored unredacted in the
+      session database. Checkpoints that hold a remote tool, question or tool
+      approval pause carry version 3, which a build that predates version 3
+      releases rather than resumes. A wait whose holder is lost, or released the
+      task at a graceful shutdown, lasts about 25 hours at most, because the
+      hourly purge deletes its checkpoint then; a wait that is still outstanding
+      when the holder lets go is not adoptable. Off by default; enable via
+      SAM_FEATURE_DURABLE_TASK_RESUME=true. When disabled the pause path is
+      unchanged, except for four changes that apply with the flag off too. A
+      tool's request for a person's answer is refused at dispatch, and the
+      model gets an error result, when its id is empty, over 256 bytes, not
+      valid UTF-8, holds a control character, or is already used by a task
+      waiting in the same process or by an earlier call of the same batch. A
+      tool's own pending hil_approval wait is cut to 30 days at most (a
+      blocking question or a tool approval wait is not capped with the flag
+      off). A remote tool call waits on a timer, so cancelling its parent
+      task, or reaching the parent's deadline, no longer logs an "invoke timed
+      out" warning. For an answer whose id is not usable (over 256 bytes, not
+      valid UTF-8 or holding a control character), a notification-service
+      answer that no wait in this process holds is logged at Debug where it
+      was logged at Info ("notify: HIL response with no matching pending
+      request; ignoring"), and the Warn for such an answer on the agent's
+      request queue gives the id's length in place of the id. An empty id on
+      the notification-service route is still dropped with the Warn "notify:
+      HIL response missing request_id; dropping".
+
+  - key: workflow_checkpoint_resume
+    release_phase: experimental
+    default: false
+    name: Workflow Checkpoint Resume
+    description: >
+      Write a running workflow's state to its durable store after every step, so
+      a task request or answer redelivered after the AWE holding the run died
+      continues the run from its last completed node instead of starting it
+      over or continuing from its last pause. Completed
+      nodes are not dispatched again and their outputs feed later nodes; nodes
+      that were in flight are dispatched again as a new attempt, so a tool or
+      agent with side effects may repeat them. The final response is sent at
+      least once: twice when the AWE dies between sending it and recording that
+      it did, or when that record cannot be written. A newly provisioned
+      request queue redelivers once, so a run survives one AWE death (a queue
+      created earlier keeps its own setting). A run is started over when its
+      checkpoint cannot be read or was written under a workflow whose nodes or
+      edges have since changed. Only the user the run belongs to can restore
+      it. The caller's auth token is stored encrypted with the identity key and
+      identity claims are not stored; a restore of a task request takes both
+      from the redelivered request.
+      Requires the workflow's session_service database, or the AWE's when the
+      workflow declares none, shared by every AWE
+      for a run to continue on another AWE (a per-pod SQLite file serves only
+      the same pod after a restart). Without a database, or with only this flag
+      on and a database that cannot be opened, the workflow runs without
+      checkpoints. Off by default; enable via
+      SAM_FEATURE_WORKFLOW_CHECKPOINT_RESUME=true. When disabled, a run's
+      state is written only when it parks for a person, and a redelivered
+      request that held its run starts the run over.
+
+  - key: workflow_tool_validation_permissive
+    name: Permissive Workflow Tool Validation
+    release_phase: general_availability
+    default: false
+    description: >
+      Downgrade the workflow tool-node argument check from fatal to advisory: an
+      `input:` key a built-in does not declare. It normally fails, which is the
+      point — the argument would otherwise be dropped in silence. This is the
+      operator lever for the opposite risk: a workflow wrongly refused, where
+      without it the only remedy is editing YAML. Enable via
+      SAM_FEATURE_WORKFLOW_TOOL_VALIDATION_PERMISSIVE=true, and expect a warning
+      instead of a failure.
+
+      The check runs in two places, and each reads this flag from ITS OWN
+      process environment. At node dispatch the AWE process reads it, and a
+      failure costs one node. At `sam config plan` / `sam config apply` the CLI
+      reads it, and a failure aborts the entire manifest before anything is
+      applied — but only for a workflow the plan is creating or changing; one
+      it leaves alone is reported as a warning regardless of this flag. Those
+      are usually different machines, so setting it on the cluster does not
+      clear the check in CI, and vice versa — set it wherever the failure is
+      being reported.
+
+      The companion check on `{{node.output.<field>}}` references needs no flag:
+      it only ever warns, both at Init and at plan time, because failing there
+      would take down a workflow that has been deployed and running since before
+      the check existed. A stale reference in a node `input:` does still
+      fail that node at run time, as it always has. What changed is conditions:
+      a `when:`, a switch case or a loop condition answers only when the
+      references that resolved already settle the answer, and otherwise does not
+      match — so a stale field can change which branch runs, silently apart from
+      a WARN naming it. No flag for that either: it fails nothing.
+
+  - key: builder_connector_node_checks_permissive
+    name: Permissive Builder Connector Node Checks
+    release_phase: general_availability
+    default: false
+    description: >
+      Downgrade the refusals the Builder's save makes for a workflow tool node
+      that calls an api connector from fatal to advisory: a connector that
+      lists its tools only through specification_url, and a `tool:` selector its
+      listed names do not settle. They normally fail the save before anything
+      is written, because the same workflow would otherwise save and then fail
+      when it is deployed (DATAGO-159197). A connector that exists nowhere is
+      not covered: the workflow's own write refuses it. This is the operator lever for the opposite risk: a
+      workflow wrongly refused, for example because the platform's reading of
+      a spec disagrees with what the runtime loads, where without it the only
+      remedy is a release. Enable via
+      SAM_FEATURE_BUILDER_CONNECTOR_NODE_CHECKS_PERMISSIVE=true, and expect a
+      warning on the workflow instead of a failure. The other checks the save
+      makes, including a node's inputs against its operation, are not affected.
+
+  - key: workflow_tool_approval_enforcement
+    name: Workflow Tool Approval Enforcement
+    release_phase: controlled_availability
+    default: true
+    description: >
+      Honour hil.require_approval on workflow `type: tool` nodes.
+
+      WITH IT ON, a gated tool pauses for approval where the workflow can reach
+      a human (requires workflow_hil_pause_resume), and fails the node where it
+      cannot. It is never dispatched unapproved, just as the agent path has
+      always refused these tools.
+
+      WITH IT OFF, a gated tool node dispatches WITHOUT asking anyone, exactly
+      as it did before the gate existed. The hil: block is still parsed and
+      still validated, so a malformed one fails config load either way; what
+      the flag governs is whether the gate is honoured. Workflows name the
+      affected tools at startup, warn once per tool per run when one dispatches
+      unprompted, and record each such dispatch with approvalReason
+      "enforcement_disabled" in the audit log.
+
+      A replica older than release 2.368 cannot decode an approval pause. It
+      drops the marker and completes the node, which turns a human's DENIAL
+      into a node success. A mesh that upgrades straight from such a release
+      with workflow_hil_pause_resume on sets this flag to false until no such
+      replica remains.
+
+  - key: workflow_decision_node
+    name: Workflow Decision Nodes
+    release_phase: early_access
+    default: true
+    description: >
+      Run workflow `type: decision` nodes, which send the node's input to a
+      third-party decision model (TypeSafe AI's Jev, OpenAI's Decisions API,
+      gpt-6-luna, an OpenAI public beta, or Google's Gemini Decisions API,
+      gemini-decision-1) and route on its typed, calibrated
+      answers. On by default as Early Access: nothing leaves the deployment
+      until a workflow names a decision model, either a registered decision
+      model through decision.model_alias or, for a workflow loaded from a config
+      file, an inline decision.api_key (with decision.provider openai, that
+      sends the node's input to OpenAI, and with google_ai_studio, to Google).
+      Review the provider's data-processing
+      terms before registering or naming one. This flag is the kill switch for
+      workflow decision nodes with every provider; decision-model evaluators
+      and the evidence screen have their own flags. Turn it off with
+      SAM_FEATURE_WORKFLOW_DECISION_NODE=false; a deployment that relied on the
+      flag being off by default sets it before upgrading.
+      WITH IT OFF, a workflow that contains decision nodes still loads, no
+      workflow data is sent, each decision node fails when reached with an error
+      naming this flag, and the Models page stops offering decision models,
+      so turning it off is a safe kill switch for workflows.
+
+  - key: decision_media_input
+    name: Decision Node Media Input
+    release_phase: early_access
+    default: false
+    description: >
+      Let workflow decision nodes send audio, video and PDF artifacts (the node
+      keys audio, video and documents) and HEIC, HEIF, GIF, BMP and TIFF images
+      to a Gemini decision model, and set image_resolution and
+      video_resolution. OpenAI and TypeSafe decision models also take GIF, BMP
+      and TIFF images, which are sent as a PNG of the first frame or page.
+      The files go to Google inline with the node's input, so review Google's
+      data-processing terms first, and expect a short video to cost far more
+      input tokens than a text decision. Turn it on with
+      SAM_FEATURE_DECISION_MEDIA_INPUT=true. Needs workflow_decision_node.
+      WITH IT OFF, a workflow whose decision nodes set audio, video,
+      documents, image_resolution or video_resolution still loads if it
+      passes the load checks that apply either way (a google_ai_studio or
+      model_alias decision block, valid resolution values, no more fixed
+      artifact references than max_media or max_images), each such decision
+      node fails when reached with an error naming this flag, and images stay
+      limited to PNG, JPEG and WebP.
+
+  - key: eval_decision_evaluator
+    name: Decision-Model Evaluators
+    release_phase: early_access
+    default: true
+    description: >
+      Let evaluation authors create `type: decision` evaluators, which grade an
+      agent's response by asking one typed question of a registered decision
+      model (TypeSafe AI's Jev, OpenAI's Decisions API, or Google's Gemini
+      Decisions API) and map the answer
+      to a 0 to 1 score. A decision evaluator can hand cases below a confidence
+      threshold, or cases the provider fails, to an existing LLM-judge
+      evaluator. On by default as Early Access: nothing leaves the deployment
+      until an administrator registers a decision model and an evaluator names
+      it; the evaluator sends only the fields its `reads` list names. Review
+      the provider's data-processing terms before registering one. Also allows
+      creating decision models while workflow decision nodes are off. Turn it
+      off with SAM_FEATURE_EVAL_DECISION_EVALUATOR=false. WITH IT OFF, nothing
+      is sent for an evaluation: the API refuses new or edited decision
+      evaluators, a run that includes one is refused when triggered, and a run
+      that was waiting to start when the flag was turned off scores them as
+      errored, each with a message naming SAM_FEATURE_EVAL_DECISION_EVALUATOR.
+
+  - key: workflow_evals
+    name: Workflow Evaluations
+    release_phase: early_access
+    default: true
+    description: >
+      Let an evaluation experiment target a workflow instead of an agent:
+      dataset examples carry structured input checked against the workflow's
+      input schema, the workflow's output is graded with the judge seeing
+      every node it ran, and a trial that ends early (a failed node, a request
+      for human input, a timeout, a cancel) is recorded with its reason and
+      left out of the score. An example can also carry an expected path (the
+      nodes that should run, fail or be skipped and the tools that should or
+      should not be called), which the built-in Workflow Path evaluator grades,
+      and expected facts (values the response must and must not contain),
+      which the built-in Output Facts evaluator grades for any target; the
+      platform adds both evaluators at startup while the flag is on. An LLM
+      judge's template can also name a workflow node, {{Node Output: <id>}}
+      or {{Node Input: <id>}}, to grade that one node, and saving a new or
+      changed template refuses a node placeholder that is mistyped or has no
+      node id. Set it on the platform and on the gateway that serves the web
+      UI. WITH IT OFF, the API refuses a new or edited experiment that names
+      a workflow, an example input, expected path or expected facts (clearing
+      one is allowed), and an import or config-apply carrying any of them; an
+      existing workflow experiment is refused when triggered; node
+      placeholders in a judge's template are not checked; and the web UI
+      offers agents only. On by default as Early Access; disable via
+      SAM_FEATURE_WORKFLOW_EVALS=false.
+
+  - key: skill_mcp_stdio
+    name: Skill-Sourced MCP Stdio Transport
+    release_phase: general_availability
+    default: false
+    description: >
+      Allow a skill's tools[] block to declare an MCP tool with
+      connection_params.type stdio, which launches a process inside the agent
+      container. Off by default because that child is handed the agent's whole
+      environment, including any Vault token, so a skill author gains
+      everything the agent process holds. Enable with
+      SAM_FEATURE_SKILL_MCP_STDIO=true only where skill authorship is as
+      trusted as agent configuration. Agent YAML is unaffected: this gate
+      applies solely to entries arriving from a SKILL.md.
+
+  - key: sam_templates
+    name: SAM Templates
+    release_phase: experimental
+    default: false
+    description: >
+      Auto-inject the built-in sam-templates skill (author and reuse report
+      templates) into every non-internal agent. Off by default; enable via
+      SAM_FEATURE_SAM_TEMPLATES=true. When disabled, the skill is not
+      auto-added to agents but can still be attached explicitly via an agent's
+      skill refs, and its template tools remain available to any agent that
+      loads it or holds a packaged .samt artifact.
+
+  - key: chat_api_v2
+    name: Chat API v2
+    release_phase: experimental
+    default: false
+    description: >
+      Make the web UI call the gateway's /api/v2/chat routes instead of
+      /api/v1. It gates no server route: the gateway always serves
+      /api/v2/chat, and a route that is not finished stays unpublished.
+
+  - key: machine_tokens
+    name: Machine Tokens
+    release_phase: general_availability
+    default: true
+    description: >
+      Opaque API keys (samk_...) owned by a custom service account, so a pipeline can
+      run `sam config` and `sam eval run` against the platform without a browser
+      login. On by default; disable via SAM_FEATURE_MACHINE_TOKENS=false.
+
+      With the flag off the key-management routes are not registered, so no key
+      can be created, renamed or deleted, and every samk_ credential is refused
+      with a 401 on the gateway and the platform. Stored keys are kept, so
+      turning the flag back on restores them. Keys also require the default_rbac authorization mode, at
+      creation and at use; AUTHORIZATION_TYPE defaults to none, so a deployment
+      not switched to default_rbac gets no keys whatever this flag says.
+
+      During a rolling upgrade from a build without keys, set the flag to false
+      until every gateway replica runs a key-aware build: a replica that does not
+      recognise samk_ answers 401 for a key another replica accepts. To roll back
+      to such a build, set the flag to false first, then replace replicas.
+
+  - key: voice_interaction
+    name: Voice Interaction
+    release_phase: experimental
+    default: false
+    description: >
+      Serve the gateway's speech-to-text and text-to-speech endpoints and
+      advertise them to the web UI, which then shows the microphone button,
+      the read-aloud button and the Speech settings. Off by default until
+      voice can be configured on every surface (Desktop, Cloud and
+      Self-managed); with it off the gateway ignores its speech block, even
+      one with valid provider keys. Enable via
+      SAM_FEATURE_VOICE_INTERACTION=true on the gateway. The agent
+      text_to_speech tools are not affected.
+
+  - key: legacy_python_model_bootstrap
+    name: Legacy Python Model Bootstrap
+    release_phase: deprecated
+    default: false
+    description: >
+      Serve platform-managed model configurations to Python SAM agents in a
+      mixed Python and Go deployment: the platform answers model bootstrap
+      requests on {namespace}/configuration/model/bootstrap/> and includes
+      model_config in the model update broadcasts on
+      {namespace}/configuration/model/{id|alias}. Both payloads carry the
+      model's provider credentials (API keys, OAuth client secrets), and any
+      client that can log in to the broker can read them, so this is off by
+      default. Enable via SAM_FEATURE_LEGACY_PYTHON_MODEL_BOOTSTRAP=true only
+      when Python agents use platform-managed models and every broker client
+      is trusted. Go agents, gateways and the STR do not need it.
+
+      With it off, a Python agent gets no model at startup, and one already
+      running drops its platform-managed model at the next edit of that model;
+      enable the flag before upgrading a mesh that has such agents. Turning it
+      off closes only these two surfaces: the control-plane model-config and
+      bindings endpoints still return credentials to a broker client that sends
+      no token.
+
+  - key: hide_linux_desktop_stage_label
+    name: Hide Linux Desktop Release-Stage Label
+    release_phase: experimental
+    default: false
+    description: >
+      Hide the Linux desktop app's Experimental label from its window title
+      and in-app banner, for example during customer demos. Off by default; set
+      SAM_FEATURE_HIDE_LINUX_DESKTOP_STAGE_LABEL=true in the desktop .env
+      (~/.config/sam/.env, or $SAM_HOME/.env) to hide both. Per-feature
+      maturity badges are not affected. Remove this flag together with the
+      label once the Linux desktop bundle reaches general availability.
+
+  - key: tool_search
+    name: Tool Search
+    release_phase: experimental
+    default: false
+    description: >
+      Let agents load tools on demand with the model's native tool search
+      instead of sending every tool definition on every LLM call. With the
+      flag on, the runtime decides for every agent, with no agent setting:
+      when the tool definitions are large enough to save tokens, every tool
+      except load_skill and the runtime's internal tools is held back and the
+      system prompt names them. Tool
+      search runs where the provider serves the model with it (Claude on
+      Anthropic, Vertex, Bedrock and Azure; GPT-5.4 and later on OpenAI's
+      Responses API); everywhere else every tool is sent in full. Enable via
+      SAM_FEATURE_TOOL_SEARCH=true on the AWE.
+
+  - key: isolated_tool_execution
+    name: Isolated Tool Execution
+    release_phase: experimental
+    default: false
+    description: >
+      Let a second STR serve the tools of another execution class, and run
+      each call as a Kubernetes Job. A toolset names its class in its manifest
+      (execution_class) and the STR that serves it names the same class
+      (STR_EXECUTION_CLASS). The default STR serves only the shared class
+      either way, so a toolset of another class is not run without an STR
+      that serves it. Enable via SAM_FEATURE_ISOLATED_TOOL_EXECUTION=true on
+      the STRs that name a class or run in kubernetes-job mode.
+
+  - key: tool_chat_model
+    name: Tool Chat Model
+    release_phase: experimental
+    default: false
+    description: >
+      Let a tool name the SAM model alias of one chat call
+      (ChatOptions.Model), the way an agent references a model alias. The STR
+      runs the call on that alias through the same resolution, metering and
+      budget, and refuses a decision model or an alias that does not resolve.
+      A toolset can restrict the aliases its tools may name with _model_aliases
+      in its config; unset, a tool may name any chat model alias in the mesh.
+      With the flag off the alias is ignored and every call runs on the tool's
+      model. Enable via SAM_FEATURE_TOOL_CHAT_MODEL=true on the STR.
+
+  - key: quiet_scheduled_runs
+    name: Quiet Scheduled Runs
+    release_phase: experimental
+    default: false
+    description: >
+      Let an agent end a scheduled run quietly when it finds nothing to
+      report. The scheduler offers the agent an end_run_quietly tool on the
+      runs of a scheduled task that targets an agent; a run that calls it is
+      recorded with the status quiet, counts as a success, and sends its owner
+      no notification. With it off every run ends as before. Enable via
+      SAM_FEATURE_QUIET_SCHEDULED_RUNS=true on the gateway; the agent needs no
+      flag. A quiet run that saved no servable file has its empty session hidden
+      from its owner, so the gateway's artifact store must be the store the
+      agents save to, with artifact_scope set to namespace, or it cannot see the
+      files and may hide a session that holds some.
+
+  - key: scheduled_task_run_as
+    name: Scheduled Task Run As
+    release_phase: experimental
+    default: false
+    description: >
+      Let a super administrator set runAs on a scheduled task through the
+      scheduled-task API, naming a service account the task runs as instead of
+      its creator. Each run then authorizes with that service account's roles,
+      uses its tool credentials and books its spend, while the creator keeps
+      owning the schedule and receives its notifications. With the flag off
+      the API refuses to set runAs, though it still accepts clearing it with
+      null, tasks without a runAs run as their creator, and a task that still
+      carries a runAs fails each run, saying run-as is turned off, instead of
+      running as its creator; the owner is notified once per streak of such
+      refusals, and likewise of the platform-upgrade refusal below, not of
+      each repeat. A refusal repeats the streak only when the nearest earlier
+      run, leaving out fires skipped because an earlier run was still running
+      or waiting and manual refusals, is a refusal of the same kind whose
+      notice was delivered; any other earlier run, an undelivered notice, or
+      no earlier run makes the next refusal notify, and a manual refusal is
+      never suppressed by the streak. While a run of a task that has a runAs cannot
+      confirm the identity it runs as because a lookup failed or the platform
+      could not read the service account's row, it stays pending with a note and
+      is sent again; if still waiting at its timeout it ends failed, uncounted
+      toward auto-pause and not retried (the note it carries then decides
+      which end applies), or skipped and counted, on the next send pass, when
+      its task was deleted or paused (a paused task skips only scheduled
+      runs). A task without a runAs never waits: a failure of its owner
+      lookup that is not a refusal, or a degraded reply, fails the run,
+      counted, with the message "identity resolution failed", and a
+      scheduled run is retried when max_retries is above 0. Every failed attempt counts toward
+      auto-pause, which pauses the task after 10 consecutive failures by
+      default, whether or not the run is retried.
+      A creator who lost the universal grant, a missing service account, a
+      service account with no scope or a denied target fails the run at once and
+      counts. A platform pod that predates
+      run-as, which reports no service account rows, makes the run wait like any
+      unconfirmed identity, because pods of two platform versions answer from
+      one queue while a platform rolls out; if the last reply before the
+      timeout lacked the row, the run ends uncounted and asks for an upgrade,
+      and setting runAs asks twice before refusing. Upgrade the platform before
+      the gateway, and finish the platform rollout before enabling the flag.
+      Enable via SAM_FEATURE_SCHEDULED_TASK_RUN_AS=true on the web
+      UI gateway, the only gateway that runs the scheduler.
+
+  - key: system_user_tool_auth
+    name: Service Account Tool Credentials
+    release_phase: experimental
+    default: false
+    description: >
+      Let a super administrator connect, list and disconnect the OAuth tool
+      credentials an agent holds for a custom service account, so a run with no
+      person present, such as a scheduled task running as that service account,
+      can call an OAuth connector. The routes are under
+      /api/v2/platform/rbac/serviceAccounts/{serviceAccountId}/toolAuth; with
+      the flag off they are not mounted and answer 404. Built-in service
+      accounts are refused, and a task running as a service account is still
+      never shown a sign-in prompt: a credential must be connected beforehand.
+      Every credential connected for a service account is also usable by an
+      evaluation experiment that names that service account as its runAs. Enable via
+      SAM_FEATURE_SYSTEM_USER_TOOL_AUTH=true on the platform.

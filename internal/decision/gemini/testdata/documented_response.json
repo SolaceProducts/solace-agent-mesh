@@ -1,0 +1,24 @@
+{
+  "answers": {
+    "department": {
+      "type": "choice",
+      "choice": "billing",
+      "probabilities": {"billing": 0.91, "technical": 0.06, "other": 0.03},
+      "confidence": 0.91
+    },
+    "urgent": {"type": "noul", "noul": 0.03, "confidence": 0.97},
+    "severity": {
+      "type": "score",
+      "score": 1.2,
+      "legend": {"0": "Looks wrong, works", "1": "Workaround available", "2": "Fully blocked"},
+      "probabilities": {"0": 0.1, "1": 0.6, "2": 0.3},
+      "confidence": 0.6
+    }
+  },
+  "usage": {
+    "total_input_tokens": 212,
+    "input_tokens_by_modality": [{"modality": "text", "tokens": 212}],
+    "total_output_tokens": 0,
+    "total_tokens": 212
+  }
+}

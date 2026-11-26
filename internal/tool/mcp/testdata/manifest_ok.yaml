@@ -1,0 +1,26 @@
+- id: getConfluenceSpaces
+  name: getConfluenceSpaces
+  description: Get spaces from Confluence.
+  inputSchema:
+    type: object
+    properties:
+      cloudId:
+        type: string
+        description: Unique cloud ID.
+      ids:
+        anyOf:
+          - type: string
+          - type: array
+            items:
+              type: number
+    required:
+      - cloudId
+    additionalProperties: false
+    $schema: http://json-schema.org/draft-07/schema#
+- id: atlassianUserInfo
+  description: Get current user info.
+  inputSchema:
+    type: object
+    properties: {}
+    additionalProperties: false
+    $schema: http://json-schema.org/draft-07/schema#

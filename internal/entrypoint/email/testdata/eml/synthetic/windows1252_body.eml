@@ -1,0 +1,10 @@
+From: "Outlook User" <outlook-user@example.com>
+To: sam-email-entrypoint@example.org
+Subject: Outlook smart quote
+Message-ID: <windows1252-body-001@example.com>
+Date: Mon, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=example.com; dkim=pass header.d=example.com; dmarc=pass header.from=example.com
+Content-Type: text/plain; charset=windows-1252
+Content-Transfer-Encoding: 8bit
+
+It’s a Windows-1252 body — we expect this to round-trip as UTF-8.

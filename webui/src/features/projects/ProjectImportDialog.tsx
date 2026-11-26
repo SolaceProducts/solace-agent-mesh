@@ -1,0 +1,316 @@
+// Copyright Solace Corporation
+//
+// Use of this software is governed by the Business Source License (BUSL-1.1)
+// included in the LICENSE file.
+
+import React, { useState } from "react";
+import JSZip from "jszip";
+import { AlertTriangle, FileJson } from "lucide-react";
+
+import { useConfigContext } from "@/providers/contexts";
+
+import { ConfirmationDialog, FileUpload, MessageBanner } from "@/common";
+import { Input, Label } from "@/ui";
+import { formatBytes } from "@/utils";
+
+interface ProjectImportDialogProps {
+    open: boolean;
+    onOpenChange: (open: boolean) => void;
+    onImport: (file: File, options: { preserveName: boolean; customName?: string }) => Promise<void>;
+}
+
+interface ArtifactPreviewInfo {
+    name: string;
+    size: number;
+    isOversized: boolean;
+}
+
+interface ProjectPreview {
+    name: string;
+    description?: string;
+    systemPrompt?: string;
+    defaultAgentId?: string;
+    artifactCount: number;
+    artifactNames: string[];
+    artifacts: ArtifactPreviewInfo[];
+    oversizedArtifacts: ArtifactPreviewInfo[];
+}
+
+const DEFAULT_MAX_ZIP_UPLOAD_SIZE_BYTES = 100 * 1024 * 1024;
+export const MAX_ZIP_FILE_COUNT = 1000;
+export const MAX_ZIP_UNCOMPRESSED_BYTES = 500 * 1024 * 1024;
+
+export const ProjectImportDialog: React.FC<ProjectImportDialogProps> = ({ open, onOpenChange, onImport }) => {
+    const { validationLimits } = useConfigContext();
+    const maxPerFileUploadSizeBytes = validationLimits?.maxPerFileUploadSizeBytes;
+    const maxZipUploadSizeBytes = validationLimits?.maxZipUploadSizeBytes ?? DEFAULT_MAX_ZIP_UPLOAD_SIZE_BYTES;
+
+    const [selectedFiles, setSelectedFiles] = useState<FileList | null>(null);
+    const [projectPreview, setProjectPreview] = useState<ProjectPreview | null>(null);
+    const [customName, setCustomName] = useState("");
+    const [error, setError] = useState<string | null>(null);
+    const [isImporting, setIsImporting] = useState(false);
+
+    const selectedFile = selectedFiles?.[0] || null;
+
+    const handleClose = () => {
+        if (!isImporting) {
+            setSelectedFiles(null);
+            setProjectPreview(null);
+            setCustomName("");
+            setError(null);
+            onOpenChange(false);
+        }
+    };
+
+    const validateAndPreviewFile = async (file: File) => {
+        setError(null);
+        setProjectPreview(null);
+        setCustomName("");
+
+        if (!file.name.endsWith(".zip")) {
+            setError("Please select a ZIP file");
+            return false;
+        }
+
+        if (file.size > maxZipUploadSizeBytes) {
+            setError(`ZIP file size exceeds ${formatBytes(maxZipUploadSizeBytes)} limit`);
+            return false;
+        }
+
+        try {
+            const zip = await JSZip.loadAsync(file);
+
+            if (Object.keys(zip.files).length > MAX_ZIP_FILE_COUNT) {
+                setError(`ZIP file contains too many entries (max ${MAX_ZIP_FILE_COUNT})`);
+                return false;
+            }
+
+            if (!zip.files["project.json"]) {
+                setError("Invalid project export: missing project.json");
+                return false;
+            }
+
+            const projectJsonContent = await zip.files["project.json"].async("string");
+            const projectData = JSON.parse(projectJsonContent);
+
+            if (projectData.version !== "1.0") {
+                setError(`Unsupported export version: ${projectData.version}. Only version 1.0 is currently supported.`);
+                return false;
+            }
+
+            const artifactFiles = Object.keys(zip.files).filter(name => name.startsWith("artifacts/") && name !== "artifacts/");
+
+            const artifactNames = artifactFiles.map(path => path.replace("artifacts/", ""));
+
+            const artifactMetadata = projectData.artifacts || [];
+            const sizeMap = new Map<string, number>();
+            for (const meta of artifactMetadata) {
+                if (meta.filename && typeof meta.size === "number") {
+                    sizeMap.set(meta.filename, meta.size);
+                }
+            }
+
+            const artifacts: ArtifactPreviewInfo[] = [];
+            const oversizedArtifacts: ArtifactPreviewInfo[] = [];
+            let totalUncompressedSize = 0;
+
+            for (const artifactPath of artifactFiles) {
+                const zipEntry = zip.files[artifactPath];
+                const filename = artifactPath.replace("artifacts/", "");
+
+                let size = sizeMap.get(filename);
+                if (size === undefined) {
+                    try {
+                        const content = await zipEntry.async("uint8array");
+                        size = content.length;
+                    } catch {
+                        size = 0;
+                    }
+                }
+
+                totalUncompressedSize += size;
+                if (totalUncompressedSize > MAX_ZIP_UNCOMPRESSED_BYTES) {
+                    setError(`ZIP file uncompressed content exceeds ${MAX_ZIP_UNCOMPRESSED_BYTES / (1024 * 1024)}MB limit`);
+                    return false;
+                }
+
+                const isOversized = maxPerFileUploadSizeBytes ? size > maxPerFileUploadSizeBytes : false;
+
+                const artifactInfo: ArtifactPreviewInfo = { name: filename, size, isOversized };
+                artifacts.push(artifactInfo);
+
+                if (isOversized) {
+                    oversizedArtifacts.push(artifactInfo);
+                }
+            }
+
+            setProjectPreview({
+                name: projectData.project.name || "",
+                description: projectData.project.description,
+                systemPrompt: projectData.project.systemPrompt,
+                defaultAgentId: projectData.project.defaultAgentId,
+                artifactCount: artifactFiles.length,
+                artifactNames: artifactNames,
+                artifacts,
+                oversizedArtifacts,
+            });
+
+            setCustomName(projectData.project.name || "");
+
+            return true;
+        } catch (err) {
+            console.error("Error validating file:", err);
+            setError("Invalid ZIP file or corrupted project export");
+            return false;
+        }
+    };
+
+    const handleFileChange = async (files: FileList | null) => {
+        setSelectedFiles(files);
+        if (files && files[0]) {
+            await validateAndPreviewFile(files[0]);
+        } else {
+            setProjectPreview(null);
+            setCustomName("");
+        }
+    };
+
+    const handleFileValidation = (files: FileList): { valid: boolean; error?: string } => {
+        setError(null);
+        const file = files[0];
+
+        if (!file.name.endsWith(".zip")) {
+            return { valid: false, error: "Please select a ZIP file" };
+        }
+
+        if (file.size > maxZipUploadSizeBytes) {
+            return { valid: false, error: `ZIP file size exceeds ${formatBytes(maxZipUploadSizeBytes)} limit` };
+        }
+
+        return { valid: true };
+    };
+
+    const handleImport = async () => {
+        if (!selectedFile) {
+            setError("Please select a file to import");
+            return;
+        }
+
+        setIsImporting(true);
+        setError(null);
+
+        try {
+            await onImport(selectedFile, {
+                preserveName: false,
+                customName: customName.trim(),
+            });
+
+            setSelectedFiles(null);
+            setProjectPreview(null);
+            setCustomName("");
+            setError(null);
+        } catch (err) {
+            const errorMessage = err instanceof Error ? err.message : "Failed to import project";
+            setError(errorMessage);
+            throw err;
+        } finally {
+            setIsImporting(false);
+        }
+    };
+
+    const handleCancel = () => {
+        if (!isImporting) {
+            handleClose();
+        }
+    };
+
+    const dialogContent = (
+        <div className="space-y-4">
+            <div className="mt-2 py-2">
+                <FileUpload name="projectFile" accept=".zip" multiple={false} disabled={isImporting} value={selectedFiles} onChange={handleFileChange} onValidate={handleFileValidation} testid="projectImportFileInput" />
+            </div>
+
+            {projectPreview && !error && (
+                <div className="space-y-3 rounded-lg border bg-(--secondary-w10) p-4">
+                    <div>
+                        <Label className="text-xs text-(--secondary-text-wMain)">Original Name</Label>
+                        <p className="text-sm font-medium">{projectPreview.name}</p>
+                    </div>
+                    {projectPreview.description && (
+                        <div>
+                            <Label className="text-xs text-(--secondary-text-wMain)">Description</Label>
+                            <p className="text-sm">{projectPreview.description}</p>
+                        </div>
+                    )}
+                    {projectPreview.systemPrompt && (
+                        <div>
+                            <Label className="text-xs text-(--secondary-text-wMain)">Instructions</Label>
+                            <p className="line-clamp-3 text-sm">{projectPreview.systemPrompt}</p>
+                        </div>
+                    )}
+                    {projectPreview.defaultAgentId && (
+                        <div>
+                            <Label className="text-xs text-(--secondary-text-wMain)">Default Agent</Label>
+                            <p className="font-mono text-sm">{projectPreview.defaultAgentId}</p>
+                        </div>
+                    )}
+                    <div>
+                        <Label className="text-xs text-(--secondary-text-wMain)">
+                            Artifacts ({projectPreview.artifactCount} {projectPreview.artifactCount === 1 ? "file" : "files"})
+                        </Label>
+                        {projectPreview.artifacts.length > 0 && (
+                            <div className="mt-1 space-y-1">
+                                {projectPreview.artifacts.slice(0, 5).map((artifact, index) => (
+                                    <div key={index} className={`flex items-center gap-1.5 text-xs ${artifact.isOversized ? "text-(--error-wMain)" : ""}`}>
+                                        {artifact.isOversized ? <AlertTriangle className="h-3 w-3 flex-shrink-0 text-(--error-wMain)" /> : <FileJson className="h-3 w-3 flex-shrink-0 text-(--secondary-text-wMain)" />}
+                                        <span className="truncate">{artifact.name}</span>
+                                        <span className="flex-shrink-0 text-(--secondary-text-wMain)">({formatBytes(artifact.size)})</span>
+                                    </div>
+                                ))}
+                                {projectPreview.artifacts.length > 5 && <p className="text-xs text-(--secondary-text-wMain) italic">+ {projectPreview.artifacts.length - 5} more files</p>}
+                            </div>
+                        )}
+                    </div>
+
+                    {projectPreview.oversizedArtifacts.length > 0 && maxPerFileUploadSizeBytes && (
+                        <div className="mt-2">
+                            <MessageBanner
+                                variant="warning"
+                                message={`${projectPreview.oversizedArtifacts.length} ${projectPreview.oversizedArtifacts.length === 1 ? "file exceeds" : "files exceed"} the maximum size of ${formatBytes(maxPerFileUploadSizeBytes)} and will be skipped during import: ${projectPreview.oversizedArtifacts
+                                    .slice(0, 3)
+                                    .map(a => a.name)
+                                    .join(", ")}${projectPreview.oversizedArtifacts.length > 3 ? ` and ${projectPreview.oversizedArtifacts.length - 3} more` : ""}`}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {projectPreview && (
+                <div className="space-y-2">
+                    <Label htmlFor="customName">Project Name</Label>
+                    <Input id="customName" value={customName} onChange={e => setCustomName(e.target.value)} placeholder="Enter project name" disabled={isImporting} />
+                    <p className="text-xs text-(--secondary-text-wMain)">Name conflicts will be resolved automatically</p>
+                </div>
+            )}
+
+            {error && <MessageBanner variant="error" message={error} />}
+        </div>
+    );
+
+    return (
+        <ConfirmationDialog
+            open={open}
+            onOpenChange={open => !open && handleClose()}
+            title="Import Project"
+            description="Import a project from an exported project ZIP file."
+            content={dialogContent}
+            actionLabels={{ confirm: "Import", cancel: "Cancel" }}
+            onConfirm={handleImport}
+            onCancel={handleCancel}
+            isLoading={isImporting}
+            isEnabled={!!projectPreview && !!customName.trim()}
+        />
+    );
+};

@@ -1,0 +1,5 @@
+{
+ "about": "Upstream code the tests run against that has no release to pin in pyproject.toml. Hermes Agent has no releases and is not on PyPI: its end-to-end tests run against this commit, the one docs/frameworks/hermes.md was written against on 2026-11-18. Move it in a pull request of its own, with the commit quoted in the docs, the example and HERMES in src/sam_link_sdk/hermes/steps.py (tests/test_compat_record.py checks they agree). sam_oldest_supported is the oldest SAM release the SDK supports, the first published release with the agent link entrypoint (internal/entrypoint/agentlink; the tags before it were never released); the compatibility workflow tests the SDK against it every day.",
+ "hermes": "b65e078cdc77ebe83979a2d5355179535f340e89",
+ "sam_oldest_supported": "2.617.0-d6cee8dfde"
+}

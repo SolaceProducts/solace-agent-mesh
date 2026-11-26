@@ -1,0 +1,46 @@
+test_case_id: "spend_decision_001"
+description: "A decision node routes to an agent branch; the decision call is booked to the workflow at its node, the branch's calls to its agent."
+tags: ["spend"]
+skip_intermediate_events: true
+expected_completion_timeout_seconds: 20
+
+test_runner_config_overrides:
+  agent_config:
+    artifact_scope: "namespace"
+
+gateway_input:
+  target_agent_name: "DecisionRoutingWorkflow"
+  user_identity: "spend_user@example.com"
+  parts:
+    - type: "data"
+      data:
+        input_text: "I was charged twice for my subscription this month"
+
+primed_decision_responses:
+  - response: >
+      {"model": "jev-1.13.0",
+       "answers": {"department": {"type": "choice", "choice": "billing",
+                                  "probabilities": {"billing": 0.93, "technical": 0.07},
+                                  "confidence": 0.86}},
+       "usage": {"input_tokens": 42, "output_tokens": 7}}
+
+llm_interactions:
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: |
+              «««save_artifact: filename="billing_out.json" mime_type="application/json" description="Billing branch result"
+              {"branch": "billing"}
+              »»»
+      usage: {prompt_tokens: 100, completion_tokens: 50, total_tokens: 150}
+  - static_response:
+      choices:
+        - message:
+            role: "assistant"
+            content: "Billing handled. «result:artifact=billing_out.json:0 status=success»"
+      usage: {prompt_tokens: 100, completion_tokens: 20, total_tokens: 120}
+
+expected_gateway_output:
+  - type: "final_response"
+    task_state: "completed"

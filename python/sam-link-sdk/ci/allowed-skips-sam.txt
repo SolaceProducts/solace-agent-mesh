@@ -1,0 +1,11 @@
+# The skips a contract or end-to-end run may have. ci/check_skips.py fails the run on any other. The format is
+# ci/allowed-skips.txt's.
+
+# Collected with every run, and Hermes is installed only into an interpreter of its own (see ci/allowed-skips.txt).
+tests/test_hermes.py | could not import 'run_agent'
+
+# No SAM build has an agent stop API yet, so the scenarios that stop an agent from SAM skip. Revisit them when it
+# lands: the API will likely be under /api/v2/platform, and the client must move with it.
+tests/contract/test_link_contract.py::test_stopped_agent_gets_no_tasks_until_released | has no agent stop API
+tests/contract/test_link_contract.py::test_a_stopped_agent_is_delisted_and_relisted_by_sam_without_a_word_from_the_agent | has no agent stop API
+tests/contract/test_link_contract.py::test_a_task_waiting_for_a_slot_is_answered_when_sam_stops_the_agent | has no agent stop API

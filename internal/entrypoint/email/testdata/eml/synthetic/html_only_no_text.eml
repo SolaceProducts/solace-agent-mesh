@@ -1,0 +1,16 @@
+From: "Eve Martin" <eve@vendor.com>
+To: sam-email-entrypoint@example.org
+Subject: HTML only, no plain text
+Message-ID: <html-only-001@vendor.com>
+Date: Sun, 27 Apr 2026 10:00:00 +0000
+Authentication-Results: protection.outlook.com; spf=pass smtp.mailfrom=vendor.com; dkim=pass header.d=vendor.com; dmarc=pass header.from=vendor.com
+MIME-Version: 1.0
+Content-Type: multipart/alternative; boundary="boundary-html-only-001"
+
+This is a multi-part message in MIME format.
+--boundary-html-only-001
+Content-Type: text/html; charset=utf-8
+Content-Transfer-Encoding: 7bit
+
+<html><body><p>This is the <em>only</em> part. No plain-text alternative.</p></body></html>
+--boundary-html-only-001--

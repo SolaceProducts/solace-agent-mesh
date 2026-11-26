@@ -1,0 +1,44 @@
+[
+  {
+    "id": "alice@dev.local",
+    "email": "alice@dev.local",
+    "name": "Alice Anderson",
+    "title": "Senior Engineer",
+    "department": "Platform"
+  },
+  {
+    "id": "bob@dev.local",
+    "email": "bob@dev.local",
+    "name": "Bob Baker",
+    "title": "Product Manager",
+    "department": "Product"
+  },
+  {
+    "id": "carol@dev.local",
+    "email": "carol@dev.local",
+    "name": "Carol Chen",
+    "title": "Designer",
+    "department": "Design"
+  },
+  {
+    "id": "dave@dev.local",
+    "email": "dave@dev.local",
+    "name": "Dave Davis",
+    "title": "Engineering Manager",
+    "department": "Platform"
+  },
+  {
+    "id": "eve@dev.local",
+    "email": "eve@dev.local",
+    "name": "Eve Evans",
+    "title": "Security Engineer",
+    "department": "Security"
+  },
+  {
+    "id": "frank@dev.local",
+    "email": "frank@dev.local",
+    "name": "Frank Foster",
+    "title": "Data Scientist",
+    "department": "Analytics"
+  }
+]
